@@ -13,19 +13,28 @@ A Java Spring Boot application that provides automated daily crypto portfolio an
 
 ## Configuration
 
-The application uses the following environment configuration in `application.properties`:
+### Application Properties Setup
+
+1. Copy the template configuration file:
+   ```bash
+   cp src/main/resources/application.properties.template src/main/resources/application.properties
+   ```
+
+2. Update `src/main/resources/application.properties` with your actual configuration:
 
 ```properties
 # LLM Provider
 app.llm-provider=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
-app.llm-api-key=YOUR_GEMINI_API_KEY
+app.llm-api-key=YOUR_ACTUAL_GEMINI_API_KEY
 
 # Email Settings
-app.smtp-user=your-email@gmail.com
-app.smtp-pass=your-app-password
-app.mail-from=your-email@gmail.com
+app.smtp-user=your-actual-email@gmail.com
+app.smtp-pass=your-actual-app-password
+app.mail-from=your-actual-email@gmail.com
 app.mail-to=recipient@gmail.com
 ```
+
+**Note**: Never commit your actual `application.properties` file with sensitive credentials to version control.
 
 ## Holdings Configuration
 
