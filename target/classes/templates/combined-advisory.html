@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Crypto Advisory</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 20px;
+        }
+        
+        /* Portfolio Summary Styles */
+        .portfolio-summary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .summary-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .summary-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        /* Individual Token Styles */
+        .token-section {
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .token-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .token-symbol {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .token-price {
+            font-size: 18px;
+        }
+        .token-content {
+            padding: 20px;
+        }
+        .token-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .positive {
+            color: #28a745;
+        }
+        .negative {
+            color: #dc3545;
+        }
+        .neutral {
+            color: #6c757d;
+        }
+        
+        /* Technical Indicators */
+        .technical-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .indicator {
+            text-align: center;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        .indicator-label {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .indicator-value {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        /* Action and Advisory */
+        .action-section {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .action-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        .action-hold { background-color: #6c757d; }
+        .action-buy { background-color: #28a745; }
+        .action-sell { background-color: #dc3545; }
+        .action-take_profit { background-color: #17a2b8; }
+        .rationale {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #495057;
+        }
+        
+        /* RSI Specific Colors */
+        .rsi-oversold { color: #28a745; } /* Green for oversold (buy signal) */
+        .rsi-overbought { color: #dc3545; } /* Red for overbought (sell signal) */
+        .rsi-neutral { color: #ffc107; } /* Yellow for neutral */
+        
+        /* MACD Specific Colors */
+        .macd-bullish { color: #28a745; }
+        .macd-bearish { color: #dc3545; }
+        
+        .footer {
+            background-color: #6c757d;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Daily Crypto Advisory</h1>
+            <p th:text="${timestamp}" style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;"></p>
+        </div>
+
+        <div class="content">
+            <!-- Portfolio Summary Section -->
+            <div class="portfolio-summary">
+                <h2 style="margin: 0 0 15px 0; font-size: 22px;">Portfolio Overview</h2>
+                <div class="summary-row">
+                    <span class="summary-label">Total Portfolio Value</span>
+                    <span class="summary-value" th:text="'$' + ${#numbers.formatDecimal(totalValue, 1, 2)}"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Total P&L</span>
+                    <span class="summary-value" 
+                          th:text="'$' + ${#numbers.formatDecimal(totalProfitLoss, 1, 2)} + ' (' + ${#numbers.formatDecimal(totalProfitLossPercentage, 1, 2)} + '%)'"
+                          th:class="${totalProfitLoss >= 0} ? 'positive' : 'negative'"></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Initial Investment</span>
+                    <span class="summary-value" th:text="'$' + ${#numbers.formatDecimal(totalInitialValue, 1, 2)}"></span>
+                </div>
+            </div>
+
+            <!-- Individual Token Analysis -->
+            <h2 style="margin: 0 0 20px 0; color: #333; font-size: 24px;">Individual Token Analysis</h2>
+            
+            <div th:each="advisory, iterStat : ${advisories}" class="token-section">
+                <th:block th:with="holding=${holdings[iterStat.index]}">
+                    <div class="token-header">
+                        <span class="token-symbol" th:text="${advisory.symbol}"></span>
+                        <span class="token-price" th:text="'$' + ${#numbers.formatDecimal(advisory.currentPrice, 1, 2)}"></span>
+                    </div>
+                    
+                    <div class="token-content">
+                        <!-- Position Metrics -->
+                        <div class="token-metrics">
+                            <div class="metric-card">
+                                <div class="metric-label">Holdings</div>
+                                <div class="metric-value" th:text="${#numbers.formatDecimal(holding.amount, 1, 8)} + ' ' + ${holding.symbol}"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Current Value</div>
+                                <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(holding.getCurrentValue(advisory.currentPrice), 1, 2)}"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Average Price</div>
+                                <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(holding.averagePrice, 1, 2)}"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">P&L</div>
+                                <div class="metric-value" 
+                                     th:text="'$' + ${#numbers.formatDecimal(advisory.profitLoss, 1, 2)} + ' (' + ${#numbers.formatDecimal(advisory.profitLossPercentage, 1, 2)} + '%)'"
+                                     th:class="${advisory.profitLoss >= 0} ? 'positive' : 'negative'"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Target Price</div>
+                                <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(holding.targetPrice, 1, 2)}"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Max Drawdown</div>
+                                <div class="metric-value" th:text="${holding.maxDrawdownPercentage} + '%'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Technical Indicators -->
+                        <div class="technical-indicators">
+                            <div class="indicator" th:if="${advisory.rsi != null}">
+                                <div class="indicator-label">RSI (14)</div>
+                                <div class="indicator-value" 
+                                     th:text="${#numbers.formatDecimal(advisory.rsi, 1, 1)}"
+                                     th:class="${advisory.rsi < 30} ? 'rsi-oversold' : (${advisory.rsi > 70} ? 'rsi-overbought' : 'rsi-neutral')"></div>
+                            </div>
+                            <div class="indicator" th:if="${advisory.macd != null}">
+                                <div class="indicator-label">MACD</div>
+                                <div class="indicator-value" 
+                                     th:text="${#numbers.formatDecimal(advisory.macd, 1, 4)}"
+                                     th:class="${advisory.macd > 0} ? 'macd-bullish' : 'macd-bearish'"></div>
+                            </div>
+                            <div class="indicator" th:if="${advisory.sma20 != null}">
+                                <div class="indicator-label">SMA 20</div>
+                                <div class="indicator-value" th:text="'$' + ${#numbers.formatDecimal(advisory.sma20, 1, 2)}"></div>
+                            </div>
+                            <div class="indicator" th:if="${advisory.sma50 != null}">
+                                <div class="indicator-label">SMA 50</div>
+                                <div class="indicator-value" th:text="'$' + ${#numbers.formatDecimal(advisory.sma50, 1, 2)}"></div>
+                            </div>
+                            <div class="indicator" th:if="${advisory.sma200 != null}">
+                                <div class="indicator-label">SMA 200</div>
+                                <div class="indicator-value" th:text="'$' + ${#numbers.formatDecimal(advisory.sma200, 1, 2)}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Action and Advisory -->
+                        <div class="action-section">
+                            <div class="action-badge" 
+                                 th:class="'action-' + ${#strings.toLowerCase(#strings.replace(advisory.action, ' ', '_'))}"
+                                 th:text="${advisory.action}"></div>
+                            <div class="rationale" th:text="${advisory.rationale}"></div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p style="margin: 0;">
+                🤖 This advisory is generated automatically for informational purposes only.<br>
+                Always conduct your own research before making investment decisions.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

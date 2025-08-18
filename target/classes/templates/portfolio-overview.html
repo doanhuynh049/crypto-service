@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Overview</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .portfolio-summary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .summary-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .summary-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .holdings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .holdings-table th,
+        .holdings-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .holdings-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+        }
+        .holdings-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .action-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 10px;
+        }
+        .action-hold { background-color: #6c757d; }
+        .action-buy { background-color: #28a745; }
+        .action-sell { background-color: #dc3545; }
+        .action-take_profit { background-color: #17a2b8; }
+        .footer {
+            background-color: #6c757d;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        .stat-title {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+        }
+        .section {
+            margin: 20px 0;
+        }
+        .section h3 {
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 Portfolio Overview</h1>
+            <p th:text="${timestamp}">Timestamp</p>
+        </div>
+        
+        <div class="content">
+            <!-- Portfolio Summary -->
+            <div class="portfolio-summary">
+                <h2 style="margin-top: 0;">Portfolio Summary</h2>
+                <div class="summary-row">
+                    <span class="summary-label">Total Value:</span>
+                    <span class="summary-value" th:text="'$' + ${#numbers.formatDecimal(totalValue, 1, 2)}">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Initial Investment:</span>
+                    <span class="summary-value" th:text="'$' + ${#numbers.formatDecimal(totalInitialValue, 1, 2)}">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Total P&L:</span>
+                    <span class="summary-value" 
+                          th:classappend="${totalProfitLoss >= 0} ? 'positive' : 'negative'"
+                          th:text="'$' + ${#numbers.formatDecimal(totalProfitLoss, 1, 2)}">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Total P&L %:</span>
+                    <span class="summary-value" 
+                          th:classappend="${totalProfitLossPercentage >= 0} ? 'positive' : 'negative'"
+                          th:text="${#numbers.formatDecimal(totalProfitLossPercentage, 1, 2)} + '%'">0.00%</span>
+                </div>
+            </div>
+
+            <!-- Holdings Table -->
+            <div class="section">
+                <h3>💼 Individual Holdings</h3>
+                <table class="holdings-table">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>Amount</th>
+                            <th>Current Price</th>
+                            <th>Value</th>
+                            <th>P&L</th>
+                            <th>P&L %</th>
+                            <th>To Target</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="advisory, iterStat : ${advisories}">
+                            <td>
+                                <strong th:text="${advisory.symbol}">TOKEN</strong>
+                            </td>
+                            <td th:text="${#numbers.formatDecimal(holdings[iterStat.index].amount, 1, 4)}">0.0000</td>
+                            <td th:text="'$' + ${#numbers.formatDecimal(advisory.currentPrice, 1, 2)}">$0.00</td>
+                            <td th:text="'$' + ${#numbers.formatDecimal(holdings[iterStat.index].amount * advisory.currentPrice, 1, 2)}">$0.00</td>
+                            <td th:classappend="${advisory.profitLoss >= 0} ? 'positive' : 'negative'"
+                                th:text="'$' + ${#numbers.formatDecimal(advisory.profitLoss, 1, 2)}">$0.00</td>
+                            <td th:classappend="${advisory.profitLossPercentage >= 0} ? 'positive' : 'negative'"
+                                th:text="${#numbers.formatDecimal(advisory.profitLossPercentage, 1, 2)} + '%'">0.00%</td>
+                            <td th:text="${#numbers.formatDecimal(advisory.percentageToTarget, 1, 2)} + '%'">0.00%</td>
+                            <td>
+                                <span th:class="'action-badge action-' + ${#strings.toLowerCase(advisory.action)}" 
+                                      th:text="${advisory.action}">HOLD</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Technical Summary -->
+            <div class="section">
+                <h3>📊 Technical Summary</h3>
+                <div class="stats-grid">
+                    <div class="stat-card" th:each="advisory : ${advisories}">
+                        <div class="stat-title" th:text="${advisory.symbol} + ' RSI'">TOKEN RSI</div>
+                        <div class="stat-value" th:text="${advisory.rsi != null} ? ${#numbers.formatDecimal(advisory.rsi, 1, 1)} : 'N/A'">N/A</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Recommendations Summary -->
+            <div class="section">
+                <h3>🤖 AI Recommendations</h3>
+                <div th:each="advisory : ${advisories}" style="margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong th:text="${advisory.symbol}">TOKEN</strong>
+                        <span th:class="'action-badge action-' + ${#strings.toLowerCase(advisory.action)}" 
+                              th:text="${advisory.action}">HOLD</span>
+                    </div>
+                    <div style="font-size: 14px; color: #666;">
+                        <strong>Rationale:</strong> <span th:text="${advisory.rationale}">Analysis rationale</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Crypto Advisory Service | Automated Daily Portfolio Analysis</p>
+            <p>⚠️ This is not financial advice. Always do your own research.</p>
+        </div>
+    </div>
+</body>
+</html>

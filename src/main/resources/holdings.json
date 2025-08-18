@@ -1,0 +1,6 @@
+{
+  "positions": [
+    { "symbol": "BTC", "amount": 0.3, "avgPrice": 62000, "targetPrice": 75000, "maxDrawdownPct": -15 },
+    { "symbol": "ETH", "amount": 5, "avgPrice": 3100, "targetPrice": 4200, "maxDrawdownPct": -12 }
+  ]
+}
