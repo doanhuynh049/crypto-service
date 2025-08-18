@@ -1,6 +1,150 @@
 {
-  "positions": [
-    { "symbol": "BTC", "amount": 0.3, "avgPrice": 62000, "targetPrice": 75000, "maxDrawdownPct": -15 },
-    { "symbol": "ETH", "amount": 5, "avgPrice": 3100, "targetPrice": 4200, "maxDrawdownPct": -12 }
-  ]
+  "portfolio": {
+    "lastBackup": "Sun Aug 17 10:31:44 ICT 2025",
+    "cryptos": [
+      {
+        "id": "ethereum",
+        "symbol": "ETH",
+        "name": "Ethereum",
+        "holdings": 0.0159872,
+        "avgBuyPrice": 2848.79,
+        "expectedEntry": 4200.0,
+        "expectedPrice": 3000.0,
+        "targetPrice3Month": 5000.0,
+        "targetPriceLongTerm": 10000.0
+      },
+      {
+        "id": "bitcoin",
+        "symbol": "BTC",
+        "name": "Bitcoin",
+        "holdings": 0.00032973,
+        "avgBuyPrice": 115644.54,
+        "expectedEntry": 107000.0,
+        "expectedPrice": 70000.0,
+        "targetPrice3Month": 140000.0,
+        "targetPriceLongTerm": 250000.0
+      },
+      {
+        "id": "solana",
+        "symbol": "SOL",
+        "name": "Solana",
+        "holdings": 0.127872,
+        "avgBuyPrice": 152.34,
+        "expectedEntry": 185.0,
+        "expectedPrice": 100.0,
+        "targetPrice3Month": 220.0,
+        "targetPriceLongTerm": 450.0
+      },
+      {
+        "id": "binancecoin",
+        "symbol": "BNB",
+        "name": "Binance Coin",
+        "holdings": 0.02094746,
+        "avgBuyPrice": 783.04,
+        "expectedEntry": 800.0,
+        "expectedPrice": 400.0,
+        "targetPrice3Month": 970.0,
+        "targetPriceLongTerm": 1200.0
+      },
+      {
+        "id": "avalanche-2",
+        "symbol": "AVAX",
+        "name": "Avalanche",
+        "holdings": 0.5497,
+        "avgBuyPrice": 20.28,
+        "expectedEntry": 22.0,
+        "expectedPrice": 23.5,
+        "targetPrice3Month": 35.0,
+        "targetPriceLongTerm": 55.0
+      },
+      {
+        "id": "optimism",
+        "symbol": "OP",
+        "name": "Optimism",
+        "holdings": 17.3,
+        "avgBuyPrice": 0.59,
+        "expectedEntry": 0.75,
+        "expectedPrice": 0.0,
+        "targetPrice3Month": 1.0,
+        "targetPriceLongTerm": 1.5
+      },
+      {
+        "id": "chainlink",
+        "symbol": "LINK",
+        "name": "Chainlink",
+        "holdings": 0.58,
+        "avgBuyPrice": 17.58,
+        "expectedEntry": 19.5,
+        "expectedPrice": 20.0,
+        "targetPrice3Month": 27.0,
+        "targetPriceLongTerm": 40.0
+      },
+      {
+        "id": "arbitrum",
+        "symbol": "ARB",
+        "name": "Arbitrum",
+        "holdings": 14.6,
+        "avgBuyPrice": 0.41,
+        "expectedEntry": 0.48,
+        "expectedPrice": 0.0,
+        "targetPrice3Month": 0.65,
+        "targetPriceLongTerm": 1.2
+      },
+      {
+        "id": "sui",
+        "symbol": "SUI",
+        "name": "Sui",
+        "holdings": 1.988,
+        "avgBuyPrice": 2.78,
+        "expectedEntry": 3.5,
+        "expectedPrice": 0.0,
+        "targetPrice3Month": 4.35,
+        "targetPriceLongTerm": 6.0
+      },
+      {
+        "id": "cardano",
+        "symbol": "ADA",
+        "name": "Cardano",
+        "holdings": 7.1928,
+        "avgBuyPrice": 0.7,
+        "expectedEntry": 0.8,
+        "expectedPrice": 1.0,
+        "targetPrice3Month": 1.18,
+        "targetPriceLongTerm": 3.0
+      },
+      {
+        "id": "render-token",
+        "symbol": "RNDR",
+        "name": "Render Token",
+        "holdings": 1.38,
+        "avgBuyPrice": 3.75,
+        "expectedEntry": 3.6,
+        "expectedPrice": 3.85,
+        "targetPrice3Month": 5.0,
+        "targetPriceLongTerm": 12.0
+      },
+      {
+        "id": "fetch-ai",
+        "symbol": "FET",
+        "name": "Artificial Superintelligence Alliance",
+        "holdings": 7.4,
+        "avgBuyPrice": 0.7,
+        "expectedEntry": 0.6,
+        "expectedPrice": 0.0,
+        "targetPrice3Month": 0.8,
+        "targetPriceLongTerm": 1.5
+      },
+      {
+        "id": "chainbase",
+        "symbol": "C",
+        "name": "Chainbase",
+        "holdings": 13.9,
+        "avgBuyPrice": 0.37,
+        "expectedEntry": 0.26,
+        "expectedPrice": 0.0,
+        "targetPrice3Month": 0.0,
+        "targetPriceLongTerm": 0.0
+      }
+    ]
+  }
 }

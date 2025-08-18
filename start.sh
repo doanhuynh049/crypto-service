@@ -9,7 +9,8 @@ if ! command -v java &> /dev/null; then
     echo "❌ Java is not installed. Please install Java 17 or higher."
     exit 1
 fi
-
+export JAVA_HOME=/opt/java-17
+export PATH=$JAVA_HOME/bin:$PATH
 # Check Java version
 JAVA_VERSION=$(java -version 2>&1 | grep -oP 'version "([0-9]+)' | grep -oP '[0-9]+')
 if [ "$JAVA_VERSION" -lt "17" ]; then
@@ -49,6 +50,19 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✅ Build successful"
+
+# Kill any existing process on port 8080
+echo "🔍 Checking for existing processes on port 8080..."
+EXISTING_PID=$(lsof -ti:8080)
+if [ ! -z "$EXISTING_PID" ]; then
+    echo "⚠️  Found existing process(es) on port 8080: $EXISTING_PID"
+    echo "🔪 Killing existing process(es)..."
+    kill -9 $EXISTING_PID
+    sleep 2
+    echo "✅ Existing process(es) killed"
+else
+    echo "✅ No existing processes found on port 8080"
+fi
 
 # Start the application
 echo "🎯 Starting Crypto Advisory Notifier..."

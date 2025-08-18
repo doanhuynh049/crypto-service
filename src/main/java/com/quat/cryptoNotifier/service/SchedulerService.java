@@ -43,35 +43,45 @@ public class SchedulerService {
         try {
             // Load holdings
             List<Holding> holdings = loadHoldings();
-            List<Advisory> advisories = new ArrayList<>();
+            List<Advisory> advisoriesWithoutAI = new ArrayList<>();
+            List<Advisory> advisoriesWithAI = new ArrayList<>();
 
-            // Process each holding
-            for (Holding holding : holdings) {
+            // First pass: Generate basic advisories for portfolio overview
+            advisoriesWithoutAI = advisoryEngineService.generateOverviewHoldingAdvisories(holdings);
+            
+            // Send portfolio overview email first (with basic market data)
+            emailService.sendPortfolioOverview(holdings, advisoriesWithoutAI);
+
+            // Second pass: Generate AI advisories for each holding
+            for (int i = 0; i < holdings.size() && i < advisoriesWithoutAI.size(); i++) {
+                Holding holding = holdings.get(i);
                 try {
-                    System.out.println("Processing " + holding.getSymbol());
+                    System.out.println("Generating AI advisory for " + holding.getSymbol());
                     
-                    // Get market data
-                    MarketData marketData = dataProviderService.getMarketData(holding.getSymbol());
+                    // Get market data again (or reuse from first pass)
+                    MarketData marketData = dataProviderService.getMarketData(holding.getId());
                     
-                    // Generate advisory
+                    // Generate AI advisory
                     Advisory advisory = advisoryEngineService.generateAdvisory(holding, marketData);
-                    advisories.add(advisory);
+                    advisoriesWithAI.add(advisory);
                     
-                    System.out.println("Completed processing " + holding.getSymbol());
+                    System.out.println("Completed AI analysis for " + holding.getSymbol());
                     
                     // Add small delay between API calls
                     Thread.sleep(1000);
                     
                 } catch (Exception e) {
-                    System.err.println("Error processing " + holding.getSymbol() + ": " + e.getMessage());
+                    System.err.println("Error generating AI advisory for " + holding.getSymbol() + ": " + e.getMessage());
+                    // Add the basic advisory if AI fails
+                    advisoriesWithAI.add(advisoriesWithoutAI.get(i));
                 }
             }
 
             // Send combined advisory email with all crypto advice
-            emailService.sendCombinedAdvisory(holdings, advisories);
+            emailService.sendCombinedAdvisory(holdings, advisoriesWithAI);
 
             // Save daily snapshot
-            saveDailySnapshot(holdings, advisories);
+            saveDailySnapshot(holdings, advisoriesWithAI);
 
             System.out.println("Daily advisory completed successfully");
 
@@ -91,7 +101,7 @@ public class SchedulerService {
         try {
             ClassPathResource resource = new ClassPathResource("holdings.json");
             Holdings holdings = objectMapper.readValue(resource.getInputStream(), Holdings.class);
-            return holdings.getPositions();
+            return holdings.getCryptos();
         } catch (Exception e) {
             throw new RuntimeException("Failed to load holdings from holdings.json", e);
         }

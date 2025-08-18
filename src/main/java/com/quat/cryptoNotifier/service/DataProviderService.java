@@ -21,17 +21,18 @@ public class DataProviderService {
         this.objectMapper = new ObjectMapper();
     }
 
-    public MarketData getMarketData(String symbol) {
+    public MarketData getMarketData(String symbolOrId) {
         try {
             // Get current price from CoinGecko
+            String coinGeckoId = getCoinGeckoId(symbolOrId);
             String priceUrl = String.format("https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true", 
-                getCoinGeckoId(symbol));
+                coinGeckoId);
             
             String priceResponse = restTemplate.getForObject(priceUrl, String.class);
             JsonNode priceNode = objectMapper.readTree(priceResponse);
-            JsonNode coinData = priceNode.get(getCoinGeckoId(symbol));
+            JsonNode coinData = priceNode.get(coinGeckoId);
 
-            MarketData marketData = new MarketData(symbol, coinData.get("usd").asDouble());
+            MarketData marketData = new MarketData(symbolOrId, coinData.get("usd").asDouble());
             
             if (coinData.has("usd_24h_change")) {
                 marketData.setPriceChangePercentage24h(coinData.get("usd_24h_change").asDouble());
@@ -43,7 +44,7 @@ public class DataProviderService {
 
             // Get historical data for technical indicators
             String historyUrl = String.format("https://api.coingecko.com/api/v3/coins/%s/market_chart?vs_currency=usd&days=200&interval=daily", 
-                getCoinGeckoId(symbol));
+                coinGeckoId);
             
             String historyResponse = restTemplate.getForObject(historyUrl, String.class);
             JsonNode historyNode = objectMapper.readTree(historyResponse);
@@ -62,7 +63,7 @@ public class DataProviderService {
             return marketData;
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch market data for " + symbol, e);
+            throw new RuntimeException("Failed to fetch market data for " + symbolOrId, e);
         }
     }
 
@@ -94,9 +95,14 @@ public class DataProviderService {
         }
     }
 
-    private String getCoinGeckoId(String symbol) {
+    private String getCoinGeckoId(String symbolOrId) {
+        // If it's already a known CoinGecko ID, return it directly
+        if (isKnownCoinGeckoId(symbolOrId)) {
+            return symbolOrId;
+        }
+        
         // Map common symbols to CoinGecko IDs
-        switch (symbol.toUpperCase()) {
+        switch (symbolOrId.toUpperCase()) {
             case "BTC":
                 return "bitcoin";
             case "ETH":
@@ -117,8 +123,39 @@ public class DataProviderService {
                 return "avalanche-2";
             case "ATOM":
                 return "cosmos";
+            case "BNB":
+                return "binancecoin";
+            case "OP":
+                return "optimism";
+            case "ARB":
+                return "arbitrum";
+            case "SUI":
+                return "sui";
+            case "RNDR":
+                return "render-token";
+            case "FET":
+                return "fetch-ai";
+            case "C":
+                return "chainbase";
             default:
-                return symbol.toLowerCase();
+                return symbolOrId.toLowerCase();
         }
+    }
+
+    private boolean isKnownCoinGeckoId(String input) {
+        // Check if the input is already a known CoinGecko ID
+        String[] knownIds = {
+            "bitcoin", "ethereum", "cardano", "polkadot", "solana", 
+            "matic-network", "chainlink", "uniswap", "avalanche-2", "cosmos",
+            "binancecoin", "optimism", "arbitrum", "sui", "render-token", 
+            "fetch-ai", "chainbase"
+        };
+        
+        for (String id : knownIds) {
+            if (id.equals(input.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

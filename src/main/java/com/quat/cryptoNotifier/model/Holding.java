@@ -3,26 +3,44 @@ package com.quat.cryptoNotifier.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Holding {
+    private String id;
     private String symbol;
-    private double amount;
-    @JsonProperty("avgPrice")
+    private String name;
+    private double holdings;
+    @JsonProperty("avgBuyPrice")
     private double averagePrice;
-    private double targetPrice;
-    @JsonProperty("maxDrawdownPct")
-    private double maxDrawdownPercentage;
+    private double expectedEntry;
+    private double expectedPrice;
+    @JsonProperty("targetPrice3Month")
+    private double targetPrice3Month;
+    @JsonProperty("targetPriceLongTerm")
+    private double targetPriceLongTerm;
 
     // Constructors
     public Holding() {}
 
-    public Holding(String symbol, double amount, double averagePrice, double targetPrice, double maxDrawdownPercentage) {
+    public Holding(String id, String symbol, String name, double holdings, double averagePrice, 
+                   double expectedEntry, double expectedPrice, double targetPrice3Month, double targetPriceLongTerm) {
+        this.id = id;
         this.symbol = symbol;
-        this.amount = amount;
+        this.name = name;
+        this.holdings = holdings;
         this.averagePrice = averagePrice;
-        this.targetPrice = targetPrice;
-        this.maxDrawdownPercentage = maxDrawdownPercentage;
+        this.expectedEntry = expectedEntry;
+        this.expectedPrice = expectedPrice;
+        this.targetPrice3Month = targetPrice3Month;
+        this.targetPriceLongTerm = targetPriceLongTerm;
     }
 
     // Getters and Setters
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getSymbol() {
         return symbol;
     }
@@ -31,12 +49,31 @@ public class Holding {
         this.symbol = symbol;
     }
 
-    public double getAmount() {
-        return amount;
+    public String getName() {
+        return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getHoldings() {
+        return holdings;
+    }
+
+    public void setHoldings(double holdings) {
+        this.holdings = holdings;
+    }
+
+    // Legacy method for backward compatibility
+    @Deprecated
+    public double getAmount() {
+        return holdings;
+    }
+
+    @Deprecated
     public void setAmount(double amount) {
-        this.amount = amount;
+        this.holdings = amount;
     }
 
     public double getAveragePrice() {
@@ -47,29 +84,66 @@ public class Holding {
         this.averagePrice = averagePrice;
     }
 
+    public double getExpectedEntry() {
+        return expectedEntry;
+    }
+
+    public void setExpectedEntry(double expectedEntry) {
+        this.expectedEntry = expectedEntry;
+    }
+
+    public double getExpectedPrice() {
+        return expectedPrice;
+    }
+
+    public void setExpectedPrice(double expectedPrice) {
+        this.expectedPrice = expectedPrice;
+    }
+
+    public double getTargetPrice3Month() {
+        return targetPrice3Month;
+    }
+
+    public void setTargetPrice3Month(double targetPrice3Month) {
+        this.targetPrice3Month = targetPrice3Month;
+    }
+
+    public double getTargetPriceLongTerm() {
+        return targetPriceLongTerm;
+    }
+
+    public void setTargetPriceLongTerm(double targetPriceLongTerm) {
+        this.targetPriceLongTerm = targetPriceLongTerm;
+    }
+
+    // Legacy method for backward compatibility
+    @Deprecated
     public double getTargetPrice() {
-        return targetPrice;
+        return targetPrice3Month;
     }
 
+    @Deprecated
     public void setTargetPrice(double targetPrice) {
-        this.targetPrice = targetPrice;
+        this.targetPrice3Month = targetPrice;
     }
 
+    @Deprecated
     public double getMaxDrawdownPercentage() {
-        return maxDrawdownPercentage;
+        return -15.0; // Default value for backward compatibility
     }
 
+    @Deprecated
     public void setMaxDrawdownPercentage(double maxDrawdownPercentage) {
-        this.maxDrawdownPercentage = maxDrawdownPercentage;
+        // Legacy method - no action needed
     }
 
     // Calculated fields
     public double getCurrentValue(double currentPrice) {
-        return amount * currentPrice;
+        return holdings * currentPrice;
     }
 
     public double getInitialValue() {
-        return amount * averagePrice;
+        return holdings * averagePrice;
     }
 
     public double getProfitLoss(double currentPrice) {
@@ -81,17 +155,25 @@ public class Holding {
     }
 
     public double getPercentageToTarget(double currentPrice) {
-        return ((targetPrice - currentPrice) / currentPrice) * 100;
+        return ((targetPrice3Month - currentPrice) / currentPrice) * 100;
+    }
+
+    public double getPercentageToTargetLongTerm(double currentPrice) {
+        return ((targetPriceLongTerm - currentPrice) / currentPrice) * 100;
     }
 
     @Override
     public String toString() {
         return "Holding{" +
-                "symbol='" + symbol + '\'' +
-                ", amount=" + amount +
+                "id='" + id + '\'' +
+                ", symbol='" + symbol + '\'' +
+                ", name='" + name + '\'' +
+                ", holdings=" + holdings +
                 ", averagePrice=" + averagePrice +
-                ", targetPrice=" + targetPrice +
-                ", maxDrawdownPercentage=" + maxDrawdownPercentage +
+                ", expectedEntry=" + expectedEntry +
+                ", expectedPrice=" + expectedPrice +
+                ", targetPrice3Month=" + targetPrice3Month +
+                ", targetPriceLongTerm=" + targetPriceLongTerm +
                 '}';
     }
 }

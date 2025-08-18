@@ -14,7 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -23,6 +25,9 @@ public class AdvisoryEngineService {
     @Autowired
     private AppConfig appConfig;
 
+    @Autowired
+    private DataProviderService dataProviderService;
+
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -30,7 +35,53 @@ public class AdvisoryEngineService {
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
     }
-
+    public List<Advisory> generateOverviewHoldingAdvisories(List<Holding> holdings) {
+        List<Advisory> advisories = new ArrayList<>();
+        
+        for (Holding holding : holdings) {
+            try {
+                System.out.println("Getting market data for portfolio overview: " + holding.getSymbol() + " (ID: " + holding.getId() + ")");
+                
+                // Get market data using the crypto ID
+                MarketData marketData = dataProviderService.getMarketData(holding.getId());
+                
+                // Create basic advisory without AI analysis for portfolio overview
+                Advisory advisory = new Advisory();
+                advisory.setSymbol(holding.getSymbol());
+                advisory.setCurrentPrice(marketData.getCurrentPrice());
+                advisory.setProfitLoss(holding.getProfitLoss(marketData.getCurrentPrice()));
+                advisory.setProfitLossPercentage(holding.getProfitLossPercentage(marketData.getCurrentPrice()));
+                advisory.setPercentageToTarget(holding.getPercentageToTarget(marketData.getCurrentPrice()));
+                advisory.setRsi(marketData.getRsi());
+                advisory.setMacd(marketData.getMacd());
+                // Set default action and rationale for overview
+                advisory.setAction("HOLD");
+                advisory.setRationale("Portfolio overview - detailed analysis pending");
+                
+                advisories.add(advisory);
+                
+                // Add small delay between API calls
+                Thread.sleep(500);
+                
+            } catch (Exception e) {
+                System.err.println("Error getting market data for portfolio overview " + holding.getSymbol() + ": " + e.getMessage());
+                
+                // Create a basic advisory with error state
+                Advisory errorAdvisory = new Advisory();
+                errorAdvisory.setSymbol(holding.getSymbol());
+                errorAdvisory.setCurrentPrice(0.0);
+                errorAdvisory.setProfitLoss(0.0);
+                errorAdvisory.setProfitLossPercentage(0.0);
+                errorAdvisory.setPercentageToTarget(0.0);
+                errorAdvisory.setAction("ERROR");
+                errorAdvisory.setRationale("Unable to fetch market data");
+                
+                advisories.add(errorAdvisory);
+            }
+        }
+        
+        return advisories;
+    }
     public Advisory generateAdvisory(Holding holding, MarketData marketData) {
         try {
             Advisory advisory = new Advisory(holding.getSymbol());
@@ -71,10 +122,10 @@ public class AdvisoryEngineService {
         
         prompt.append("POSITION DETAILS:\n");
         prompt.append(String.format("Symbol: %s\n", holding.getSymbol()));
-        prompt.append(String.format("Amount: %.4f\n", holding.getAmount()));
+        prompt.append(String.format("Amount: %.4f\n", holding.getHoldings()));
         prompt.append(String.format("Average Price: $%.2f\n", holding.getAveragePrice()));
-        prompt.append(String.format("Target Price: $%.2f\n", holding.getTargetPrice()));
-        prompt.append(String.format("Max Drawdown: %.1f%%\n", holding.getMaxDrawdownPercentage()));
+        prompt.append(String.format("Target Price (3M): $%.2f\n", holding.getTargetPrice3Month()));
+        prompt.append(String.format("Target Price (Long): $%.2f\n", holding.getTargetPriceLongTerm()));
         
         prompt.append("\nCURRENT MARKET DATA:\n");
         prompt.append(String.format("Current Price: $%.2f\n", marketData.getCurrentPrice()));
