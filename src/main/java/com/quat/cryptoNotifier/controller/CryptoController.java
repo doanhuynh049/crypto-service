@@ -23,6 +23,17 @@ public class CryptoController {
         }
     }
 
+    @GetMapping("/test-risk-analysis")
+    public String testRiskAnalysis() {
+        try {
+            // This will only run the risk analysis phase
+            schedulerService.runManualAdvisory();
+            return "Risk & Opportunity Analysis completed successfully. Check your email and logs.";
+        } catch (Exception e) {
+            return "Error running risk analysis: " + e.getMessage();
+        }
+    }
+
     @GetMapping("/health")
     public String health() {
         return "Crypto Advisory Service is running";

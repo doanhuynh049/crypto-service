@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SchedulerService {
@@ -43,42 +44,11 @@ public class SchedulerService {
         try {
             // Load holdings
             List<Holding> holdings = loadHoldings();
-            List<Advisory> advisoriesWithoutAI = new ArrayList<>();
             List<Advisory> advisoriesWithAI = new ArrayList<>();
 
             // First pass: Generate basic advisories for portfolio overview
-            advisoriesWithoutAI = advisoryEngineService.generateOverviewHoldingAdvisories(holdings);
-            
-            // Send portfolio overview email first (with basic market data)
-            emailService.sendPortfolioOverview(holdings, advisoriesWithoutAI);
-
-            // Second pass: Generate AI advisories for each holding
-            for (int i = 0; i < holdings.size() && i < advisoriesWithoutAI.size(); i++) {
-                Holding holding = holdings.get(i);
-                try {
-                    System.out.println("Generating AI advisory for " + holding.getSymbol());
-                    
-                    // Get market data again (or reuse from first pass)
-                    MarketData marketData = dataProviderService.getMarketData(holding.getId());
-                    
-                    // Generate AI advisory
-                    Advisory advisory = advisoryEngineService.generateAdvisory(holding, marketData);
-                    advisoriesWithAI.add(advisory);
-                    
-                    System.out.println("Completed AI analysis for " + holding.getSymbol());
-                    
-                    // Add small delay between API calls
-                    Thread.sleep(1000);
-                    
-                } catch (Exception e) {
-                    System.err.println("Error generating AI advisory for " + holding.getSymbol() + ": " + e.getMessage());
-                    // Add the basic advisory if AI fails
-                    advisoriesWithAI.add(advisoriesWithoutAI.get(i));
-                }
-            }
-
-            // Send combined advisory email with all crypto advice
-            emailService.sendCombinedAdvisory(holdings, advisoriesWithAI);
+            Map<String, Object> overviewAdvisories = advisoryEngineService.generateRiskOpportunityAnalysis(holdings);
+            emailService.sendRiskOpportunityAnalysis(holdings, overviewAdvisories);
 
             // Save daily snapshot
             saveDailySnapshot(holdings, advisoriesWithAI);
@@ -91,6 +61,35 @@ public class SchedulerService {
         }
     }
 
+    public void sendAdvisoriesForEachCrypto(List<Holding> holdings, List<Advisory> advisories) {
+            // // Second pass: Generate AI advisories for each holding
+            // for (int i = 0; i < holdings.size() && i < advisoriesWithoutAI.size(); i++) {
+            //     Holding holding = holdings.get(i);
+            //     try {
+            //         System.out.println("Generating AI advisory for " + holding.getSymbol());
+                    
+            //         // Get market data again (or reuse from first pass)
+            //         MarketData marketData = dataProviderService.getMarketData(holding.getId());
+                    
+            //         // Generate AI advisory
+            //         Advisory advisory = advisoryEngineService.generateAdvisory(holding, marketData);
+            //         advisoriesWithAI.add(advisory);
+                    
+            //         System.out.println("Completed AI analysis for " + holding.getSymbol());
+                    
+            //         // Add small delay between API calls
+            //         Thread.sleep(1000);
+                    
+            //     } catch (Exception e) {
+            //         System.err.println("Error generating AI advisory for " + holding.getSymbol() + ": " + e.getMessage());
+            //         // Add the basic advisory if AI fails
+            //         advisoriesWithAI.add(advisoriesWithoutAI.get(i));
+            //     }
+            // }
+
+            // // Send combined advisory email with all crypto advice
+            // emailService.sendCombinedAdvisory(holdings, advisoriesWithAI);
+    }
     // Manual trigger method for testing
     public void runManualAdvisory() {
         System.out.println("Running manual advisory...");

@@ -15,6 +15,7 @@ import org.thymeleaf.context.Context;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EmailService {
@@ -104,7 +105,7 @@ public class EmailService {
         }
     }
 
-    public void sendPortfolioOverview(List<Holding> holdings, List<Advisory> advisories) {
+    public void sendPortfolioOverview(List<Holding> holdings, Map<String, Object> advisories) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -119,31 +120,6 @@ public class EmailService {
             context.setVariable("advisories", advisories);
             context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
-            // Calculate portfolio totals
-            double totalValue = 0;
-            double totalProfitLoss = 0;
-            double totalInitialValue = 0;
-
-            for (Advisory advisory : advisories) {
-                Holding holding = holdings.stream()
-                    .filter(h -> h.getSymbol().equals(advisory.getSymbol()))
-                    .findFirst()
-                    .orElse(null);
-                
-                if (holding != null) {
-                    totalValue += holding.getCurrentValue(advisory.getCurrentPrice());
-                    totalProfitLoss += advisory.getProfitLoss();
-                    totalInitialValue += holding.getInitialValue();
-                }
-            }
-
-            double totalProfitLossPercentage = totalInitialValue > 0 ? (totalProfitLoss / totalInitialValue) * 100 : 0;
-
-            context.setVariable("totalValue", totalValue);
-            context.setVariable("totalProfitLoss", totalProfitLoss);
-            context.setVariable("totalProfitLossPercentage", totalProfitLossPercentage);
-            context.setVariable("totalInitialValue", totalInitialValue);
-
             String content = templateEngine.process("portfolio-overview", context);
             helper.setText(content, true);
 
@@ -156,41 +132,30 @@ public class EmailService {
         }
     }
 
-    public void sendPortfolioOverview(List<Holding> holdings) {
+    public void sendRiskOpportunityAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(appConfig.getMailFrom());
             helper.setTo(appConfig.getMailTo());
-            helper.setSubject(String.format("📈 Portfolio Overview - %s", 
+            helper.setSubject(String.format("🎯 Risk & Opportunity Analysis - %s", 
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))));
 
             Context context = new Context();
             context.setVariable("holdings", holdings);
+            context.setVariable("analysisData", analysisData);
             context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
-            // Calculate portfolio totals
-            double totalValue = 0;
-            double totalProfitLoss = 0;
-            double totalInitialValue = 0;
-
-            double totalProfitLossPercentage = totalInitialValue > 0 ? (totalProfitLoss / totalInitialValue) * 100 : 0;
-
-            context.setVariable("totalValue", totalValue);
-            context.setVariable("totalProfitLoss", totalProfitLoss);
-            context.setVariable("totalProfitLossPercentage", totalProfitLossPercentage);
-            context.setVariable("totalInitialValue", totalInitialValue);
-
-            String content = templateEngine.process("portfolio-overview", context);
+            String content = templateEngine.process("risk-opportunity-analysis", context);
             helper.setText(content, true);
 
             mailSender.send(message);
 
-            System.out.println("Portfolio overview email sent successfully");
+            System.out.println("Risk & Opportunity Analysis email sent successfully");
 
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send portfolio overview email", e);
+            throw new RuntimeException("Failed to send risk & opportunity analysis email", e);
         }
     }
 }

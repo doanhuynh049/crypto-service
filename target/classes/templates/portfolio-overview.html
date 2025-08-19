@@ -143,6 +143,56 @@
         </div>
         
         <div class="content">
+            <!-- AI Portfolio Overview (Gemini Response) -->
+            <div class="portfolio-summary">
+                <h2 style="margin-top: 0;">AI Portfolio Overview</h2>
+                <div th:if="${aiAdvisory}">
+                    <div style="text-align:left;">
+                        <p><strong>Action:</strong> <span th:text="${aiAdvisory.portfolio_action}"></span></p>
+                        <p><strong>Summary:</strong> <span th:text="${aiAdvisory.summary}"></span></p>
+                        <p><strong>Risk Assessment:</strong> <span th:text="${aiAdvisory.risk_assessment}"></span></p>
+                        <p><strong>Risk Notes:</strong> <span th:text="${aiAdvisory.risk_notes}"></span></p>
+                    </div>
+                    <div th:if="${aiAdvisory.allocation_suggestions}">
+                        <h3 style="text-align:left;">Allocation Suggestions</h3>
+                        <table class="holdings-table">
+                            <thead>
+                                <tr>
+                                    <th>Token</th>
+                                    <th>Action</th>
+                                    <th>New Allocation</th>
+                                    <th>Rationale</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="alloc : ${aiAdvisory.allocation_suggestions}">
+                                    <td th:text="${alloc.symbol}"></td>
+                                    <td th:text="${alloc.action}"></td>
+                                    <td th:text="${alloc.new_allocation}"></td>
+                                    <td th:text="${alloc.rationale}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${aiAdvisory.opportunity_sectors}">
+                        <h3 style="text-align:left;">Opportunity Sectors</h3>
+                        <ul>
+                            <li th:each="sector : ${aiAdvisory.opportunity_sectors}" th:text="${sector}"></li>
+                        </ul>
+                    </div>
+                    <div th:if="${aiAdvisory.missing_assets}">
+                        <h3 style="text-align:left;">Missing Assets</h3>
+                        <ul>
+                            <li th:each="asset : ${aiAdvisory.missing_assets}" th:text="${asset}"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div th:unless="${aiAdvisory}">
+                    <p>AI advisory data could not be parsed or is unavailable.</p>
+                    <pre th:text="${advisories}"></pre>
+                </div>
+            </div>
+
             <!-- Portfolio Summary -->
             <div class="portfolio-summary">
                 <h2 style="margin-top: 0;">Portfolio Summary</h2>
@@ -181,55 +231,20 @@
                             <th>P&L</th>
                             <th>P&L %</th>
                             <th>To Target</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="advisory, iterStat : ${advisories}">
-                            <td>
-                                <strong th:text="${advisory.symbol}">TOKEN</strong>
-                            </td>
-                            <td th:text="${#numbers.formatDecimal(holdings[iterStat.index].amount, 1, 4)}">0.0000</td>
-                            <td th:text="'$' + ${#numbers.formatDecimal(advisory.currentPrice, 1, 2)}">$0.00</td>
-                            <td th:text="'$' + ${#numbers.formatDecimal(holdings[iterStat.index].amount * advisory.currentPrice, 1, 2)}">$0.00</td>
-                            <td th:classappend="${advisory.profitLoss >= 0} ? 'positive' : 'negative'"
-                                th:text="'$' + ${#numbers.formatDecimal(advisory.profitLoss, 1, 2)}">$0.00</td>
-                            <td th:classappend="${advisory.profitLossPercentage >= 0} ? 'positive' : 'negative'"
-                                th:text="${#numbers.formatDecimal(advisory.profitLossPercentage, 1, 2)} + '%'">0.00%</td>
-                            <td th:text="${#numbers.formatDecimal(advisory.percentageToTarget, 1, 2)} + '%'">0.00%</td>
-                            <td>
-                                <span th:class="'action-badge action-' + ${#strings.toLowerCase(advisory.action)}" 
-                                      th:text="${advisory.action}">HOLD</span>
-                            </td>
+                        <tr th:each="holding : ${holdings}">
+                            <td><strong th:text="${holding.symbol}">TOKEN</strong></td>
+                            <td th:text="${#numbers.formatDecimal(holding.holdings, 1, 4)}">0.0000</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
-
-            <!-- Technical Summary -->
-            <div class="section">
-                <h3>📊 Technical Summary</h3>
-                <div class="stats-grid">
-                    <div class="stat-card" th:each="advisory : ${advisories}">
-                        <div class="stat-title" th:text="${advisory.symbol} + ' RSI'">TOKEN RSI</div>
-                        <div class="stat-value" th:text="${advisory.rsi != null} ? ${#numbers.formatDecimal(advisory.rsi, 1, 1)} : 'N/A'">N/A</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- AI Recommendations Summary -->
-            <div class="section">
-                <h3>🤖 AI Recommendations</h3>
-                <div th:each="advisory : ${advisories}" style="margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <strong th:text="${advisory.symbol}">TOKEN</strong>
-                        <span th:class="'action-badge action-' + ${#strings.toLowerCase(advisory.action)}" 
-                              th:text="${advisory.action}">HOLD</span>
-                    </div>
-                    <div style="font-size: 14px; color: #666;">
-                        <strong>Rationale:</strong> <span th:text="${advisory.rationale}">Analysis rationale</span>
-                    </div>
-                </div>
             </div>
         </div>
 

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk & Opportunity Analysis</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .header .date {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 25px;
+        }
+        
+        /* Executive Summary */
+        .executive-summary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        .executive-summary h2 {
+            margin: 0 0 15px 0;
+            font-size: 24px;
+        }
+        .overall-recommendation {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        /* Portfolio Analysis Section */
+        .portfolio-analysis {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .portfolio-analysis h2 {
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        /* Diversification Grid */
+        .diversification-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .sector-card {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .sector-card h4 {
+            margin: 0 0 10px 0;
+            color: #34495e;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .sector-card p {
+            margin: 0;
+            color: #5a6c7d;
+            font-size: 14px;
+        }
+        
+        /* Risk Analysis Cards */
+        .risk-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .risk-card {
+            background: white;
+            border-left: 5px solid #e74c3c;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .risk-card.good {
+            border-left-color: #27ae60;
+        }
+        .risk-card.warning {
+            border-left-color: #f39c12;
+        }
+        .risk-card h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        
+        /* Recommendations */
+        .recommendations {
+            background: #fff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #e1e8ed;
+        }
+        .recommendations h3 {
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-size: 20px;
+        }
+        .recommendation-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .recommendation-item.high-priority {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .recommendation-item.medium-priority {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+        .recommendation-item.low-priority {
+            border-left-color: #27ae60;
+            background: #f0f9f4;
+        }
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .priority-high { background: #e74c3c; color: white; }
+        .priority-medium { background: #f39c12; color: white; }
+        .priority-low { background: #27ae60; color: white; }
+        
+        /* Individual Analysis */
+        .individual-analysis {
+            margin-bottom: 25px;
+        }
+        .individual-analysis h2 {
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            border-bottom: 3px solid #9b59b6;
+            padding-bottom: 10px;
+        }
+        .coin-analysis {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e1e8ed;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .coin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        .coin-symbol {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .action-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .action-buy { background: #d5f4e6; color: #27ae60; }
+        .action-hold { background: #fff3cd; color: #f39c12; }
+        .action-sell { background: #f8d7da; color: #e74c3c; }
+        
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .analysis-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .analysis-item h5 {
+            margin: 0 0 8px 0;
+            color: #34495e;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .analysis-item p {
+            margin: 0;
+            color: #5a6c7d;
+            font-size: 14px;
+        }
+        
+        /* Missing Assets */
+        .missing-assets {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        .missing-assets h3 {
+            margin: 0 0 15px 0;
+            color: #8b4513;
+            font-size: 20px;
+        }
+        .asset-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .asset-tag {
+            background: #fff;
+            color: #8b4513;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Footer */
+        .footer {
+            background: #34495e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            .content {
+                padding: 15px;
+            }
+            .diversification-grid,
+            .risk-cards,
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 Risk & Opportunity Analysis</h1>
+            <div class="date" th:text="${#dates.format(#dates.createNow(), 'MMMM dd, yyyy - HH:mm')}">Date</div>
+        </div>
+
+        <div class="content">
+            <!-- Executive Summary -->
+            <div class="executive-summary">
+                <h2>📊 Executive Summary</h2>
+                <p th:text="${analysisData.summary}">Portfolio analysis summary will appear here.</p>
+                <div class="overall-recommendation">
+                    <strong>Overall Recommendation: </strong>
+                    <span th:text="${analysisData.overall_recommendation}">BALANCED_GROWTH</span>
+                </div>
+            </div>
+
+            <!-- Portfolio Analysis -->
+            <div class="portfolio-analysis">
+                <h2>🏗️ Portfolio Analysis</h2>
+                
+                <!-- Sector Diversification -->
+                <h3>Sector Diversification</h3>
+                <div class="diversification-grid" th:if="${analysisData.portfolio_analysis?.sector_diversification}">
+                    <div class="sector-card">
+                        <h4>🏛️ Layer 1 Blockchains</h4>
+                        <p th:text="${analysisData.portfolio_analysis.sector_diversification.layer1_exposure}">Layer 1 exposure analysis</p>
+                    </div>
+                    <div class="sector-card">
+                        <h4>⚡ Layer 2 Solutions</h4>
+                        <p th:text="${analysisData.portfolio_analysis.sector_diversification.layer2_exposure}">Layer 2 exposure analysis</p>
+                    </div>
+                    <div class="sector-card">
+                        <h4>🔄 DeFi Protocols</h4>
+                        <p th:text="${analysisData.portfolio_analysis.sector_diversification.defi_exposure}">DeFi exposure analysis</p>
+                    </div>
+                    <div class="sector-card">
+                        <h4>🤖 AI & Machine Learning</h4>
+                        <p th:text="${analysisData.portfolio_analysis.sector_diversification.ai_exposure}">AI exposure analysis</p>
+                    </div>
+                    <div class="sector-card">
+                        <h4>🌐 Other Sectors</h4>
+                        <p th:text="${analysisData.portfolio_analysis.sector_diversification.other_sectors}">Other sectors analysis</p>
+                    </div>
+                </div>
+
+                <!-- Risk Assessment Cards -->
+                <h3>Risk Assessment</h3>
+                <div class="risk-cards">
+                    <div class="risk-card" th:classappend="${analysisData.portfolio_analysis.diversification_score == 'EXCELLENT'} ? 'good' : (${analysisData.portfolio_analysis.diversification_score == 'GOOD'} ? 'good' : (${analysisData.portfolio_analysis.diversification_score == 'POOR'} ? 'risk' : 'warning'))">
+                        <h4>📈 Diversification Score</h4>
+                        <p><strong th:text="${analysisData.portfolio_analysis.diversification_score}">FAIR</strong></p>
+                    </div>
+                    <div class="risk-card warning">
+                        <h4>⚠️ Correlation Risks</h4>
+                        <p th:text="${analysisData.portfolio_analysis.correlation_risks}">Correlation risk analysis</p>
+                    </div>
+                    <div class="risk-card">
+                        <h4>🎯 Overexposure Concerns</h4>
+                        <p th:text="${analysisData.portfolio_analysis.overexposure_concerns}">Overexposure analysis</p>
+                    </div>
+                    <div class="risk-card good">
+                        <h4>⚖️ Risk vs Reward Balance</h4>
+                        <p th:text="${analysisData.portfolio_analysis.risk_reward_balance}">Risk reward balance assessment</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="recommendations">
+                <h3>💡 Recommended Adjustments</h3>
+                <div th:each="recommendation : ${analysisData.portfolio_analysis.recommended_adjustments}">
+                    <div class="recommendation-item" 
+                         th:classappend="${recommendation.priority == 'HIGH'} ? 'high-priority' : (${recommendation.priority == 'MEDIUM'} ? 'medium-priority' : 'low-priority')">
+                        <div class="priority-badge" 
+                             th:classappend="${recommendation.priority == 'HIGH'} ? 'priority-high' : (${recommendation.priority == 'MEDIUM'} ? 'priority-medium' : 'priority-low')"
+                             th:text="${recommendation.priority}">PRIORITY</div>
+                        <h4 th:text="${recommendation.action}">Recommendation action</h4>
+                        <p th:text="${recommendation.rationale}">Rationale for this recommendation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missing Assets -->
+            <div class="missing-assets" th:if="${analysisData.portfolio_analysis.missing_sectors}">
+                <h3>🎯 Missing Investment Opportunities</h3>
+                <p>Consider adding exposure to these sectors to improve diversification:</p>
+                <div class="asset-tags">
+                    <span class="asset-tag" th:each="sector : ${analysisData.portfolio_analysis.missing_sectors}" 
+                          th:text="${sector}">Missing Sector</span>
+                </div>
+            </div>
+
+            <!-- Individual Analysis -->
+            <div class="individual-analysis">
+                <h2>💰 Individual Coin Analysis</h2>
+                <div th:each="coin : ${analysisData.individual_analysis}" class="coin-analysis">
+                    <div class="coin-header">
+                        <div class="coin-symbol" th:text="${coin.symbol}">BTC</div>
+                        <div class="action-badge" 
+                             th:classappend="${coin.action_recommendation == 'BUY'} ? 'action-buy' : (${coin.action_recommendation == 'SELL'} ? 'action-sell' : 'action-hold')"
+                             th:text="${coin.action_recommendation}">HOLD</div>
+                    </div>
+                    
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <h5>📈 Short-term Outlook</h5>
+                            <p th:text="${coin.market_outlook_short}">Short-term market analysis</p>
+                        </div>
+                        <div class="analysis-item">
+                            <h5>🎯 Long-term Outlook</h5>
+                            <p th:text="${coin.market_outlook_long}">Long-term market analysis</p>
+                        </div>
+                        <div class="analysis-item">
+                            <h5>⚠️ Risk Factors</h5>
+                            <p th:text="${coin.risk_factors}">Key risk factors to monitor</p>
+                        </div>
+                        <div class="analysis-item">
+                            <h5>🚀 Upside Opportunities</h5>
+                            <p th:text="${coin.upside_opportunities}">Growth opportunities and catalysts</p>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-item" style="margin-top: 15px; background: #e8f5e8;">
+                        <h5>💭 Investment Rationale</h5>
+                        <p th:text="${coin.rationale}">Reasoning for the recommendation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>This analysis is for informational purposes only and should not be considered as financial advice.<br>
+            Always conduct your own research and consult with financial professionals before making investment decisions.</p>
+        </div>
+    </div>
+</body>
+</html>
