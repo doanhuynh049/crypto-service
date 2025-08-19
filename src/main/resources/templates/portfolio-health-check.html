@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Health Check</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .header .date {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 25px;
+        }
+        
+        /* Health Score Section */
+        .health-score {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .health-score h2 {
+            margin: 0 0 15px 0;
+            font-size: 24px;
+        }
+        .score-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .score-excellent { background: #27ae60; }
+        .score-good { background: #f39c12; }
+        .score-fair { background: #e67e22; }
+        .score-poor { background: #e74c3c; }
+        
+        /* Section Headers */
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #3498db;
+        }
+        .section h2 {
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+        }
+        .section h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: #3498db;
+            margin-right: 15px;
+            border-radius: 2px;
+        }
+        
+        /* Weight Analysis */
+        .weight-analysis {
+            border-left-color: #e74c3c;
+        }
+        .weight-analysis h2::before {
+            background: #e74c3c;
+        }
+        .weight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .weight-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .weight-card.overweight {
+            border-left: 4px solid #e74c3c;
+        }
+        .weight-card.underweight {
+            border-left: 4px solid #f39c12;
+        }
+        .coin-symbol {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .weight-info {
+            margin-bottom: 10px;
+        }
+        .weight-current {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .weight-recommended {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        /* Target Price Analysis */
+        .target-analysis {
+            border-left-color: #9b59b6;
+        }
+        .target-analysis h2::before {
+            background: #9b59b6;
+        }
+        .target-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .target-card.unrealistic {
+            border-left: 4px solid #e74c3c;
+        }
+        .target-card.conservative {
+            border-left: 4px solid #f39c12;
+        }
+        .price-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .price-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .price-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .price-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        /* Profit Taking Strategy */
+        .profit-strategy {
+            border-left-color: #27ae60;
+        }
+        .profit-strategy h2::before {
+            background: #27ae60;
+        }
+        .profit-candidates {
+            margin-bottom: 20px;
+        }
+        .profit-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .profit-card.immediate {
+            border-left: 4px solid #27ae60;
+        }
+        .profit-card.future {
+            border-left: 4px solid #3498db;
+        }
+        .gain-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .gain-high { background: #d5f4e6; color: #27ae60; }
+        .gain-medium { background: #fff3cd; color: #f39c12; }
+        
+        /* Stablecoin Recommendation */
+        .stablecoin-section {
+            border-left-color: #34495e;
+        }
+        .stablecoin-section h2::before {
+            background: #34495e;
+        }
+        .stablecoin-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .percentage-badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .stablecoin-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .stablecoin-tag {
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Action Priorities */
+        .action-priorities {
+            border-left-color: #f39c12;
+        }
+        .action-priorities h2::before {
+            background: #f39c12;
+        }
+        .priority-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .priority-item.high {
+            border-left: 4px solid #e74c3c;
+        }
+        .priority-item.medium {
+            border-left: 4px solid #f39c12;
+        }
+        .priority-item.low {
+            border-left: 4px solid #95a5a6;
+        }
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .priority-high { background: #e74c3c; color: white; }
+        .priority-medium { background: #f39c12; color: white; }
+        .priority-low { background: #95a5a6; color: white; }
+        
+        /* Risk Warnings */
+        .risk-warnings {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        .risk-warnings h3 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+        }
+        .risk-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .risk-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .risk-list li:last-child {
+            border-bottom: none;
+        }
+        .risk-list li::before {
+            content: '⚠️';
+            margin-right: 10px;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #34495e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            .content {
+                padding: 15px;
+            }
+            .weight-grid,
+            .price-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏥 Portfolio Health Check</h1>
+            <div class="date" th:text="${#dates.format(#dates.createNow(), 'MMMM dd, yyyy - HH:mm')}">Date</div>
+        </div>
+
+        <div class="content">
+            <!-- Health Score -->
+            <div class="health-score">
+                <h2>🎯 Overall Health Score</h2>
+                <div class="score-badge" 
+                     th:classappend="${healthData.overall_health_score == 'EXCELLENT'} ? 'score-excellent' : (${healthData.overall_health_score == 'GOOD'} ? 'score-good' : (${healthData.overall_health_score == 'POOR'} ? 'score-poor' : 'score-fair'))"
+                     th:text="${healthData.overall_health_score}">FAIR</div>
+                <p th:text="${healthData.health_summary}">Portfolio health summary will appear here.</p>
+            </div>
+
+            <!-- Weight Analysis -->
+            <div class="section weight-analysis">
+                <h2>⚖️ Portfolio Weight Analysis</h2>
+                
+                <h3>Overweighted Positions</h3>
+                <div class="weight-grid" th:if="${healthData.weight_analysis?.overweighted_coins}">
+                    <div class="weight-card overweight" th:each="coin : ${healthData.weight_analysis.overweighted_coins}">
+                        <div class="coin-symbol" th:text="${coin.symbol}">BTC</div>
+                        <div class="weight-info">
+                            <strong>Current: </strong><span class="weight-current" th:text="${coin.current_weight}">25%</span><br>
+                            <strong>Recommended: </strong><span class="weight-recommended" th:text="${coin.recommended_weight}">15-20%</span>
+                        </div>
+                        <div><strong>Action: </strong><span th:text="${coin.action}">Trim position</span></div>
+                        <div><strong>Reasoning: </strong><span th:text="${coin.reasoning}">Risk explanation</span></div>
+                    </div>
+                </div>
+                
+                <h3>Underweighted Positions</h3>
+                <div class="weight-grid" th:if="${healthData.weight_analysis?.underweighted_coins}">
+                    <div class="weight-card underweight" th:each="coin : ${healthData.weight_analysis.underweighted_coins}">
+                        <div class="coin-symbol" th:text="${coin.symbol}">ETH</div>
+                        <div class="weight-info">
+                            <strong>Current: </strong><span class="weight-current" th:text="${coin.current_weight}">5%</span><br>
+                            <strong>Recommended: </strong><span class="weight-recommended" th:text="${coin.recommended_weight}">10-15%</span>
+                        </div>
+                        <div><strong>Action: </strong><span th:text="${coin.action}">Increase allocation</span></div>
+                        <div><strong>Reasoning: </strong><span th:text="${coin.reasoning}">Growth explanation</span></div>
+                    </div>
+                </div>
+                
+                <div class="weight-card" th:if="${healthData.weight_analysis?.optimal_weights}">
+                    <h4>💡 Optimal Allocation Strategy</h4>
+                    <p th:text="${healthData.weight_analysis.optimal_weights}">Recommended portfolio allocation strategy</p>
+                </div>
+            </div>
+
+            <!-- Target Price Analysis -->
+            <div class="section target-analysis">
+                <h2>🎯 Target Price Analysis</h2>
+                
+                <h3>Unrealistic Targets</h3>
+                <div th:each="target : ${healthData.target_price_analysis?.unrealistic_targets}">
+                    <div class="target-card unrealistic">
+                        <div class="coin-symbol" th:text="${target.symbol}">SOL</div>
+                        <p th:text="${target.reasoning}">Target analysis reasoning</p>
+                        <div class="price-comparison">
+                            <div class="price-item">
+                                <div class="price-label">Current 3M Target</div>
+                                <div class="price-value" th:text="${target.current_target_3m}">$300</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-label">Realistic 3M Target</div>
+                                <div class="price-value" th:text="${target.realistic_target_3m}">$180-220</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-label">Current Long Target</div>
+                                <div class="price-value" th:text="${target.current_target_long}">$500</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-label">Realistic Long Target</div>
+                                <div class="price-value" th:text="${target.realistic_target_long}">$350-400</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Conservative Targets</h3>
+                <div th:each="target : ${healthData.target_price_analysis?.conservative_targets}">
+                    <div class="target-card conservative">
+                        <div class="coin-symbol" th:text="${target.symbol}">AVAX</div>
+                        <p th:text="${target.reasoning}">Conservative target reasoning</p>
+                        <div class="price-comparison">
+                            <div class="price-item">
+                                <div class="price-label">Current Long Target</div>
+                                <div class="price-value" th:text="${target.current_target_long}">$100</div>
+                            </div>
+                            <div class="price-item">
+                                <div class="price-label">Suggested Long Target</div>
+                                <div class="price-value" th:text="${target.suggested_target_long}">$120-150</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profit Taking Strategy -->
+            <div class="section profit-strategy">
+                <h2>💰 Profit Taking Strategy</h2>
+                
+                <div class="profit-candidates">
+                    <h3>Immediate Candidates</h3>
+                    <div th:each="candidate : ${healthData.profit_taking_strategy?.immediate_candidates}">
+                        <div class="profit-card immediate">
+                            <div class="coin-symbol" th:text="${candidate.symbol}">SOL</div>
+                            <div class="gain-badge gain-high" th:text="'Current Gain: ' + ${candidate.current_gain}">Current Gain: 120%</div>
+                            <div><strong>Action: </strong><span th:text="${candidate.action}">Sell strategy</span></div>
+                            <p th:text="${candidate.reasoning}">Profit taking reasoning</p>
+                        </div>
+                    </div>
+                    
+                    <h3>Future Candidates</h3>
+                    <div th:each="candidate : ${healthData.profit_taking_strategy?.future_candidates}">
+                        <div class="profit-card future">
+                            <div class="coin-symbol" th:text="${candidate.symbol}">AVAX</div>
+                            <div class="gain-badge gain-medium" th:text="'Trigger at: ' + ${candidate.trigger_gain}">Trigger at: 50%</div>
+                            <div><strong>Action: </strong><span th:text="${candidate.action}">Future action</span></div>
+                            <p th:text="${candidate.reasoning}">Future strategy reasoning</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profit-card" th:if="${healthData.profit_taking_strategy?.overall_strategy}">
+                    <h4>📋 Overall Strategy</h4>
+                    <p th:text="${healthData.profit_taking_strategy.overall_strategy}">Overall profit taking philosophy</p>
+                </div>
+            </div>
+
+            <!-- Stablecoin Recommendation -->
+            <div class="section stablecoin-section">
+                <h2>🏦 Stablecoin Buffer Recommendation</h2>
+                
+                <div class="stablecoin-card">
+                    <div class="percentage-badge" th:text="${healthData.stablecoin_recommendation?.recommended_percentage}">10-15%</div>
+                    
+                    <h4>💡 Reasoning</h4>
+                    <p th:text="${healthData.stablecoin_recommendation?.reasoning}">Stablecoin allocation reasoning</p>
+                    
+                    <h4>🎯 Deployment Strategy</h4>
+                    <p th:text="${healthData.stablecoin_recommendation?.deployment_strategy}">How to deploy stablecoin buffer</p>
+                    
+                    <h4>💎 Yield Opportunities</h4>
+                    <p th:text="${healthData.stablecoin_recommendation?.yield_opportunities}">Staking and lending options</p>
+                    
+                    <h4>🪙 Suggested Stablecoins</h4>
+                    <div class="stablecoin-tags">
+                        <span class="stablecoin-tag" th:each="coin : ${healthData.stablecoin_recommendation?.suggested_stablecoins}" 
+                              th:text="${coin}">USDC</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Priorities -->
+            <div class="section action-priorities">
+                <h2>📋 Action Priorities</h2>
+                
+                <div th:each="action : ${healthData.action_priorities}">
+                    <div class="priority-item" 
+                         th:classappend="${action.priority == 'HIGH'} ? 'high' : (${action.priority == 'MEDIUM'} ? 'medium' : 'low')">
+                        <div class="priority-badge" 
+                             th:classappend="${action.priority == 'HIGH'} ? 'priority-high' : (${action.priority == 'MEDIUM'} ? 'priority-medium' : 'priority-low')"
+                             th:text="${action.priority}">HIGH</div>
+                        <h4 th:text="${action.action}">Action to take</h4>
+                        <div><strong>Timeline: </strong><span th:text="${action.timeline}">When to execute</span></div>
+                        <div><strong>Expected Impact: </strong><span th:text="${action.impact}">Portfolio improvement</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Warnings -->
+            <div class="risk-warnings" th:if="${healthData.risk_warnings}">
+                <h3>⚠️ Key Risk Warnings</h3>
+                <ul class="risk-list">
+                    <li th:each="warning : ${healthData.risk_warnings}" th:text="${warning}">Risk warning</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>This health check is for informational purposes only and should not be considered as financial advice.<br>
+            Always conduct your own research and consult with financial professionals before making investment decisions.</p>
+        </div>
+    </div>
+</body>
+</html>

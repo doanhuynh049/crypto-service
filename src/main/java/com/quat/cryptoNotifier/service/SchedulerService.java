@@ -47,9 +47,11 @@ public class SchedulerService {
             List<Advisory> advisoriesWithAI = new ArrayList<>();
 
             // First pass: Generate basic advisories for portfolio overview
-            Map<String, Object> overviewAdvisories = advisoryEngineService.generateRiskOpportunityAnalysis(holdings);
-            emailService.sendRiskOpportunityAnalysis(holdings, overviewAdvisories);
+            Map<String, Object> riskAdvisories = advisoryEngineService.generateRiskOpportunityAnalysis(holdings);
+            emailService.sendRiskOpportunityAnalysis(holdings, riskAdvisories);
 
+            Map<String, Object> healthAdvisories = advisoryEngineService.generatePortfolioHealthCheck(holdings);
+            emailService.sendPortfolioHealthCheck(holdings, healthAdvisories);
             // Save daily snapshot
             saveDailySnapshot(holdings, advisoriesWithAI);
 

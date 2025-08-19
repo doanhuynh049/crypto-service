@@ -158,4 +158,31 @@ public class EmailService {
             throw new RuntimeException("Failed to send risk & opportunity analysis email", e);
         }
     }
+
+    public void sendPortfolioHealthCheck(List<Holding> holdings, Map<String, Object> healthData) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(appConfig.getMailFrom());
+            helper.setTo(appConfig.getMailTo());
+            helper.setSubject(String.format("🏥 Portfolio Health Check - %s", 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))));
+
+            Context context = new Context();
+            context.setVariable("holdings", holdings);
+            context.setVariable("healthData", healthData);
+            context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+            String content = templateEngine.process("portfolio-health-check", context);
+            helper.setText(content, true);
+
+            mailSender.send(message);
+
+            System.out.println("Portfolio Health Check email sent successfully");
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send portfolio health check email", e);
+        }
+    }
 }
