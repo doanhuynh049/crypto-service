@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="|${analysisData.symbol} Investment Analysis|">Crypto Investment Analysis</title>
+    <style>
+        /* Email-safe CSS Reset */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            border-collapse: collapse !important;
+        }
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* 👇 Emoji-safe font stack for the whole email */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji",
+                         Arial, Helvetica, sans-serif !important;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+            color: #333333;
+        }
+
+        /* Extra-robust emoji class for Outlook/Gmail */
+        .emoji {
+            font-family: "Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",
+                         -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Arial, Helvetica, sans-serif !important;
+        }
+
+        /* Use table-based layout for better email compatibility */
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .header-table {
+            width: 100%;
+            background-color: #2c5aa0;
+            color: #ffffff;
+        }
+
+        .header-cell {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header-date {
+            margin: 10px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content-table {
+            width: 100%;
+            background-color: #ffffff;
+        }
+
+        .content-cell {
+            padding: 20px;
+        }
+
+        /* Bottom Line Section */
+        .bottom-line-table {
+            width: 100%;
+            background-color: #f44336;
+            border-radius: 8px;
+            margin: 0 0 20px 0;
+        }
+        .bottom-line-table.buy { background-color: #4CAF50; }
+        .bottom-line-table.dca { background-color: #ff9800; }
+        .bottom-line-table.wait { background-color: #f44336; }
+
+        .bottom-line-cell {
+            padding: 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .recommendation-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .confidence-text {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Section styling */
+        .section-table {
+            width: 100%;
+            margin: 0 0 20px 0;
+            background-color: #f8f9fa;
+            border-left: 4px solid #2c5aa0;
+        }
+
+        .section-header {
+            padding: 15px 20px 5px 20px;
+            background-color: #f8f9fa;
+        }
+
+        .section-title {
+            margin: 0;
+            color: #333333;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-content {
+            padding: 15px 20px 20px 20px;
+            background-color: #ffffff;
+        }
+
+        /* Lists */
+        .analysis-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .analysis-list li {
+            background-color: #f8f9fa;
+            margin: 5px 0;
+            padding: 10px 15px;
+            border-left: 3px solid #2c5aa0;
+        }
+
+        /* Price levels table */
+        .levels-table {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .levels-cell {
+            width: 50%;
+            padding: 10px;
+            vertical-align: top;
+        }
+
+        .support-header {
+            color: #4CAF50;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+
+        .resistance-header {
+            color: #f44336;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+
+        .level-item {
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        /* Two column layout */
+        .two-column-table { width: 100%; }
+
+        .column-cell {
+            width: 50%;
+            padding: 10px;
+            vertical-align: top;
+        }
+
+        /* Outlook grid - simplified for email */
+        .outlook-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .outlook-title {
+            margin: 0 0 10px 0;
+            color: #2c5aa0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* Sentiment indicator */
+        .sentiment-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .sentiment-bullish { background-color: #e8f5e8; color: #2e7d32; }
+        .sentiment-neutral { background-color: #fff3e0; color: #f57c00; }
+        .sentiment-bearish { background-color: #ffebee; color: #c62828; }
+
+        /* Key info box */
+        .key-info {
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .key-info-title {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        /* Position sizing */
+        .sizing-table { width: 100%; margin: 15px 0; }
+
+        .sizing-cell {
+            width: 33.33%;
+            padding: 10px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .sizing-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .sizing-label {
+            margin: 0 0 8px 0;
+            color: #333333;
+            font-size: 14px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .sizing-percentage {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c5aa0;
+        }
+
+        /* Footer */
+        .footer-table {
+            width: 100%;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .footer-cell {
+            padding: 20px;
+            text-align: center;
+            color: #666666;
+            font-size: 14px;
+        }
+
+        /* Responsive adjustments */
+        @media only screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .levels-cell, .column-cell, .sizing-cell {
+                width: 100% !important;
+                display: block !important;
+            }
+        }
+    </style>
+
+    <!--[if mso]>
+    <style type="text/css">
+      .emoji { font-family: "Segoe UI Emoji","Segoe UI Symbol",Arial,sans-serif !important; }
+    </style>
+    <![endif]-->
+</head>
+<body>
+    <table class="email-container" cellpadding="0" cellspacing="0" border="0" role="presentation">
+        <!-- Header -->
+        <tr>
+            <td>
+                <table class="header-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                    <tr>
+                        <td class="header-cell">
+                            <h1 class="header-title"><span th:text="${analysisData.symbol}">CRYPTO</span> Investment Analysis</h1>
+                            <p class="header-date" th:text="${timestamp}">Timestamp</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+            <td>
+                <table class="content-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                    <tr>
+                        <td class="content-cell">
+
+                            <!-- Bottom Line Section -->
+                            <table class="bottom-line-table"
+                                   th:classappend="${analysisData.recommendation == 'BUY'} ? 'buy' :
+                                                  (${analysisData.recommendation == 'DCA'} ? 'dca' : 'wait')"
+                                   cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="bottom-line-cell">
+                                        <h2 style="margin: 0 0 10px 0; font-size: 20px;">
+                                            <span class="emoji">💡</span> Bottom Line
+                                        </h2>
+                                        <div class="recommendation-text" th:text="${analysisData.recommendation}">WAIT</div>
+                                        <p style="margin: 10px 0;" th:text="${analysisData.bottom_line}">Analysis pending</p>
+                                        <div class="confidence-text">
+                                            Confidence Level: <span th:text="${analysisData.confidence}">LOW</span>
+                                        </div>
+                                        <div style="margin-top: 15px;">
+                                            Target Allocation: <span th:text="${analysisData.target_allocation}">5-10%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Current Price Analysis -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">📈</span> Current Price Entry Analysis</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <div class="key-info">
+                                            <h4 class="key-info-title">Entry Quality: <span th:text="${analysisData.current_price_analysis?.entry_quality}">FAIR</span></h4>
+                                        </div>
+                                        <table class="two-column-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0;">Price Context</h4>
+                                                    <p th:text="${analysisData.current_price_analysis?.price_context}">Price context analysis</p>
+                                                </td>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0;">Value Assessment</h4>
+                                                    <p th:text="${analysisData.current_price_analysis?.value_assessment}">Value assessment</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <h4 style="margin: 15px 0 10px 0;">Timing Factors</h4>
+                                        <p th:text="${analysisData.current_price_analysis?.timing_factors}">Timing considerations</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Technical Levels -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">📊</span> Technical Levels</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <table class="levels-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="levels-cell">
+                                                    <h4 class="support-header"><span class="emoji">🟢</span> Support Levels</h4>
+                                                    <div th:each="level : ${analysisData.technical_levels?.support_levels}">
+                                                        <div class="level-item" th:text="${level}">$2800</div>
+                                                    </div>
+                                                </td>
+                                                <td class="levels-cell">
+                                                    <h4 class="resistance-header"><span class="emoji">🔴</span> Resistance Levels</h4>
+                                                    <div th:each="level : ${analysisData.technical_levels?.resistance_levels}">
+                                                        <div class="level-item" th:text="${level}">$3200</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="two-column-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0;">Key Breakout Level</h4>
+                                                    <div class="level-item" th:text="${analysisData.technical_levels?.key_breakout_level}">TBD</div>
+                                                </td>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0;">Stop Loss Suggestion</h4>
+                                                    <div class="level-item" th:text="${analysisData.technical_levels?.stop_loss_suggestion}">Set based on risk tolerance</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Outlook -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">🔮</span> Outlook</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title"><span class="emoji">📅</span> Short-term (1-3M)</h4>
+                                            <p th:text="${analysisData.outlook?.short_term}">Short-term outlook</p>
+                                        </div>
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title"><span class="emoji">📈</span> Medium-term (3-12M)</h4>
+                                            <p th:text="${analysisData.outlook?.medium_term}">Medium-term outlook</p>
+                                        </div>
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title"><span class="emoji">🚀</span> Long-term (1-3Y)</h4>
+                                            <p th:text="${analysisData.outlook?.long_term}">Long-term outlook</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Strategy -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">🎯</span> Strategy</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <table class="two-column-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0;">Entry Strategy</h4>
+                                                    <p th:text="${analysisData.strategy?.entry_strategy}">Entry strategy</p>
+                                                </td>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0;">DCA Schedule</h4>
+                                                    <p th:text="${analysisData.strategy?.dca_schedule}">DCA schedule</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <h4 style="margin: 15px 0 10px 0;"><span class="emoji">📊</span> Profit Targets</h4>
+                                        <ul class="analysis-list">
+                                            <li th:each="target : ${analysisData.strategy?.profit_targets}" th:text="${target}">Target level</li>
+                                        </ul>
+                                        <h4 style="margin: 15px 0 10px 0;"><span class="emoji">🛡️</span> Risk Management</h4>
+                                        <p th:text="${analysisData.strategy?.risk_management}">Risk management considerations</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Market Sentiment -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">📊</span> Market Sentiment & Macro</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <h4 style="margin: 0 0 15px 0;">Current Sentiment</h4>
+                                        <span class="sentiment-indicator"
+                                              th:classappend="${analysisData.market_sentiment?.current_sentiment == 'BULLISH'} ? 'sentiment-bullish' :
+                                                             (${analysisData.market_sentiment?.current_sentiment == 'NEUTRAL'} ? 'sentiment-neutral' : 'sentiment-bearish')"
+                                              th:text="${analysisData.market_sentiment?.current_sentiment}">NEUTRAL</span>
+
+                                        <table class="two-column-table" cellpadding="0" cellspacing="0" border="0" style="margin-top: 15px;" role="presentation">
+                                            <tr>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0;"><span class="emoji">🏢</span> Institutional Activity</h4>
+                                                    <p th:text="${analysisData.market_sentiment?.institutional_activity}">Institutional analysis</p>
+                                                </td>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0;"><span class="emoji">👥</span> Retail Sentiment</h4>
+                                                    <p th:text="${analysisData.market_sentiment?.retail_sentiment}">Retail sentiment</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <h4 style="margin: 15px 0 10px 0;"><span class="emoji">🌍</span> Macro Factors</h4>
+                                        <p th:text="${analysisData.market_sentiment?.macro_factors}">Macro factors</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Fundamentals -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">🔬</span> On-Chain & Fundamentals</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title"><span class="emoji">🌐</span> Network Health</h4>
+                                            <p th:text="${analysisData.fundamentals?.network_health}">Network health analysis</p>
+                                        </div>
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title"><span class="emoji">🔒</span> Staking Metrics</h4>
+                                            <p th:text="${analysisData.fundamentals?.staking_metrics}">Staking analysis</p>
+                                        </div>
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title"><span class="emoji">🏦</span> Ecosystem Activity</h4>
+                                            <p th:text="${analysisData.fundamentals?.ecosystem_activity}">Ecosystem activity analysis</p>
+                                        </div>
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title"><span class="emoji">👨‍💻</span> Development Activity</h4>
+                                            <p th:text="${analysisData.fundamentals?.development_activity}">Development analysis</p>
+                                        </div>
+                                        <h4 style="margin: 15px 0 10px 0;"><span class="emoji">🏆</span> Competitive Position</h4>
+                                        <p th:text="${analysisData.fundamentals?.competitive_position}">Competitive position analysis</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Catalysts and Risks -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">⚡</span> Catalysts & Risks</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <table class="two-column-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0; color: #4CAF50;"><span class="emoji">🚀</span> Positive Catalysts</h4>
+                                                    <ul class="analysis-list">
+                                                        <li th:each="catalyst : ${analysisData.catalysts_and_risks?.positive_catalysts}" th:text="${catalyst}">Catalyst</li>
+                                                    </ul>
+                                                </td>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 0 0 10px 0; color: #f44336;"><span class="emoji">⚠️</span> Risk Factors</h4>
+                                                    <ul class="analysis-list">
+                                                        <li th:each="risk : ${analysisData.catalysts_and_risks?.risk_factors}" th:text="${risk}">Risk factor</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="two-column-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 15px 0 10px 0;"><span class="emoji">📅</span> Upcoming Events</h4>
+                                                    <ul class="analysis-list">
+                                                        <li th:each="event : ${analysisData.catalysts_and_risks?.upcoming_events}" th:text="${event}">Event</li>
+                                                    </ul>
+                                                </td>
+                                                <td class="column-cell">
+                                                    <h4 style="margin: 15px 0 10px 0;"><span class="emoji">⚖️</span> Regulatory Outlook</h4>
+                                                    <p th:text="${analysisData.catalysts_and_risks?.regulatory_outlook}">Regulatory analysis</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Position Sizing -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">📊</span> Position Sizing</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <table class="sizing-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="sizing-cell">
+                                                    <div class="sizing-item">
+                                                        <h4 class="sizing-label">Conservative</h4>
+                                                        <div class="sizing-percentage" th:text="${analysisData.position_sizing?.conservative_allocation}">5-10%</div>
+                                                    </div>
+                                                </td>
+                                                <td class="sizing-cell">
+                                                    <div class="sizing-item">
+                                                        <h4 class="sizing-label">Moderate</h4>
+                                                        <div class="sizing-percentage" th:text="${analysisData.position_sizing?.moderate_allocation}">10-20%</div>
+                                                    </div>
+                                                </td>
+                                                <td class="sizing-cell">
+                                                    <div class="sizing-item">
+                                                        <h4 class="sizing-label">Aggressive</h4>
+                                                        <div class="sizing-percentage" th:text="${analysisData.position_sizing?.aggressive_allocation}">20-30%</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <h4 style="margin: 15px 0 10px 0;"><span class="emoji">💡</span> Sizing Rationale</h4>
+                                        <p th:text="${analysisData.position_sizing?.sizing_rationale}">Allocation rationale</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Key Triggers -->
+                            <table class="section-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="section-header">
+                                        <h3 class="section-title"><span class="emoji">🎯</span> Key Triggers</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="section-content">
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title" style="color: #4CAF50;"><span class="emoji">🟢</span> Buy Triggers</h4>
+                                            <ul class="analysis-list">
+                                                <li th:each="trigger : ${analysisData.key_triggers?.buy_triggers}" th:text="${trigger}">Buy trigger</li>
+                                            </ul>
+                                        </div>
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title" style="color: #f44336;"><span class="emoji">🔴</span> Sell Triggers</h4>
+                                            <ul class="analysis-list">
+                                                <li th:each="trigger : ${analysisData.key_triggers?.sell_triggers}" th:text="${trigger}">Sell trigger</li>
+                                            </ul>
+                                        </div>
+                                        <div class="outlook-item">
+                                            <h4 class="outlook-title" style="color: #ff9800;"><span class="emoji">🔄</span> Reassessment Triggers</h4>
+                                            <ul class="analysis-list">
+                                                <li th:each="trigger : ${analysisData.key_triggers?.reassessment_triggers}" th:text="${trigger}">Reassessment trigger</li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td>
+                <table class="footer-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                    <tr>
+                        <td class="footer-cell">
+                            <p style="margin: 0 0 10px 0;"><span class="emoji">📧</span> This analysis was generated automatically by your Crypto Advisory Service</p>
+                            <p style="margin: 0 0 10px 0;"><span class="emoji">⚠️</span> This is not financial advice. Always do your own research and consider your risk tolerance.</p>
+                            <p style="margin: 0;">Generated on <span th:text="${timestamp}">timestamp</span></p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

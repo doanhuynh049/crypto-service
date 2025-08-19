@@ -27,10 +27,14 @@ public class DataProviderService {
             String coinGeckoId = getCoinGeckoId(symbolOrId);
             String priceUrl = String.format("https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true", 
                 coinGeckoId);
-            
+            System.out.println("[DataProviderService] Fetching price from: " + priceUrl);
             String priceResponse = restTemplate.getForObject(priceUrl, String.class);
             JsonNode priceNode = objectMapper.readTree(priceResponse);
             JsonNode coinData = priceNode.get(coinGeckoId);
+            if (coinData == null) {
+                System.err.println("[DataProviderService] No data found for " + coinGeckoId + " in price response: " + priceResponse);
+                throw new RuntimeException("No data found for " + coinGeckoId);
+            }
 
             MarketData marketData = new MarketData(symbolOrId, coinData.get("usd").asDouble());
             
@@ -41,14 +45,18 @@ public class DataProviderService {
             if (coinData.has("usd_24h_vol")) {
                 marketData.setVolume24h(coinData.get("usd_24h_vol").asDouble());
             }
-
+            Thread.sleep(1000); // To respect API rate limits
             // Get historical data for technical indicators
             String historyUrl = String.format("https://api.coingecko.com/api/v3/coins/%s/market_chart?vs_currency=usd&days=200&interval=daily", 
                 coinGeckoId);
-            
+            System.out.println("[DataProviderService] Fetching history from: " + historyUrl);
             String historyResponse = restTemplate.getForObject(historyUrl, String.class);
             JsonNode historyNode = objectMapper.readTree(historyResponse);
             JsonNode pricesArray = historyNode.get("prices");
+            if (pricesArray == null) {
+                System.err.println("[DataProviderService] No prices array found for " + coinGeckoId + " in history response: " + historyResponse);
+                throw new RuntimeException("No prices array found for " + coinGeckoId);
+            }
 
             List<Double> historicalPrices = new ArrayList<>();
             for (JsonNode pricePoint : pricesArray) {
@@ -63,6 +71,8 @@ public class DataProviderService {
             return marketData;
 
         } catch (Exception e) {
+            System.err.println("[DataProviderService] Error fetching market data for " + symbolOrId + ": " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to fetch market data for " + symbolOrId, e);
         }
     }

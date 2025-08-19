@@ -212,4 +212,64 @@ public class EmailService {
             throw new RuntimeException("Failed to send opportunity finder analysis email", e);
         }
     }
+
+    public void sendPortfolioOptimizationAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(appConfig.getMailFrom());
+            helper.setTo(appConfig.getMailTo());
+            helper.setSubject(String.format("🔍 Portfolio Optimization Analysis - %s", 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))));
+
+            Context context = new Context();
+            context.setVariable("holdings", holdings);
+            context.setVariable("analysisData", analysisData);
+            context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+            String content = templateEngine.process("portfolio-optimization", context);
+            helper.setText(content, true);
+
+            mailSender.send(message);
+
+            System.out.println("Portfolio Optimization Analysis email sent successfully");
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send portfolio optimization analysis email", e);
+        }
+    }
+
+    public void sendInvestmentAnalysis(Map<String, Object> analysisData) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(appConfig.getMailFrom());
+            helper.setTo(appConfig.getMailTo());
+            
+            String symbol = (String) analysisData.getOrDefault("symbol", "CRYPTO");
+            helper.setSubject(String.format("📊 %s Investment Analysis - %s", symbol,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))));
+
+            Context context = new Context();
+            context.setVariable("analysisData", analysisData);
+            context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+            String content = templateEngine.process("investment-analysis", context);
+            helper.setText(content, true);
+
+            mailSender.send(message);
+
+            System.out.println(symbol + " Investment Analysis email sent successfully");
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send investment analysis email", e);
+        }
+    }
+
+    // Legacy method for ETH analysis
+    public void sendETHInvestmentAnalysis(Map<String, Object> analysisData) {
+        sendInvestmentAnalysis(analysisData);
+    }
 }

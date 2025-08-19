@@ -47,15 +47,11 @@ public class SchedulerService {
             List<Advisory> advisoriesWithAI = new ArrayList<>();
 
             // First pass: Generate basic advisories for portfolio overview
-            // Map<String, Object> riskAdvisories = advisoryEngineService.generateRiskOpportunityAnalysis(holdings);
-            // emailService.sendRiskOpportunityAnalysis(holdings, riskAdvisories);
+            buildAndSendOverviewAdvisory(holdings);
 
-            // Map<String, Object> healthAdvisories = advisoryEngineService.generatePortfolioHealthCheck(holdings);
-            // emailService.sendPortfolioHealthCheck(holdings, healthAdvisories);
-
-             Map<String, Object> opportunityFinderAdvisories = advisoryEngineService.generateOpportunityFinder(holdings);
-            emailService.sendOpportunityFinderAnalysis(holdings, opportunityFinderAdvisories);
-            // Save daily snapshot
+            // Second pass: Generate AI investment analysis for each crypto
+            sendAdvisoriesForEachCrypto(holdings);
+            
             saveDailySnapshot(holdings, advisoriesWithAI);
 
             System.out.println("Daily advisory completed successfully");
@@ -66,35 +62,72 @@ public class SchedulerService {
         }
     }
 
-    public void sendAdvisoriesForEachCrypto(List<Holding> holdings, List<Advisory> advisories) {
-            // // Second pass: Generate AI advisories for each holding
-            // for (int i = 0; i < holdings.size() && i < advisoriesWithoutAI.size(); i++) {
-            //     Holding holding = holdings.get(i);
-            //     try {
-            //         System.out.println("Generating AI advisory for " + holding.getSymbol());
-                    
-            //         // Get market data again (or reuse from first pass)
-            //         MarketData marketData = dataProviderService.getMarketData(holding.getId());
-                    
-            //         // Generate AI advisory
-            //         Advisory advisory = advisoryEngineService.generateAdvisory(holding, marketData);
-            //         advisoriesWithAI.add(advisory);
-                    
-            //         System.out.println("Completed AI analysis for " + holding.getSymbol());
-                    
-            //         // Add small delay between API calls
-            //         Thread.sleep(1000);
-                    
-            //     } catch (Exception e) {
-            //         System.err.println("Error generating AI advisory for " + holding.getSymbol() + ": " + e.getMessage());
-            //         // Add the basic advisory if AI fails
-            //         advisoriesWithAI.add(advisoriesWithoutAI.get(i));
-            //     }
-            // }
+    public void buildAndSendOverviewAdvisory(List<Holding> holdings) throws InterruptedException {
+        try {
+            Map<String, Object> riskAdvisories = advisoryEngineService.generateRiskOpportunityAnalysis(holdings);
+            emailService.sendRiskOpportunityAnalysis(holdings, riskAdvisories);
+        } catch (Exception e) {
+            System.err.println("Risk Opportunity Analysis failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
 
-            // // Send combined advisory email with all crypto advice
-            // emailService.sendCombinedAdvisory(holdings, advisoriesWithAI);
+        try {
+            Map<String, Object> healthAdvisories = advisoryEngineService.generatePortfolioHealthCheck(holdings);
+            emailService.sendPortfolioHealthCheck(holdings, healthAdvisories);
+        } catch (Exception e) {
+            System.err.println("Portfolio Health Check failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
+
+        try {
+            Map<String, Object> opportunityFinderAdvisories = advisoryEngineService.generateOpportunityFinder(holdings);
+            emailService.sendOpportunityFinderAnalysis(holdings, opportunityFinderAdvisories);
+        } catch (Exception e) {
+            System.err.println("Opportunity Finder Analysis failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
+
+        try {
+            Map<String, Object> portfolioOptimizationAdvisories = advisoryEngineService.generatePortfolioOptimizationAnalysis(holdings);
+            emailService.sendPortfolioOptimizationAnalysis(holdings, portfolioOptimizationAdvisories);
+        } catch (Exception e) {
+            System.err.println("Portfolio Optimization Analysis failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
     }
+
+    public void sendAdvisoriesForEachCrypto(List<Holding> holdings) throws InterruptedException {
+        for (int i = 9; i < holdings.size(); i++) {
+            Holding holding = holdings.get(i);
+            System.out.println("Generating AI advisory for " + holding.getSymbol());
+            Map<String, Object> riskAdvisories = advisoryEngineService.generateInvestmentAnalysis(holding);
+            emailService.sendInvestmentAnalysis(riskAdvisories);
+            Thread.sleep(30000);
+            System.out.println("Completed AI analysis for " + holding.getSymbol());
+        }
+    }
+
+    public void runInvestmentAnalysisTest(List<Holding> holdings) {
+        Holding ethHolding = holdings.stream()
+            .filter(h -> "ETH".equalsIgnoreCase(h.getSymbol()))
+            .findFirst()
+            .orElse(null);
+            
+        // If ETH holding not found, create a default one for analysis
+        if (ethHolding == null) {
+            ethHolding = new Holding();
+            ethHolding.setSymbol("ETH");
+            ethHolding.setName("Ethereum");
+        }
+            
+        Map<String, Object> riskAdvisories = advisoryEngineService.generateInvestmentAnalysis(ethHolding);
+        emailService.sendInvestmentAnalysis(riskAdvisories);
+    }
+
     // Manual trigger method for testing
     public void runManualAdvisory() {
         System.out.println("Running manual advisory...");

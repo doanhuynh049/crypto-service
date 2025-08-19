@@ -7,6 +7,7 @@ import com.quat.cryptoNotifier.model.Holding;
 import com.quat.cryptoNotifier.model.Holdings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,62 @@ public class CryptoController {
             return "Portfolio Health Check completed successfully. Check your email for detailed analysis.";
         } catch (Exception e) {
             return "Error running portfolio health check: " + e.getMessage();
+        }
+    }
+
+    @GetMapping("/test-portfolio-optimization")
+    public String testPortfolioOptimization() {
+        try {
+            // Load holdings
+            ClassPathResource resource = new ClassPathResource("holdings.json");
+            Holdings holdings = objectMapper.readValue(resource.getInputStream(), Holdings.class);
+            List<Holding> cryptos = holdings.getCryptos();
+
+            // Generate portfolio optimization analysis
+            Map<String, Object> optimizationData = advisoryEngineService.generatePortfolioOptimizationAnalysis(cryptos);
+
+            // Send email
+            emailService.sendPortfolioOptimizationAnalysis(cryptos, optimizationData);
+
+            return "Portfolio Optimization Analysis completed successfully. Check your email for detailed insights.";
+        } catch (Exception e) {
+            return "Error running portfolio optimization analysis: " + e.getMessage();
+        }
+    }
+
+    @GetMapping("/test-investment-analysis")
+    public String testInvestmentAnalysis(@RequestParam(defaultValue = "ETH") String symbol,
+                                       @RequestParam(defaultValue = "Ethereum") String name) {
+        try {
+            // Create holding object from parameters
+            Holding holding = new Holding();
+            holding.setSymbol(symbol.toUpperCase());
+            holding.setName(name);
+            
+            // Generate investment analysis
+            Map<String, Object> investmentAnalysis = advisoryEngineService.generateInvestmentAnalysis(holding);
+
+            // Send email with analysis
+            emailService.sendInvestmentAnalysis(investmentAnalysis);
+
+            return symbol.toUpperCase() + " Investment Analysis completed successfully. Check your email for detailed insights.";
+        } catch (Exception e) {
+            return "Error running " + symbol.toUpperCase() + " investment analysis: " + e.getMessage();
+        }
+    }
+
+    @GetMapping("/test-eth-investment-analysis")
+    public String testETHInvestmentAnalysis() {
+        try {
+            // Generate ETH investment analysis
+            Map<String, Object> ethAnalysis = advisoryEngineService.generateETHInvestmentAnalysis();
+
+            // Send email with analysis
+            emailService.sendETHInvestmentAnalysis(ethAnalysis);
+
+            return "ETH Investment Analysis completed successfully. Check your email for detailed insights.";
+        } catch (Exception e) {
+            return "Error running ETH investment analysis: " + e.getMessage();
         }
     }
 

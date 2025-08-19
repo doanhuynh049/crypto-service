@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETH Investment Analysis</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #627eea 0%, #7269ef 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .header .date {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 25px;
+        }
+        
+        /* Bottom Line Section */
+        .bottom-line {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .bottom-line.buy {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+        .bottom-line.dca {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+        .bottom-line.wait {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        }
+        .bottom-line h2 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        .bottom-line .recommendation {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .bottom-line .confidence {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Section Cards */
+        .section {
+            background: #f8f9fa;
+            border-left: 4px solid #627eea;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        .section h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .section-content {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        /* Two-column layout */
+        .two-column {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .column {
+            flex: 1;
+        }
+
+        /* List styles */
+        .analysis-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .analysis-list li {
+            background: white;
+            margin: 8px 0;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 3px solid #627eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Price levels */
+        .price-levels {
+            display: flex;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .levels-group {
+            flex: 1;
+        }
+        .levels-group h4 {
+            margin: 0 0 10px 0;
+            color: #555;
+            font-size: 16px;
+        }
+        .support-levels {
+            border-left: 3px solid #4CAF50;
+        }
+        .resistance-levels {
+            border-left: 3px solid #f44336;
+        }
+        .level-item {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        /* Outlook grid */
+        .outlook-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .outlook-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .outlook-item h4 {
+            margin: 0 0 10px 0;
+            color: #627eea;
+            font-size: 16px;
+        }
+
+        /* Position sizing */
+        .sizing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .sizing-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        .sizing-item h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .sizing-item .percentage {
+            font-size: 24px;
+            font-weight: bold;
+            color: #627eea;
+        }
+
+        /* Sentiment indicators */
+        .sentiment-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .sentiment-bullish {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        .sentiment-neutral {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        .sentiment-bearish {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* Catalysts and risks */
+        .catalysts-risks {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .positive-catalysts {
+            border-left: 3px solid #4CAF50;
+        }
+        .risk-factors {
+            border-left: 3px solid #f44336;
+        }
+
+        /* Key info boxes */
+        .key-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .key-info h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+
+        /* Footer */
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .two-column, .catalysts-risks {
+                flex-direction: column;
+                grid-template-columns: 1fr;
+            }
+            .price-levels {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 ETH Investment Analysis</h1>
+            <div class="date" th:text="${timestamp}">Timestamp</div>
+        </div>
+
+        <div class="content">
+            <!-- Bottom Line Section -->
+            <div class="bottom-line" 
+                 th:classappend="${analysisData.recommendation == 'BUY'} ? 'buy' : 
+                                (${analysisData.recommendation == 'DCA'} ? 'dca' : 'wait')">
+                <h2>💡 Bottom Line</h2>
+                <div class="recommendation" th:text="${analysisData.recommendation}">WAIT</div>
+                <div th:text="${analysisData.bottom_line}">Analysis pending</div>
+                <div class="confidence">
+                    Confidence Level: <span th:text="${analysisData.confidence}">LOW</span>
+                </div>
+                <div style="margin-top: 15px;">
+                    Target Allocation: <span th:text="${analysisData.target_allocation}">5-10%</span>
+                </div>
+            </div>
+
+            <!-- Current Price Analysis -->
+            <div class="section">
+                <h3>📈 Current Price Entry Analysis</h3>
+                <div class="section-content">
+                    <div class="key-info">
+                        <h4>Entry Quality: <span th:text="${analysisData.current_price_analysis?.entry_quality}">FAIR</span></h4>
+                    </div>
+                    <div class="two-column">
+                        <div class="column">
+                            <h4>Price Context</h4>
+                            <p th:text="${analysisData.current_price_analysis?.price_context}">Price context analysis</p>
+                        </div>
+                        <div class="column">
+                            <h4>Value Assessment</h4>
+                            <p th:text="${analysisData.current_price_analysis?.value_assessment}">Value assessment</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Timing Factors</h4>
+                        <p th:text="${analysisData.current_price_analysis?.timing_factors}">Timing considerations</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Levels -->
+            <div class="section">
+                <h3>📊 Technical Levels</h3>
+                <div class="section-content">
+                    <div class="price-levels">
+                        <div class="levels-group support-levels">
+                            <h4>🟢 Support Levels</h4>
+                            <div th:each="level : ${analysisData.technical_levels?.support_levels}">
+                                <div class="level-item" th:text="${level}">$2800</div>
+                            </div>
+                        </div>
+                        <div class="levels-group resistance-levels">
+                            <h4>🔴 Resistance Levels</h4>
+                            <div th:each="level : ${analysisData.technical_levels?.resistance_levels}">
+                                <div class="level-item" th:text="${level}">$3200</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="two-column">
+                        <div class="column">
+                            <h4>Key Breakout Level</h4>
+                            <div class="level-item" th:text="${analysisData.technical_levels?.key_breakout_level}">TBD</div>
+                        </div>
+                        <div class="column">
+                            <h4>Stop Loss Suggestion</h4>
+                            <div class="level-item" th:text="${analysisData.technical_levels?.stop_loss_suggestion}">Set based on risk tolerance</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outlook -->
+            <div class="section">
+                <h3>🔮 Outlook</h3>
+                <div class="section-content">
+                    <div class="outlook-grid">
+                        <div class="outlook-item">
+                            <h4>📅 Short-term (1-3M)</h4>
+                            <p th:text="${analysisData.outlook?.short_term}">Short-term outlook</p>
+                        </div>
+                        <div class="outlook-item">
+                            <h4>📈 Medium-term (3-12M)</h4>
+                            <p th:text="${analysisData.outlook?.medium_term}">Medium-term outlook</p>
+                        </div>
+                        <div class="outlook-item">
+                            <h4>🚀 Long-term (1-3Y)</h4>
+                            <p th:text="${analysisData.outlook?.long_term}">Long-term outlook</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategy -->
+            <div class="section">
+                <h3>🎯 Strategy</h3>
+                <div class="section-content">
+                    <div class="two-column">
+                        <div class="column">
+                            <h4>Entry Strategy</h4>
+                            <p th:text="${analysisData.strategy?.entry_strategy}">Entry strategy</p>
+                        </div>
+                        <div class="column">
+                            <h4>DCA Schedule</h4>
+                            <p th:text="${analysisData.strategy?.dca_schedule}">DCA schedule</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>📊 Profit Targets</h4>
+                        <ul class="analysis-list">
+                            <li th:each="target : ${analysisData.strategy?.profit_targets}" th:text="${target}">Target level</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>🛡️ Risk Management</h4>
+                        <p th:text="${analysisData.strategy?.risk_management}">Risk management considerations</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Sentiment -->
+            <div class="section">
+                <h3>📊 Market Sentiment & Macro</h3>
+                <div class="section-content">
+                    <div style="margin-bottom: 15px;">
+                        <h4>Current Sentiment</h4>
+                        <span class="sentiment-indicator" 
+                              th:classappend="${analysisData.market_sentiment?.current_sentiment == 'BULLISH'} ? 'sentiment-bullish' : 
+                                             (${analysisData.market_sentiment?.current_sentiment == 'NEUTRAL'} ? 'sentiment-neutral' : 'sentiment-bearish')"
+                              th:text="${analysisData.market_sentiment?.current_sentiment}">NEUTRAL</span>
+                    </div>
+                    <div class="two-column">
+                        <div class="column">
+                            <h4>🏢 Institutional Activity</h4>
+                            <p th:text="${analysisData.market_sentiment?.institutional_activity}">Institutional analysis</p>
+                        </div>
+                        <div class="column">
+                            <h4>👥 Retail Sentiment</h4>
+                            <p th:text="${analysisData.market_sentiment?.retail_sentiment}">Retail sentiment</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>🌍 Macro Factors</h4>
+                        <p th:text="${analysisData.market_sentiment?.macro_factors}">Macro factors</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fundamentals -->
+            <div class="section">
+                <h3>🔬 On-Chain & Fundamentals</h3>
+                <div class="section-content">
+                    <div class="outlook-grid">
+                        <div class="outlook-item">
+                            <h4>🌐 Network Health</h4>
+                            <p th:text="${analysisData.fundamentals?.network_health}">Network health analysis</p>
+                        </div>
+                        <div class="outlook-item">
+                            <h4>🔒 Staking Metrics</h4>
+                            <p th:text="${analysisData.fundamentals?.staking_metrics}">Staking analysis</p>
+                        </div>
+                        <div class="outlook-item">
+                            <h4>🏦 DeFi Activity</h4>
+                            <p th:text="${analysisData.fundamentals?.defi_activity}">DeFi activity analysis</p>
+                        </div>
+                        <div class="outlook-item">
+                            <h4>👨‍💻 Development Activity</h4>
+                            <p th:text="${analysisData.fundamentals?.development_activity}">Development analysis</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>🏆 Competitive Position</h4>
+                        <p th:text="${analysisData.fundamentals?.competitive_position}">Competitive position analysis</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catalysts and Risks -->
+            <div class="section">
+                <h3>⚡ Catalysts & Risks</h3>
+                <div class="section-content">
+                    <div class="catalysts-risks">
+                        <div class="positive-catalysts">
+                            <h4>🚀 Positive Catalysts</h4>
+                            <ul class="analysis-list">
+                                <li th:each="catalyst : ${analysisData.catalysts_and_risks?.positive_catalysts}" th:text="${catalyst}">Catalyst</li>
+                            </ul>
+                        </div>
+                        <div class="risk-factors">
+                            <h4>⚠️ Risk Factors</h4>
+                            <ul class="analysis-list">
+                                <li th:each="risk : ${analysisData.catalysts_and_risks?.risk_factors}" th:text="${risk}">Risk factor</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="two-column">
+                        <div class="column">
+                            <h4>📅 Upcoming Events</h4>
+                            <ul class="analysis-list">
+                                <li th:each="event : ${analysisData.catalysts_and_risks?.upcoming_events}" th:text="${event}">Event</li>
+                            </ul>
+                        </div>
+                        <div class="column">
+                            <h4>⚖️ Regulatory Outlook</h4>
+                            <p th:text="${analysisData.catalysts_and_risks?.regulatory_outlook}">Regulatory analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position Sizing -->
+            <div class="section">
+                <h3>📊 Position Sizing</h3>
+                <div class="section-content">
+                    <div class="sizing-grid">
+                        <div class="sizing-item">
+                            <h4>Conservative</h4>
+                            <div class="percentage" th:text="${analysisData.position_sizing?.conservative_allocation}">5-10%</div>
+                        </div>
+                        <div class="sizing-item">
+                            <h4>Moderate</h4>
+                            <div class="percentage" th:text="${analysisData.position_sizing?.moderate_allocation}">10-20%</div>
+                        </div>
+                        <div class="sizing-item">
+                            <h4>Aggressive</h4>
+                            <div class="percentage" th:text="${analysisData.position_sizing?.aggressive_allocation}">20-30%</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>💡 Sizing Rationale</h4>
+                        <p th:text="${analysisData.position_sizing?.sizing_rationale}">Allocation rationale</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Triggers -->
+            <div class="section">
+                <h3>🎯 Key Triggers</h3>
+                <div class="section-content">
+                    <div class="outlook-grid">
+                        <div class="outlook-item">
+                            <h4>🟢 Buy Triggers</h4>
+                            <ul class="analysis-list">
+                                <li th:each="trigger : ${analysisData.key_triggers?.buy_triggers}" th:text="${trigger}">Buy trigger</li>
+                            </ul>
+                        </div>
+                        <div class="outlook-item">
+                            <h4>🔴 Sell Triggers</h4>
+                            <ul class="analysis-list">
+                                <li th:each="trigger : ${analysisData.key_triggers?.sell_triggers}" th:text="${trigger}">Sell trigger</li>
+                            </ul>
+                        </div>
+                        <div class="outlook-item">
+                            <h4>🔄 Reassessment Triggers</h4>
+                            <ul class="analysis-list">
+                                <li th:each="trigger : ${analysisData.key_triggers?.reassessment_triggers}" th:text="${trigger}">Reassessment trigger</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📧 This analysis was generated automatically by your Crypto Advisory Service</p>
+            <p>⚠️ This is not financial advice. Always do your own research and consider your risk tolerance.</p>
+            <p>Generated on <span th:text="${timestamp}">timestamp</span></p>
+        </div>
+    </div>
+</body>
+</html>
