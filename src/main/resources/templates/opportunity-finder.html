@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunity Finder Analysis</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .header .date {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 25px;
+        }
+        
+        /* Portfolio Grade */
+        .portfolio-grade {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .grade-display {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .grade-a { color: #2ecc71; }
+        .grade-b { color: #3498db; }
+        .grade-c { color: #f39c12; }
+        .grade-d { color: #e67e22; }
+        .grade-f { color: #e74c3c; }
+        
+        /* Summary */
+        .summary {
+            background: #f8f9fa;
+            border-left: 5px solid #3498db;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        /* Fundamental Strength Analysis */
+        .strength-analysis {
+            margin-bottom: 25px;
+        }
+        .strength-analysis h2 {
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 10px;
+        }
+        .coin-strength-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .coin-strength-card {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .strength-excellent { border-left: 5px solid #2ecc71; }
+        .strength-strong { border-left: 5px solid #27ae60; }
+        .strength-good { border-left: 5px solid #3498db; }
+        .strength-fair { border-left: 5px solid #f39c12; }
+        .strength-weak { border-left: 5px solid #e74c3c; }
+        
+        .coin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .coin-symbol {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .strength-score {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .score-excellent { background: #d5f4e6; color: #27ae60; }
+        .score-strong { background: #d1f2eb; color: #148f77; }
+        .score-good { background: #d6eaf8; color: #2980b9; }
+        .score-fair { background: #fdeaa7; color: #f39c12; }
+        .score-weak { background: #fadbd8; color: #e74c3c; }
+        
+        .recommendation-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .rec-hold { background: #d6eaf8; color: #2980b9; }
+        .rec-accumulate { background: #d5f4e6; color: #27ae60; }
+        .rec-maintain { background: #fdeaa7; color: #f39c12; }
+        .rec-monitor { background: #fadbd8; color: #e67e22; }
+        .rec-reduce { background: #f8d7da; color: #e74c3c; }
+        
+        .detail-item {
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #34495e;
+            font-size: 14px;
+        }
+        .detail-value {
+            color: #5a6c7d;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+        
+        /* Risk Assessment */
+        .risk-assessment {
+            background: #fff5f5;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .risk-assessment h2 {
+            color: #e74c3c;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+        .risk-level-very-high { border-left: 5px solid #c0392b; }
+        .risk-level-high { border-left: 5px solid #e74c3c; }
+        .risk-level-moderate { border-left: 5px solid #f39c12; }
+        
+        /* Diversification Opportunities */
+        .diversification {
+            background: #f0f8ff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .diversification h2 {
+            color: #3498db;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .sector-opportunity {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .priority-high { border-left-color: #e74c3c; }
+        .priority-medium { border-left-color: #f39c12; }
+        .priority-low { border-left-color: #27ae60; }
+        
+        .asset-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .asset-tag {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Exit/Reduce Recommendations */
+        .exit-recommendations {
+            background: #fef9e7;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .exit-recommendations h2 {
+            color: #f39c12;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            border-bottom: 3px solid #f39c12;
+            padding-bottom: 10px;
+        }
+        .exit-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .urgency-high { border-left: 4px solid #e74c3c; }
+        .urgency-medium { border-left: 4px solid #f39c12; }
+        .urgency-low { border-left: 4px solid #27ae60; }
+        
+        /* Action Plan */
+        .action-plan {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #e1e8ed;
+        }
+        .action-plan h2 {
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            border-bottom: 3px solid #8e44ad;
+            padding-bottom: 10px;
+        }
+        .action-section {
+            margin-bottom: 20px;
+        }
+        .action-section h4 {
+            color: #34495e;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .action-list {
+            list-style: none;
+            padding: 0;
+        }
+        .action-list li {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+        
+        /* Market Timing */
+        .market-timing {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        .market-timing h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #34495e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            .content {
+                padding: 15px;
+            }
+            .coin-strength-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔍 Opportunity Finder Analysis</h1>
+            <div class="date" th:text="${#dates.format(#dates.createNow(), 'MMMM dd, yyyy - HH:mm')}">Date</div>
+        </div>
+
+        <div class="content">
+            <!-- Portfolio Grade -->
+            <div class="portfolio-grade">
+                <div class="grade-display" 
+                     th:classappend="${analysisData.portfolio_grade == 'A'} ? 'grade-a' : (${analysisData.portfolio_grade == 'B'} ? 'grade-b' : (${analysisData.portfolio_grade == 'C'} ? 'grade-c' : (${analysisData.portfolio_grade == 'D'} ? 'grade-d' : 'grade-f')))"
+                     th:text="${analysisData.portfolio_grade}">C</div>
+                <h2>Portfolio Grade</h2>
+                <p>Overall assessment of your portfolio's opportunity potential</p>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary">
+                <h3>📝 Executive Summary</h3>
+                <p th:text="${analysisData.opportunity_summary}">Opportunity analysis summary will appear here.</p>
+            </div>
+
+            <!-- Fundamental Strength Analysis -->
+            <div class="strength-analysis">
+                <h2>💪 Fundamental Strength Analysis</h2>
+                
+                <!-- Strongest Coins -->
+                <h3>🏆 Strongest Holdings</h3>
+                <div class="coin-strength-grid" th:if="${analysisData.fundamental_strength_analysis?.strongest_coins}">
+                    <div th:each="coin : ${analysisData.fundamental_strength_analysis.strongest_coins}" 
+                         class="coin-strength-card"
+                         th:classappend="${coin.strength_score == 'EXCELLENT'} ? 'strength-excellent' : (${coin.strength_score == 'STRONG'} ? 'strength-strong' : (${coin.strength_score == 'GOOD'} ? 'strength-good' : (${coin.strength_score == 'FAIR'} ? 'strength-fair' : 'strength-weak')))">
+                        <div class="coin-header">
+                            <div class="coin-symbol" th:text="${coin.symbol}">BTC</div>
+                            <div class="strength-score"
+                                 th:classappend="${coin.strength_score == 'EXCELLENT'} ? 'score-excellent' : (${coin.strength_score == 'STRONG'} ? 'score-strong' : (${coin.strength_score == 'GOOD'} ? 'score-good' : (${coin.strength_score == 'FAIR'} ? 'score-fair' : 'score-weak')))"
+                                 th:text="${coin.strength_score}">EXCELLENT</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">🎯 Key Strengths</div>
+                            <div class="detail-value" th:text="${coin.key_strengths}">Primary fundamental advantages</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">🚀 Growth Drivers</div>
+                            <div class="detail-value" th:text="${coin.growth_drivers}">Key catalysts for future growth</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">💭 Rationale</div>
+                            <div class="detail-value" th:text="${coin.rationale}">Reasoning for the assessment</div>
+                        </div>
+                        
+                        <div class="recommendation-badge"
+                             th:classappend="${coin.recommendation == 'ACCUMULATE'} ? 'rec-accumulate' : (${coin.recommendation == 'HOLD'} ? 'rec-hold' : 'rec-maintain')"
+                             th:text="${coin.recommendation}">HOLD</div>
+                    </div>
+                </div>
+
+                <!-- Moderate Coins -->
+                <h3>⚖️ Moderate Holdings</h3>
+                <div class="coin-strength-grid" th:if="${analysisData.fundamental_strength_analysis?.moderate_coins}">
+                    <div th:each="coin : ${analysisData.fundamental_strength_analysis.moderate_coins}" 
+                         class="coin-strength-card"
+                         th:classappend="${coin.strength_score == 'GOOD'} ? 'strength-good' : 'strength-fair'">
+                        <div class="coin-header">
+                            <div class="coin-symbol" th:text="${coin.symbol}">ETH</div>
+                            <div class="strength-score"
+                                 th:classappend="${coin.strength_score == 'GOOD'} ? 'score-good' : 'score-fair'"
+                                 th:text="${coin.strength_score}">GOOD</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">✅ Key Strengths</div>
+                            <div class="detail-value" th:text="${coin.key_strengths}">Notable advantages</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">⚠️ Concerns</div>
+                            <div class="detail-value" th:text="${coin.concerns}">Areas of concern or uncertainty</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">💭 Rationale</div>
+                            <div class="detail-value" th:text="${coin.rationale}">Reasoning for the assessment</div>
+                        </div>
+                        
+                        <div class="recommendation-badge"
+                             th:classappend="${coin.recommendation == 'HOLD'} ? 'rec-hold' : (${coin.recommendation == 'MONITOR'} ? 'rec-monitor' : 'rec-reduce')"
+                             th:text="${coin.recommendation}">MONITOR</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Assessment -->
+            <div class="risk-assessment">
+                <h2>⚠️ Risk Assessment</h2>
+                
+                <!-- Portfolio Risks -->
+                <div class="detail-item" th:if="${analysisData.risk_assessment?.portfolio_risks}">
+                    <div class="detail-label">📊 Overall Portfolio Risks</div>
+                    <div class="detail-value" th:text="${analysisData.risk_assessment.portfolio_risks}">Overall portfolio risk assessment</div>
+                </div>
+                
+                <div class="detail-item" th:if="${analysisData.risk_assessment?.concentration_concerns}">
+                    <div class="detail-label">🎯 Concentration Concerns</div>
+                    <div class="detail-value" th:text="${analysisData.risk_assessment.concentration_concerns}">Areas of excessive concentration</div>
+                </div>
+
+                <!-- Speculative Coins -->
+                <h3>🚨 Speculative Holdings</h3>
+                <div class="coin-strength-grid" th:if="${analysisData.risk_assessment?.speculative_coins}">
+                    <div th:each="coin : ${analysisData.risk_assessment.speculative_coins}" 
+                         class="coin-strength-card"
+                         th:classappend="${coin.risk_level == 'VERY_HIGH'} ? 'risk-level-very-high' : (${coin.risk_level == 'HIGH'} ? 'risk-level-high' : 'risk-level-moderate')">
+                        <div class="coin-header">
+                            <div class="coin-symbol" th:text="${coin.symbol}">SPEC</div>
+                            <div class="strength-score score-weak" th:text="${coin.risk_level}">HIGH</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">⚠️ Risk Factors</div>
+                            <div class="detail-value" th:text="${coin.risk_factors}">Primary risk concerns</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">🎲 Speculative Elements</div>
+                            <div class="detail-value" th:text="${coin.speculative_elements}">What makes it speculative</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">⏰ Timeline</div>
+                            <div class="detail-value" th:text="${coin.timeline}">When to take action</div>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <div class="detail-label">💭 Rationale</div>
+                            <div class="detail-value" th:text="${coin.rationale}">Reasoning for the assessment</div>
+                        </div>
+                        
+                        <div class="recommendation-badge rec-reduce" th:text="${coin.recommendation}">MONITOR</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diversification Opportunities -->
+            <div class="diversification">
+                <h2>🌟 Diversification Opportunities</h2>
+                
+                <!-- Missing Sectors -->
+                <h3>🎯 Missing Sectors</h3>
+                <div th:each="sector : ${analysisData.diversification_opportunities?.missing_sectors}" 
+                     class="sector-opportunity"
+                     th:classappend="${sector.priority == 'HIGH'} ? 'priority-high' : (${sector.priority == 'MEDIUM'} ? 'priority-medium' : 'priority-low')">
+                    <h4 th:text="${sector.sector}">AI/Machine Learning</h4>
+                    <p th:text="${sector.rationale}">Why this sector would improve the portfolio</p>
+                    <div class="detail-item">
+                        <div class="detail-label">📊 Suggested Allocation</div>
+                        <div class="detail-value" th:text="${sector.allocation_suggestion}">5-10%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">🏷️ Priority</div>
+                        <div class="detail-value" th:text="${sector.priority}">HIGH</div>
+                    </div>
+                    <div class="asset-suggestions" th:if="${sector.suggested_assets}">
+                        <span th:each="asset : ${sector.suggested_assets}" class="asset-tag" th:text="${asset}">FET</span>
+                    </div>
+                </div>
+
+                <!-- Underrepresented Areas -->
+                <h3>📈 Underrepresented Areas</h3>
+                <div th:each="area : ${analysisData.diversification_opportunities?.underrepresented_areas}" class="sector-opportunity">
+                    <h4 th:text="${area.area}">Stablecoins/Yield</h4>
+                    <p th:text="${area.benefits}">Risk reduction and yield generation</p>
+                    <div class="detail-item">
+                        <div class="detail-label">📊 Current Allocation</div>
+                        <div class="detail-value" th:text="${area.current_allocation}">0%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">🎯 Suggested Allocation</div>
+                        <div class="detail-value" th:text="${area.suggested_allocation}">10-15%</div>
+                    </div>
+                    <div class="asset-suggestions" th:if="${area.suggested_assets}">
+                        <span th:each="asset : ${area.suggested_assets}" class="asset-tag" th:text="${asset}">USDC</span>
+                    </div>
+                </div>
+
+                <!-- Market Cap Gaps -->
+                <div class="detail-item" th:if="${analysisData.diversification_opportunities?.market_cap_gaps}">
+                    <div class="detail-label">💰 Market Cap Distribution</div>
+                    <div class="detail-value" th:text="${analysisData.diversification_opportunities.market_cap_gaps}">Assessment of market cap distribution</div>
+                </div>
+            </div>
+
+            <!-- Exit/Reduce Recommendations -->
+            <div class="exit-recommendations">
+                <h2>🚪 Exit & Reduce Recommendations</h2>
+                
+                <!-- Immediate Exits -->
+                <h3>🚨 Immediate Exit Candidates</h3>
+                <div th:each="exit : ${analysisData.exit_reduce_recommendations?.immediate_exits}" 
+                     class="exit-item"
+                     th:classappend="${exit.urgency == 'HIGH'} ? 'urgency-high' : (${exit.urgency == 'MEDIUM'} ? 'urgency-medium' : 'urgency-low')">
+                    <h4 th:text="${exit.symbol}">RISKY</h4>
+                    <div class="detail-item">
+                        <div class="detail-label">📋 Reason</div>
+                        <div class="detail-value" th:text="${exit.reason}">Deteriorating fundamentals or excessive risk</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">⚡ Urgency</div>
+                        <div class="detail-value" th:text="${exit.urgency}">HIGH</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">🔄 Exit Strategy</div>
+                        <div class="detail-value" th:text="${exit.exit_strategy}">How to exit (gradual vs immediate)</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">💰 Reinvestment</div>
+                        <div class="detail-value" th:text="${exit.reinvestment_suggestion}">Where to redeploy capital</div>
+                    </div>
+                </div>
+
+                <!-- Position Reductions -->
+                <h3>📉 Position Reduction Candidates</h3>
+                <div th:each="reduction : ${analysisData.exit_reduce_recommendations?.position_reductions}" class="exit-item">
+                    <h4 th:text="${reduction.symbol}">OVERWEIGHT</h4>
+                    <div class="detail-item">
+                        <div class="detail-label">📊 Current Weight</div>
+                        <div class="detail-value" th:text="${reduction.current_weight}">25%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">🎯 Suggested Weight</div>
+                        <div class="detail-value" th:text="${reduction.suggested_weight}">15-20%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">📉 Reduction Amount</div>
+                        <div class="detail-value" th:text="${reduction.reduction_amount}">20-40% of position</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">📋 Reason</div>
+                        <div class="detail-value" th:text="${reduction.reason}">Concentration risk or profit-taking</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">⏰ Timing</div>
+                        <div class="detail-value" th:text="${reduction.timing}">When to reduce the position</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Plan -->
+            <div class="action-plan">
+                <h2>📋 Action Plan</h2>
+                
+                <div class="action-section" th:if="${analysisData.action_plan?.immediate_actions}">
+                    <h4>🚀 Immediate Actions (1 Month)</h4>
+                    <ul class="action-list">
+                        <li th:each="action : ${analysisData.action_plan.immediate_actions}" th:text="${action}">Action item</li>
+                    </ul>
+                </div>
+                
+                <div class="action-section" th:if="${analysisData.action_plan?.medium_term_actions}">
+                    <h4>📈 Medium Term Actions (1-6 Months)</h4>
+                    <ul class="action-list">
+                        <li th:each="action : ${analysisData.action_plan.medium_term_actions}" th:text="${action}">Action item</li>
+                    </ul>
+                </div>
+                
+                <div class="action-section" th:if="${analysisData.action_plan?.long_term_strategy}">
+                    <h4>🎯 Long Term Strategy</h4>
+                    <p th:text="${analysisData.action_plan.long_term_strategy}">Overall strategic direction for the portfolio</p>
+                </div>
+            </div>
+
+            <!-- Market Timing Considerations -->
+            <div class="market-timing" th:if="${analysisData.market_timing_considerations}">
+                <h3>⏰ Market Timing Considerations</h3>
+                <p th:text="${analysisData.market_timing_considerations}">Current market conditions and timing factors</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>This analysis is for informational purposes only and should not be considered as financial advice.<br>
+            Always conduct your own research and consult with financial professionals before making investment decisions.</p>
+        </div>
+    </div>
+</body>
+</html>
