@@ -101,7 +101,7 @@ public class SchedulerService {
     }
 
     public void sendAdvisoriesForEachCrypto(List<Holding> holdings) throws InterruptedException {
-        for (int i = 9; i < holdings.size(); i++) {
+        for (int i = 0; i < holdings.size(); i++) {
             Holding holding = holdings.get(i);
             System.out.println("Generating AI advisory for " + holding.getSymbol());
             Map<String, Object> riskAdvisories = advisoryEngineService.generateInvestmentAnalysis(holding);
