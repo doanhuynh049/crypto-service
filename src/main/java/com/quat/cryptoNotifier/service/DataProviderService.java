@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quat.cryptoNotifier.model.MarketData;
 import com.quat.cryptoNotifier.util.IndicatorUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,6 +14,9 @@ import java.util.List;
 @Service
 public class DataProviderService {
 
+    @Autowired
+    private MarketDataCacheService cacheService;
+
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -21,7 +25,17 @@ public class DataProviderService {
         this.objectMapper = new ObjectMapper();
     }
 
+    /**
+     * Public method that uses caching - this is what other services should call
+     */
     public MarketData getMarketData(String coinGeckoId) {
+        return cacheService.getMarketData(coinGeckoId);
+    }
+
+    /**
+     * Direct API call method used by cache service - bypasses cache
+     */
+    public MarketData fetchMarketDataDirect(String coinGeckoId) {
         try {
             // Get current price from CoinGecko
             String priceUrl = String.format("https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true",
