@@ -2192,59 +2192,117 @@ public class AdvisoryEngineService {
     }
 
     private String buildEntryExitStrategyPrompt(List<Holding> holdings) {
-        StringBuilder p = new StringBuilder();
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Entry & Exit Strategy Analysis Prompt\n");
+        prompt.append("Provide comprehensive entry and exit strategy recommendations for my cryptocurrency portfolio holdings.\n\n");
 
-        p.append("Crypto Entry/Exit Playbook\n");
-        p.append("Goal: Produce concise, number-first ENTRY and EXIT plans per coin. Avoid macro/sector essays.\n\n");
+        prompt.append("For each cryptocurrency, provide:\n");
+        prompt.append("1. Entry Strategy Analysis - Optimal entry points, market timing, DCA strategy, risk management\n");
+        prompt.append("2. Exit Strategy Analysis - Profit-taking levels, stop-loss strategy, time-based exits, market condition exits\n");
+        prompt.append("3. Market Context Analysis - Current market phase, sector rotation, correlation analysis, risk assessment\n");
+        prompt.append("4. Strategic Recommendations - Hold vs. trade, allocation suggestions, hedging strategies, timeline considerations\n\n");
 
-        p.append("Constraints:\n");
-        p.append("- Be brief. Use bullet-like JSON.\n");
-        p.append("- Give exact price LEVELS (not ranges longer than 10%).\n");
-        p.append("- Max 3 entry zones and max 3 take-profit levels per coin.\n");
-        p.append("- Include ONE hard invalidation/stop and ONE trailing-stop rule if applicable.\n");
-        p.append("- Timeframe: 6–36 months. Risk: Moderate. Focus: fundamentals + sustainable value.\n\n");
+        prompt.append("Portfolio Holdings with Current Market Data:\n\n");
 
-        p.append("Holdings:\n");
-        for (Holding h : holdings) {
-            p.append(String.format(
-                    "- %s (%s): qty=%.6f avg=$%.2f initial_value=$%.2f\n",
-                    h.getSymbol(), h.getName(), h.getHoldings(), h.getAveragePrice(), h.getInitialValue()
-            ));
+        // Add detailed portfolio information WITH current market data
+        for (Holding holding : holdings) {
+            prompt.append(String.format("--- %s (%s) ---\n", holding.getSymbol(), holding.getName()));
+            prompt.append(String.format("Holdings: %.6f %s\n", holding.getHoldings(), holding.getSymbol()));
+            prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
+            prompt.append(String.format("Initial Investment Value: $%.2f\n", holding.getInitialValue()));
+
+            // Fetch and include current market data for each holding
+            try {
+                MarketData marketData = dataProviderService.getMarketData(holding.getId());
+                if (marketData != null) {
+                    prompt.append("\n--- Current Market Data ---\n");
+                    prompt.append(String.format("Current Price: $%.2f\n", marketData.getCurrentPrice()));
+                    prompt.append(String.format("24h Change: %.2f%%\n", marketData.getPriceChangePercentage24h()));
+                    prompt.append(String.format("24h Volume: $%.0f\n", marketData.getVolume24h()));
+
+                    // Calculate current P&L for context
+                    double currentValue = holding.getHoldings() * marketData.getCurrentPrice();
+                    double profitLoss = currentValue - holding.getInitialValue();
+                    double profitLossPercentage = (profitLoss / holding.getInitialValue()) * 100;
+                    prompt.append(String.format("Current Position Value: $%.2f\n", currentValue));
+                    prompt.append(String.format("Unrealized P&L: $%.2f (%.1f%%)\n", profitLoss, profitLossPercentage));
+
+                    // Include technical indicators if available
+                    if (marketData.getRsi() != null) {
+                        prompt.append(String.format("RSI (14): %.1f\n", marketData.getRsi()));
+                    }
+                    if (marketData.getMacd() != null) {
+                        prompt.append(String.format("MACD: %.4f\n", marketData.getMacd()));
+                    }
+                    if (marketData.getSma20() != null) {
+                        prompt.append(String.format("SMA 20: $%.2f\n", marketData.getSma20()));
+                    }
+                    if (marketData.getSma50() != null) {
+                        prompt.append(String.format("SMA 50: $%.2f\n", marketData.getSma50()));
+                    }
+                    if (marketData.getSma200() != null) {
+                        prompt.append(String.format("SMA 200: $%.2f\n", marketData.getSma200()));
+                    }
+
+                    // Price context relative to moving averages
+                    double currentPrice = marketData.getCurrentPrice();
+                    if (marketData.getSma20() != null) {
+                        double sma20Distance = ((currentPrice - marketData.getSma20()) / marketData.getSma20()) * 100;
+                        prompt.append(String.format("Distance from SMA20: %.1f%%\n", sma20Distance));
+                    }
+                    if (marketData.getSma50() != null) {
+                        double sma50Distance = ((currentPrice - marketData.getSma50()) / marketData.getSma50()) * 100;
+                        prompt.append(String.format("Distance from SMA50: %.1f%%\n", sma50Distance));
+                    }
+                }
+            } catch (Exception e) {
+                prompt.append("\n--- Market Data Unavailable ---\n");
+                System.err.println("Could not fetch market data for " + holding.getSymbol() + ": " + e.getMessage());
+            }
+
+            prompt.append("\n");
         }
-        p.append("\n");
 
-        p.append("Output JSON EXACTLY in this shape (no extra text):\n");
-        p.append("{\n");
-        p.append("  \"strategies\": [\n");
-        p.append("    {\n");
-        p.append("      \"symbol\": \"BTC\",\n");
-        p.append("      \"action\": \"BUY_NOW|WAIT|HOLD|TRIM\",\n");
-        p.append("      \"entry\": {\n");
-        p.append("        \"zones\": [\"$xxxxx\", \"$yyyyy\", \"$zzzzz\"],\n");
-        p.append("        \"dca\": \"frequency + amount/percent (optional)\",\n");
-        p.append("        \"confirmation\": \"e.g., reclaim 200D MA; RSI cross; structure break\"\n");
-        p.append("      },\n");
-        p.append("      \"exit\": {\n");
-        p.append("        \"take_profits\": [\n");
-        p.append("          {\"level\": \"$tp1\", \"sell_pct\": \"25%\"},\n");
-        p.append("          {\"level\": \"$tp2\", \"sell_pct\": \"25%\"},\n");
-        p.append("          {\"level\": \"$tp3\", \"sell_pct\": \"50%\"}\n");
-        p.append("        ],\n");
-        p.append("        \"stop\": {\"type\": \"hard\", \"value\": \"$or-%%\"},\n");
-        p.append("        \"trailing\": {\"type\": \"percent|ATR\", \"value\": \"e.g., 10%\"},\n");
-        p.append("        \"invalidations\": [\"one clear invalidation condition\"]\n");
-        p.append("      },\n");
-        p.append("      \"notes\": \"<= 2 short lines: key catalyst/risks impacting entries/exits\"\n");
-        p.append("    }\n");
-        p.append("  ],\n");
-        p.append("  \"portfolio\": {\n");
-        p.append("    \"cash_buffer\": \"suggested % for new entries\",\n");
-        p.append("    \"rebalance_trigger\": \"e.g., +/-5% drift or TP hit\",\n");
-        p.append("    \"risk_guardrails\": \"max position %; max portfolio drawdown rule\"\n");
-        p.append("  }\n");
-        p.append("}\n");
+        // --- Context & Preferences ---
+        prompt.append("⚠️ Context & Preferences:\n");
+        prompt.append("- Investment timeframe: 6 months – 3 years\n");
+        prompt.append("- Risk tolerance: Moderate\n");
+        prompt.append("- Focus: Strong fundamentals, real-world utility, sustainable long-term value\n");
+        prompt.append("- Exclusions: No meme coins or highly speculative low-cap tokens\n\n");
 
-        return p.toString();
+        // --- Output Format ---
+        prompt.append("👉 Please provide your analysis in the following structured JSON format:\n");
+        prompt.append("{\n");
+        prompt.append("  \"strategies\": [\n");
+        prompt.append("    {\n");
+        prompt.append("      \"symbol\": \"BTC\",\n");
+        prompt.append("      \"action\": \"BUY_NOW|WAIT|HOLD|TRIM\",\n");
+        prompt.append("      \"entry\": {\n");
+        prompt.append("        \"zones\": [\"$xxxxx\", \"$yyyyy\", \"$zzzzz\"],\n");
+        prompt.append("        \"dca\": \"frequency + amount/percent (optional)\",\n");
+        prompt.append("        \"confirmation\": \"e.g., reclaim 200D MA; RSI cross; structure break\"\n");
+        prompt.append("      },\n");
+        prompt.append("      \"exit\": {\n");
+        prompt.append("        \"take_profits\": [\n");
+        prompt.append("          {\"level\": \"$tp1\", \"sell_pct\": \"25%\"},\n");
+        prompt.append("          {\"level\": \"$tp2\", \"sell_pct\": \"25%\"},\n");
+        prompt.append("          {\"level\": \"$tp3\", \"sell_pct\": \"50%\"}\n");
+        prompt.append("        ],\n");
+        prompt.append("        \"stop\": {\"type\": \"hard\", \"value\": \"$or-%%\"},\n");
+        prompt.append("        \"trailing\": {\"type\": \"percent|ATR\", \"value\": \"e.g., 10%\"},\n");
+        prompt.append("        \"invalidations\": [\"one clear invalidation condition\"]\n");
+        prompt.append("      },\n");
+        prompt.append("      \"notes\": \"<= 2 short lines: key catalyst/risks impacting entries/exits\"\n");
+        prompt.append("    }\n");
+        prompt.append("  ],\n");
+        prompt.append("  \"portfolio\": {\n");
+        prompt.append("    \"cash_buffer\": \"suggested % for new entries\",\n");
+        prompt.append("    \"rebalance_trigger\": \"e.g., +/-5% drift or TP hit\",\n");
+        prompt.append("    \"risk_guardrails\": \"max position %; max portfolio drawdown rule\"\n");
+        prompt.append("  }\n");
+        prompt.append("}\n");
+
+        return prompt.toString();
     }
 
     private Map<String, Object> parseEntryExitStrategyResponse(String response) {

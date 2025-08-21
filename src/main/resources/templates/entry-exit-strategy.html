@@ -9,252 +9,611 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
         .container {
             background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         .header {
             text-align: center;
-            border-bottom: 3px solid #007bff;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #667eea, #764ba2) 1;
+            padding-bottom: 25px;
+            margin-bottom: 35px;
+            position: relative;
+        }
+        .header::after {
+            content: '📊 📈 📉';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 15px;
+            font-size: 1.2em;
         }
         .header h1 {
-            color: #007bff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin: 0;
-            font-size: 2.2em;
+            font-size: 2.5em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .timestamp {
             color: #666;
             font-size: 0.9em;
-            margin-top: 10px;
+            margin-top: 15px;
+            background: #f8f9fa;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
         }
-
-        .strategy-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 25px;
+        .market-overview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 35px;
+            position: relative;
             overflow: hidden;
         }
+        .market-overview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .market-overview h2 {
+            margin-top: 0;
+            color: white;
+            font-size: 1.8em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .strategy-card {
+            border: 2px solid transparent;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(45deg, #667eea, #764ba2) border-box;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        .strategy-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
         .strategy-header {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-bottom: 1px solid #ddd;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px 25px;
+            border-bottom: 2px solid #e9ecef;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+        }
+        .strategy-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .strategy-header h3 {
             margin: 0;
             color: #333;
-            font-size: 1.4em;
+            font-size: 1.5em;
+            font-weight: 600;
         }
         .action-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.85em;
             font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
         }
-        .action-buy_now { background: #d4edda; color: #155724; }
-        .action-hold    { background: #fff3cd; color: #856404; }
-        .action-trim    { background: #f8d7da; color: #721c24; }
-        .action-wait    { background: #e2e3e5; color: #495057; }
-
-        .strategy-content { padding: 20px; }
-        .strategy-section { margin-bottom: 20px; }
+        .action-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .action-badge:hover::before {
+            left: 100%;
+        }
+        .action-buy_now {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: 2px solid #28a745;
+        }
+        .action-hold {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+            border: 2px solid #ffc107;
+        }
+        .action-trim {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+            color: white;
+            border: 2px solid #dc3545;
+        }
+        .action-wait {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            border: 2px solid #6c757d;
+        }
+        .strategy-content {
+            padding: 25px;
+            background: linear-gradient(135deg, #fefefe 0%, #f8f9fa 100%);
+        }
+        .strategy-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            border-left: 4px solid transparent;
+            border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
         .strategy-section h4 {
-            color: #007bff;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            color: #667eea;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .strategy-section h4::before {
+            content: '▶';
+            color: #764ba2;
         }
         .entry-points, .profit-levels, .invalidations {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin: 10px 0;
+            gap: 12px;
+            margin: 15px 0;
         }
-        .chip {
-            background: #f1f5ff;
-            color: #0b5ed7;
-            padding: 6px 10px;
-            border-radius: 14px;
-            font-weight: 600;
+        .price-point {
+            background: linear-gradient(135deg, #e7f3ff, #cce7ff);
+            color: #0066cc;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
             font-size: 0.9em;
+            border: 2px solid #b3d9ff;
+            box-shadow: 0 2px 6px rgba(0,102,204,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .price-point::before {
+            content: '💰';
+            margin-right: 5px;
         }
         .profit-level {
-            background: #e8f5e8;
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
             color: #2d5a2d;
-            padding: 8px 12px;
-            border-radius: 15px;
+            padding: 12px 18px;
+            border-radius: 20px;
             font-size: 0.9em;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            border: 2px solid #b8e6b8;
+            box-shadow: 0 2px 6px rgba(45,90,45,0.15);
+            position: relative;
         }
-        .kv {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #007bff;
-            margin-top: 10px;
+        .profit-level::before {
+            content: '🎯';
+            margin-right: 8px;
+        }
+        .invalidation-item {
+            background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+            color: #cc0000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            border: 2px solid #ffb3b3;
+            box-shadow: 0 2px 6px rgba(204,0,0,0.15);
+        }
+        .invalidation-item::before {
+            content: '⚠️';
+            margin-right: 5px;
+        }
+        .risk-level {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .risk-high {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        .risk-moderate {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+        .risk-low {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .timeline-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid transparent;
+            border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .timeline-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .timeline-card h5 {
+            margin-top: 0;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .portfolio-summary {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 35px 0;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
         }
-        .portfolio-summary h2 { color: #333; margin-top: 0; }
+        .portfolio-summary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: xor;
+            -webkit-mask-composite: xor;
+        }
+        .portfolio-summary h2 {
+            color: #333;
+            margin-top: 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .portfolio-summary h2::before {
+            content: '🎯';
+            font-size: 1.2em;
+        }
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
         }
         .summary-item {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid transparent;
+            border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+            transition: all 0.3s ease;
         }
-        .summary-item h4 { margin: 0 0 8px; color: #007bff; }
-
+        .summary-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .summary-item h4 {
+            margin-top: 0;
+            color: #667eea;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .metrics-list {
+            background: white;
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .metrics-list h3 {
+            margin-top: 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .metrics-list h3::before {
+            content: '📊';
+        }
+        .metrics-list ul {
+            margin: 0;
+            padding-left: 25px;
+        }
+        .metrics-list li {
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+            position: relative;
+        }
+        .metrics-list li::before {
+            content: '▶';
+            color: #667eea;
+            position: absolute;
+            left: -20px;
+            font-size: 0.8em;
+        }
         .footer {
             text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
+            margin-top: 45px;
+            padding-top: 25px;
+            border-top: 2px solid transparent;
+            border-image: linear-gradient(90deg, transparent, #667eea, #764ba2, transparent) 1;
             color: #666;
             font-size: 0.9em;
         }
+        .warning-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(255,193,7,0.2);
+        }
+        .warning-box::before {
+            content: '⚠️';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5em;
+        }
+        .warning-box h4 {
+            color: #856404;
+            margin-top: 0;
+            margin-left: 40px;
+            font-weight: 600;
+        }
+        .warning-box div {
+            margin-left: 40px;
+        }
+        .dca-info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+        }
+        .dca-info::before {
+            content: '📅 ';
+        }
+        .stop-loss-info {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #f44336;
+            margin: 10px 0;
+        }
+        .stop-loss-info::before {
+            content: '🛡️ ';
+        }
         @media (max-width: 600px) {
-            .strategy-header { flex-direction: column; align-items: flex-start; }
-            .strategy-header h3 { margin-bottom: 10px; }
-            .summary-grid { grid-template-columns: 1fr; }
+            .strategy-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .strategy-header h3 {
+                margin-bottom: 15px;
+            }
+            .timeline-grid, .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            .entry-points, .profit-levels, .invalidations {
+                flex-direction: column;
+            }
+        }
+        /* Smooth animations */
+        * {
+            transition: all 0.3s ease;
+        }
+        .strategy-card, .summary-item, .timeline-card {
+            animation: fadeInUp 0.6s ease;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>🎯 Entry & Exit Strategy Analysis</h1>
-        <div class="timestamp" th:text="'Generated: ' + ${timestamp}">Generated: --</div>
-    </div>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Entry & Exit Strategy Analysis</h1>
+            <div class="timestamp" th:text="'Generated: ' + ${timestamp}"></div>
+        </div>
 
-    <!-- Strategies -->
-    <div th:if="${analysisData != null and analysisData.strategies != null and #lists.size(analysisData.strategies) > 0}">
-        <h2>💰 Individual Asset Strategies</h2>
+        <!-- Individual Strategies -->
+        <div th:if="${analysisData.strategies}">
+            <h2 style="color: #333; display: flex; align-items: center; gap: 15px;">
+                <span>💰</span> Individual Asset Strategies
+            </h2>
 
-        <div th:each="s : ${analysisData.strategies}" class="strategy-card">
-            <div class="strategy-header"
-                 th:with="act=${s.action != null ? s.action : 'HOLD'},
-                          actlc=${#strings.toLowerCase(act)}">
-                <h3 th:text="${s.symbol}">SYMBOL</h3>
-                <span class="action-badge"
-                      th:classappend="' action-' + ${actlc}"
-                      th:text="${act}">HOLD</span>
-            </div>
+            <div th:each="strategy : ${analysisData.strategies}" class="strategy-card">
+                <div class="strategy-header">
+                    <h3 th:text="${strategy.symbol}"></h3>
+                    <span class="action-badge"
+                          th:classappend="'action-' + ${#strings.toLowerCase(#strings.replace(strategy.action ?: 'hold', '_', '_'))}"
+                          th:text="${strategy.action ?: 'HOLD'}">
+                    </span>
+                </div>
 
-            <div class="strategy-content">
-                <!-- Entry -->
-                <div class="strategy-section" th:if="${s.entry != null}">
-                    <h4>📈 Entry</h4>
+                <div class="strategy-content">
+                    <!-- Entry Strategy -->
+                    <div class="strategy-section" th:if="${strategy.entry}">
+                        <h4>📈 Entry Strategy</h4>
 
-                    <div th:if="${s.entry.zones != null and #lists.size(s.entry.zones) > 0}">
-                        <strong>Zones:</strong>
-                        <div class="entry-points">
-                            <span class="chip" th:each="z : ${s.entry.zones}" th:text="${z}">$0</span>
+                        <div th:if="${strategy.entry.zones}">
+                            <strong>Entry Zones:</strong>
+                            <div class="entry-points">
+                                <span th:each="zone : ${strategy.entry.zones}"
+                                      class="price-point" th:text="${zone}"></span>
+                            </div>
+                        </div>
+
+                        <div th:if="${strategy.entry.dca}" class="dca-info">
+                            <strong>DCA Strategy:</strong>
+                            <p th:text="${strategy.entry.dca}"></p>
+                        </div>
+
+                        <div th:if="${strategy.entry.confirmation}">
+                            <strong>Entry Confirmation:</strong>
+                            <p th:text="${strategy.entry.confirmation}"></p>
                         </div>
                     </div>
 
-                    <div class="kv" th:if="${s.entry.dca != null and !#strings.isEmpty(s.entry.dca)}">
-                        <strong>DCA:</strong>
-                        <span th:text="${s.entry.dca}"></span>
-                    </div>
+                    <!-- Exit Strategy -->
+                    <div class="strategy-section" th:if="${strategy.exit}">
+                        <h4>📉 Exit Strategy</h4>
 
-                    <div class="kv" th:if="${s.entry.confirmation != null and !#strings.isEmpty(s.entry.confirmation)}">
-                        <strong>Confirmation:</strong>
-                        <span th:text="${s.entry.confirmation}"></span>
-                    </div>
-                </div>
+                        <div th:if="${strategy.exit.take_profits}">
+                            <strong>Take Profit Levels:</strong>
+                            <div th:each="tp : ${strategy.exit.take_profits}" class="profit-level">
+                                <strong th:text="${tp.level}"></strong> -
+                                Sell <span th:text="${tp.sell_pct}"></span>
+                            </div>
+                        </div>
 
-                <!-- Exit -->
-                <div class="strategy-section" th:if="${s.exit != null}">
-                    <h4>📉 Exit</h4>
+                        <div th:if="${strategy.exit.stop}" class="stop-loss-info">
+                            <strong>Stop Loss:</strong>
+                            <span th:text="${strategy.exit.stop.type}"></span> at
+                            <span th:text="${strategy.exit.stop.value}"></span>
+                        </div>
 
-                    <div th:if="${s.exit.take_profits != null and #lists.size(s.exit.take_profits) > 0}">
-                        <strong>Take Profits:</strong>
-                        <div class="profit-levels">
-                            <div class="profit-level" th:each="tp : ${s.exit.take_profits}">
-                                <strong th:text="${tp.level}">$0</strong>
-                                <span> — Sell </span>
-                                <span th:text="${tp.sell_pct}">0%</span>
+                        <div th:if="${strategy.exit.trailing}" style="margin-top: 10px;">
+                            <strong>Trailing Stop:</strong>
+                            <span th:text="${strategy.exit.trailing.type}"></span> -
+                            <span th:text="${strategy.exit.trailing.value}"></span>
+                        </div>
+
+                        <div th:if="${strategy.exit.invalidations}">
+                            <strong>Invalidation Conditions:</strong>
+                            <div class="invalidations">
+                                <span th:each="inv : ${strategy.exit.invalidations}"
+                                      class="invalidation-item" th:text="${inv}"></span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- STOP: render safely without boolean coercion -->
-                    <div class="kv" th:if="${s.exit.stop != null}">
-                        <strong>Stop:</strong>
-                        <span th:if="${s.exit.stop.type != null}" th:text="${s.exit.stop.type}"></span>
-                        <span th:if="${s.exit.stop.value != null and !#strings.isEmpty(s.exit.stop.value)}"
-                              th:text="${' @ ' + s.exit.stop.value}"></span>
+                    <!-- Notes -->
+                    <div class="strategy-section" th:if="${strategy.notes}">
+                        <h4>📝 Key Notes</h4>
+                        <p th:text="${strategy.notes}"></p>
                     </div>
-
-                    <!-- TRAILING: render safely without boolean coercion -->
-                    <div class="kv" th:if="${s.exit.trailing != null}">
-                        <strong>Trailing:</strong>
-                        <span th:if="${s.exit.trailing.type != null}" th:text="${s.exit.trailing.type}"></span>
-                        <span th:if="${s.exit.trailing.value != null and !#strings.isEmpty(s.exit.trailing.value)}"
-                              th:text="${' = ' + s.exit.trailing.value}"></span>
-                    </div>
-
-                    <div th:if="${s.exit.invalidations != null and #lists.size(s.exit.invalidations) > 0}">
-                        <strong>Invalidations:</strong>
-                        <div class="invalidations">
-                            <span class="chip" th:each="inv : ${s.exit.invalidations}" th:text="${inv}"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Notes -->
-                <div class="strategy-section" th:if="${s.notes != null and !#strings.isEmpty(s.notes)}">
-                    <h4>📝 Notes</h4>
-                    <p th:text="${s.notes}"></p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Portfolio -->
-    <div class="portfolio-summary" th:if="${analysisData != null and analysisData.portfolio != null}">
-        <h2>🎯 Portfolio Guardrails</h2>
-        <div class="summary-grid">
-            <div class="summary-item" th:if="${analysisData.portfolio.cash_buffer != null and !#strings.isEmpty(analysisData.portfolio.cash_buffer)}">
-                <h4>Cash Buffer</h4>
-                <p th:text="${analysisData.portfolio.cash_buffer}"></p>
-            </div>
-            <div class="summary-item" th:if="${analysisData.portfolio.rebalance_trigger != null and !#strings.isEmpty(analysisData.portfolio.rebalance_trigger)}">
-                <h4>Rebalance Trigger</h4>
-                <p th:text="${analysisData.portfolio.rebalance_trigger}"></p>
-            </div>
-            <div class="summary-item" th:if="${analysisData.portfolio.risk_guardrails != null and !#strings.isEmpty(analysisData.portfolio.risk_guardrails)}">
-                <h4>Risk Guardrails</h4>
-                <p th:text="${analysisData.portfolio.risk_guardrails}"></p>
+        <!-- Portfolio Strategy -->
+        <div class="portfolio-summary" th:if="${analysisData.portfolio}">
+            <h2>Portfolio Management</h2>
+            <div class="summary-grid">
+                <div class="summary-item" th:if="${analysisData.portfolio.cash_buffer}">
+                    <h4>💵 Cash Buffer</h4>
+                    <p th:text="${analysisData.portfolio.cash_buffer}"></p>
+                </div>
+                <div class="summary-item" th:if="${analysisData.portfolio.rebalance_trigger}">
+                    <h4>⚖️ Rebalancing</h4>
+                    <p th:text="${analysisData.portfolio.rebalance_trigger}"></p>
+                </div>
+                <div class="summary-item" th:if="${analysisData.portfolio.risk_guardrails}">
+                    <h4>🛡️ Risk Guardrails</h4>
+                    <p th:text="${analysisData.portfolio.risk_guardrails}"></p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="footer">
-        <p><strong>Disclaimer:</strong> This analysis is for informational purposes only and is not financial advice. Do your own research and consider your risk tolerance.</p>
-        <p>📧 Generated by Crypto Advisory System | <span th:text="${timestamp}">--</span></p>
+        <div class="footer">
+            <p><strong>Disclaimer:</strong> This analysis is for informational purposes only and should not be considered as financial advice.
+            Always do your own research and consider your risk tolerance before making investment decisions.</p>
+            <p>📧 Generated by Crypto Advisory System | <span th:text="${timestamp}"></span></p>
+        </div>
     </div>
-</div>
 </body>
 </html>

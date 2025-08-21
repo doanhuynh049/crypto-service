@@ -21,11 +21,10 @@ public class DataProviderService {
         this.objectMapper = new ObjectMapper();
     }
 
-    public MarketData getMarketData(String symbolOrId) {
+    public MarketData getMarketData(String coinGeckoId) {
         try {
             // Get current price from CoinGecko
-            String coinGeckoId = getCoinGeckoId(symbolOrId);
-            String priceUrl = String.format("https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true", 
+            String priceUrl = String.format("https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true",
                 coinGeckoId);
             System.out.println("[DataProviderService] Fetching price from: " + priceUrl);
             String priceResponse = restTemplate.getForObject(priceUrl, String.class);
@@ -36,7 +35,7 @@ public class DataProviderService {
                 throw new RuntimeException("No data found for " + coinGeckoId);
             }
 
-            MarketData marketData = new MarketData(symbolOrId, coinData.get("usd").asDouble());
+            MarketData marketData = new MarketData(coinGeckoId, coinData.get("usd").asDouble());
             
             if (coinData.has("usd_24h_change")) {
                 marketData.setPriceChangePercentage24h(coinData.get("usd_24h_change").asDouble());
@@ -71,9 +70,9 @@ public class DataProviderService {
             return marketData;
 
         } catch (Exception e) {
-            System.err.println("[DataProviderService] Error fetching market data for " + symbolOrId + ": " + e.getMessage());
+            System.err.println("[DataProviderService] Error fetching market data for " + coinGeckoId + ": " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Failed to fetch market data for " + symbolOrId, e);
+            throw new RuntimeException("Failed to fetch market data for " + coinGeckoId, e);
         }
     }
 
@@ -103,69 +102,5 @@ public class DataProviderService {
         } catch (Exception e) {
             System.err.println("Error calculating technical indicators for " + marketData.getSymbol() + ": " + e.getMessage());
         }
-    }
-
-    private String getCoinGeckoId(String symbolOrId) {
-        // If it's already a known CoinGecko ID, return it directly
-        if (isKnownCoinGeckoId(symbolOrId)) {
-            return symbolOrId;
-        }
-        
-        // Map common symbols to CoinGecko IDs
-        switch (symbolOrId.toUpperCase()) {
-            case "BTC":
-                return "bitcoin";
-            case "ETH":
-                return "ethereum";
-            case "ADA":
-                return "cardano";
-            case "DOT":
-                return "polkadot";
-            case "SOL":
-                return "solana";
-            case "MATIC":
-                return "matic-network";
-            case "LINK":
-                return "chainlink";
-            case "UNI":
-                return "uniswap";
-            case "AVAX":
-                return "avalanche-2";
-            case "ATOM":
-                return "cosmos";
-            case "BNB":
-                return "binancecoin";
-            case "OP":
-                return "optimism";
-            case "ARB":
-                return "arbitrum";
-            case "SUI":
-                return "sui";
-            case "RNDR":
-                return "render-token";
-            case "FET":
-                return "fetch-ai";
-            case "C":
-                return "chainbase";
-            default:
-                return symbolOrId.toLowerCase();
-        }
-    }
-
-    private boolean isKnownCoinGeckoId(String input) {
-        // Check if the input is already a known CoinGecko ID
-        String[] knownIds = {
-            "bitcoin", "ethereum", "cardano", "polkadot", "solana", 
-            "matic-network", "chainlink", "uniswap", "avalanche-2", "cosmos",
-            "binancecoin", "optimism", "arbitrum", "sui", "render-token", 
-            "fetch-ai", "chainbase"
-        };
-        
-        for (String id : knownIds) {
-            if (id.equals(input.toLowerCase())) {
-                return true;
-            }
-        }
-        return false;
     }
 }
