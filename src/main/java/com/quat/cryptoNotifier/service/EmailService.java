@@ -272,4 +272,31 @@ public class EmailService {
     public void sendETHInvestmentAnalysis(Map<String, Object> analysisData) {
         sendInvestmentAnalysis(analysisData);
     }
+
+    public void sendEntryExitStrategyAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(appConfig.getMailFrom());
+            helper.setTo(appConfig.getMailTo());
+            helper.setSubject(String.format("🎯 Entry & Exit Strategy Analysis - %s",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))));
+
+            Context context = new Context();
+            context.setVariable("holdings", holdings);
+            context.setVariable("analysisData", analysisData);
+            context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+            String content = templateEngine.process("entry-exit-strategy", context);
+            helper.setText(content, true);
+
+            mailSender.send(message);
+
+            System.out.println("Entry & Exit Strategy Analysis email sent successfully");
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send entry & exit strategy analysis email", e);
+        }
+    }
 }

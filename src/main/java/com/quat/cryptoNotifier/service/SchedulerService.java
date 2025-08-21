@@ -98,6 +98,15 @@ public class SchedulerService {
             e.printStackTrace();
         }
         Thread.sleep(1000);
+
+        try {
+            Map<String, Object> entryExitStrategies = advisoryEngineService.generateEntryExitStrategy(holdings);
+            emailService.sendEntryExitStrategyAnalysis(holdings, entryExitStrategies);
+        } catch (Exception e) {
+            System.err.println("Entry & Exit Strategy Analysis failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
     }
 
     public void sendAdvisoriesForEachCrypto(List<Holding> holdings) throws InterruptedException {

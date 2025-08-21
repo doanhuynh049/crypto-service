@@ -127,6 +127,18 @@ public class AdvisoryEngineService {
         return parsedAnalysis;
     }
 
+    public Map<String, Object> generateEntryExitStrategy(List<Holding> holdings) {
+        String prompt = buildEntryExitStrategyPrompt(holdings);
+        System.out.println("Entry & Exit Strategy Analysis Prompt: " + prompt);
+        String aiResponse = callGeminiAPI(prompt);
+        System.out.println("Entry & Exit Strategy Analysis AI Response: " + aiResponse);
+
+        // Parse the AI response and return structured data
+        Map<String, Object> parsedAnalysis = parseEntryExitStrategyResponse(aiResponse);
+        return parsedAnalysis;
+    }
+
+    //=============================================================================================
     private String buildRiskOpportunityPrompt(List<Holding> holdings) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("Risk & Opportunity Analysis Prompt\n");
@@ -2177,5 +2189,176 @@ public class AdvisoryEngineService {
         }
         
         return parsedData;
+    }
+
+    private String buildEntryExitStrategyPrompt(List<Holding> holdings) {
+        StringBuilder p = new StringBuilder();
+
+        p.append("Crypto Entry/Exit Playbook\n");
+        p.append("Goal: Produce concise, number-first ENTRY and EXIT plans per coin. Avoid macro/sector essays.\n\n");
+
+        p.append("Constraints:\n");
+        p.append("- Be brief. Use bullet-like JSON.\n");
+        p.append("- Give exact price LEVELS (not ranges longer than 10%).\n");
+        p.append("- Max 3 entry zones and max 3 take-profit levels per coin.\n");
+        p.append("- Include ONE hard invalidation/stop and ONE trailing-stop rule if applicable.\n");
+        p.append("- Timeframe: 6–36 months. Risk: Moderate. Focus: fundamentals + sustainable value.\n\n");
+
+        p.append("Holdings:\n");
+        for (Holding h : holdings) {
+            p.append(String.format(
+                    "- %s (%s): qty=%.6f avg=$%.2f initial_value=$%.2f\n",
+                    h.getSymbol(), h.getName(), h.getHoldings(), h.getAveragePrice(), h.getInitialValue()
+            ));
+        }
+        p.append("\n");
+
+        p.append("Output JSON EXACTLY in this shape (no extra text):\n");
+        p.append("{\n");
+        p.append("  \"strategies\": [\n");
+        p.append("    {\n");
+        p.append("      \"symbol\": \"BTC\",\n");
+        p.append("      \"action\": \"BUY_NOW|WAIT|HOLD|TRIM\",\n");
+        p.append("      \"entry\": {\n");
+        p.append("        \"zones\": [\"$xxxxx\", \"$yyyyy\", \"$zzzzz\"],\n");
+        p.append("        \"dca\": \"frequency + amount/percent (optional)\",\n");
+        p.append("        \"confirmation\": \"e.g., reclaim 200D MA; RSI cross; structure break\"\n");
+        p.append("      },\n");
+        p.append("      \"exit\": {\n");
+        p.append("        \"take_profits\": [\n");
+        p.append("          {\"level\": \"$tp1\", \"sell_pct\": \"25%\"},\n");
+        p.append("          {\"level\": \"$tp2\", \"sell_pct\": \"25%\"},\n");
+        p.append("          {\"level\": \"$tp3\", \"sell_pct\": \"50%\"}\n");
+        p.append("        ],\n");
+        p.append("        \"stop\": {\"type\": \"hard\", \"value\": \"$or-%%\"},\n");
+        p.append("        \"trailing\": {\"type\": \"percent|ATR\", \"value\": \"e.g., 10%\"},\n");
+        p.append("        \"invalidations\": [\"one clear invalidation condition\"]\n");
+        p.append("      },\n");
+        p.append("      \"notes\": \"<= 2 short lines: key catalyst/risks impacting entries/exits\"\n");
+        p.append("    }\n");
+        p.append("  ],\n");
+        p.append("  \"portfolio\": {\n");
+        p.append("    \"cash_buffer\": \"suggested % for new entries\",\n");
+        p.append("    \"rebalance_trigger\": \"e.g., +/-5% drift or TP hit\",\n");
+        p.append("    \"risk_guardrails\": \"max position %; max portfolio drawdown rule\"\n");
+        p.append("  }\n");
+        p.append("}\n");
+
+        return p.toString();
+    }
+
+    private Map<String, Object> parseEntryExitStrategyResponse(String response) {
+        Map<String, Object> parsed = new HashMap<>();
+
+        try {
+            // Strip code fences if present
+            String clean = response.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
+
+            // Extract the JSON block
+            int start = clean.indexOf("{");
+            int end = clean.lastIndexOf("}");
+            String json = (start >= 0 && end > start) ? clean.substring(start, end + 1) : clean;
+
+            JsonNode root = objectMapper.readTree(json);
+
+            // === strategies ===
+            List<Map<String, Object>> strategies = new ArrayList<>();
+            if (root.has("strategies") && root.get("strategies").isArray()) {
+                for (JsonNode s : root.get("strategies")) {
+                    Map<String, Object> one = new HashMap<>();
+                    one.put("symbol", s.has("symbol") ? s.get("symbol").asText() : "");
+                    one.put("action", s.has("action") ? s.get("action").asText() : "");
+
+                    // entry
+                    Map<String, Object> entry = new HashMap<>();
+                    if (s.has("entry") && s.get("entry").isObject()) {
+                        JsonNode e = s.get("entry");
+                        // zones
+                        List<String> zones = new ArrayList<>();
+                        if (e.has("zones") && e.get("zones").isArray()) {
+                            for (JsonNode z : e.get("zones")) zones.add(z.asText());
+                        }
+                        entry.put("zones", zones);
+                        entry.put("dca", e.has("dca") ? e.get("dca").asText() : "");
+                        entry.put("confirmation", e.has("confirmation") ? e.get("confirmation").asText() : "");
+                    }
+                    one.put("entry", entry);
+
+                    // exit
+                    Map<String, Object> exit = new HashMap<>();
+                    if (s.has("exit") && s.get("exit").isObject()) {
+                        JsonNode x = s.get("exit");
+
+                        // take_profits
+                        List<Map<String, String>> tps = new ArrayList<>();
+                        if (x.has("take_profits") && x.get("take_profits").isArray()) {
+                            for (JsonNode tp : x.get("take_profits")) {
+                                Map<String, String> tpMap = new HashMap<>();
+                                tpMap.put("level", tp.has("level") ? tp.get("level").asText() : "");
+                                tpMap.put("sell_pct", tp.has("sell_pct") ? tp.get("sell_pct").asText() : "");
+                                tps.add(tpMap);
+                            }
+                        }
+                        exit.put("take_profits", tps);
+
+                        // stop
+                        Map<String, String> stop = new HashMap<>();
+                        if (x.has("stop") && x.get("stop").isObject()) {
+                            JsonNode st = x.get("stop");
+                            stop.put("type", st.has("type") ? st.get("type").asText() : "");
+                            stop.put("value", st.has("value") ? st.get("value").asText() : "");
+                        }
+                        exit.put("stop", stop);
+
+                        // trailing
+                        Map<String, String> trailing = new HashMap<>();
+                        if (x.has("trailing") && x.get("trailing").isObject()) {
+                            JsonNode tr = x.get("trailing");
+                            trailing.put("type", tr.has("type") ? tr.get("type").asText() : "");
+                            trailing.put("value", tr.has("value") ? tr.get("value").asText() : "");
+                        }
+                        exit.put("trailing", trailing);
+
+                        // invalidations
+                        List<String> invalidations = new ArrayList<>();
+                        if (x.has("invalidations") && x.get("invalidations").isArray()) {
+                            for (JsonNode inv : x.get("invalidations")) invalidations.add(inv.asText());
+                        }
+                        exit.put("invalidations", invalidations);
+                    }
+                    one.put("exit", exit);
+
+                    one.put("notes", s.has("notes") ? s.get("notes").asText() : "");
+                    strategies.add(one);
+                }
+            }
+            parsed.put("strategies", strategies);
+
+            // === portfolio ===
+            Map<String, String> portfolio = new HashMap<>();
+            if (root.has("portfolio") && root.get("portfolio").isObject()) {
+                JsonNode p = root.get("portfolio");
+                portfolio.put("cash_buffer", p.has("cash_buffer") ? p.get("cash_buffer").asText() : "");
+                portfolio.put("rebalance_trigger", p.has("rebalance_trigger") ? p.get("rebalance_trigger").asText() : "");
+                portfolio.put("risk_guardrails", p.has("risk_guardrails") ? p.get("risk_guardrails").asText() : "");
+            }
+            parsed.put("portfolio", portfolio);
+
+            // Optional: minimal backward-compat shim (old responses)
+            if (strategies.isEmpty() && root.has("individual_strategies")) {
+                // Populate empty keys so downstream code doesn't break
+                parsed.putIfAbsent("portfolio", portfolio);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error parsing entry/exit strategy response: " + e.getMessage());
+            e.printStackTrace();
+
+            // Safe defaults on failure
+            parsed.put("strategies", new ArrayList<>());
+            parsed.put("portfolio", new HashMap<>());
+        }
+
+        return parsed;
     }
 }
