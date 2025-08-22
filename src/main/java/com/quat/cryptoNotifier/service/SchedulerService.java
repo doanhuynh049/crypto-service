@@ -37,7 +37,7 @@ public class SchedulerService {
         this.objectMapper = new ObjectMapper();
     }
 
-    @Scheduled(cron = "0 30 7 * * *", zone = "Asia/Ho_Chi_Minh")
+    @Scheduled(cron = "0 30 3 * * *", zone = "Asia/Ho_Chi_Minh")
     public void runDailyAdvisory() {
         System.out.println("Starting daily crypto advisory at " + LocalDateTime.now());
         
@@ -51,7 +51,7 @@ public class SchedulerService {
 
             // Second pass: Generate AI investment analysis for each crypto
             sendAdvisoriesForEachCrypto(holdings);
-            
+
             saveDailySnapshot(holdings, advisoriesWithAI);
 
             System.out.println("Daily advisory completed successfully");
