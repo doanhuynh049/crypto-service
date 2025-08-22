@@ -6,29 +6,45 @@ import com.quat.cryptoNotifier.model.MarketData;
 import com.quat.cryptoNotifier.util.IndicatorUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class MarketDataCacheService {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ConcurrentHashMap<String, CachedMarketData> cache = new ConcurrentHashMap<>();
     private final ReentrantLock cacheLock = new ReentrantLock();
+    private static final String CACHE_FILE_PATH = "cache/market-data-cache.json";
 
-    // Cache entry with timestamp
-    private static class CachedMarketData {
-        private final MarketData marketData;
-        private final LocalDateTime cacheTime;
+    public MarketDataCacheService() {
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    // Cache entry with timestamp - made static for JSON serialization
+    public static class CachedMarketData {
+        private MarketData marketData;
+        private LocalDateTime cacheTime;
+
+        // Default constructor for JSON deserialization
+        public CachedMarketData() {}
 
         public CachedMarketData(MarketData marketData) {
             this.marketData = marketData;
@@ -39,12 +55,145 @@ public class MarketDataCacheService {
             return marketData;
         }
 
+        public void setMarketData(MarketData marketData) {
+            this.marketData = marketData;
+        }
+
         public LocalDateTime getCacheTime() {
             return cacheTime;
         }
 
+        public void setCacheTime(LocalDateTime cacheTime) {
+            this.cacheTime = cacheTime;
+        }
+
         public boolean isExpired(int cacheHours) {
             return LocalDateTime.now().isAfter(cacheTime.plusHours(cacheHours));
+        }
+    }
+
+    /**
+     * Initialize cache by loading from file on startup
+     */
+    @PostConstruct
+    public void initializeCache() {
+        loadCacheFromFile();
+    }
+
+    /**
+     * Save cache to file before application shutdown
+     */
+    @PreDestroy
+    public void shutdownCache() {
+        saveCacheToFile();
+    }
+
+    /**
+     * Load cache from file
+     */
+    private void loadCacheFromFile() {
+        cacheLock.lock();
+        try {
+            File cacheFile = new File(CACHE_FILE_PATH);
+            if (!cacheFile.exists()) {
+                System.out.println("[MarketDataCache] No cache file found - starting with empty cache");
+                return;
+            }
+
+            System.out.println("[MarketDataCache] Loading cache from file: " + CACHE_FILE_PATH);
+
+            // Read the cache file as a map
+            Map<String, CachedMarketData> savedCache = objectMapper.readValue(
+                cacheFile,
+                objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, CachedMarketData.class)
+            );
+
+            // Clear current cache and load saved data
+            cache.clear();
+            int loadedCount = 0;
+            int expiredCount = 0;
+
+            for (Map.Entry<String, CachedMarketData> entry : savedCache.entrySet()) {
+                CachedMarketData cachedData = entry.getValue();
+
+                // Only load non-expired entries (within 18 hours)
+                if (!cachedData.isExpired(18)) {
+                    cache.put(entry.getKey(), cachedData);
+                    loadedCount++;
+                } else {
+                    expiredCount++;
+                }
+            }
+
+            System.out.println("[MarketDataCache] Cache loaded successfully. " +
+                "Loaded: " + loadedCount + ", Expired (skipped): " + expiredCount);
+
+        } catch (IOException e) {
+            System.err.println("[MarketDataCache] Error loading cache from file: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("[MarketDataCache] Unexpected error loading cache: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            cacheLock.unlock();
+        }
+    }
+
+    /**
+     * Save cache to file
+     */
+    private void saveCacheToFile() {
+        cacheLock.lock();
+        try {
+            // Create cache directory if it doesn't exist
+            File cacheDir = new File("cache");
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+
+            File cacheFile = new File(CACHE_FILE_PATH);
+
+            // Convert concurrent map to regular map for serialization
+            Map<String, CachedMarketData> cacheToSave = new HashMap<>(cache);
+
+            objectMapper.writeValue(cacheFile, cacheToSave);
+
+            System.out.println("[MarketDataCache] Cache saved to file: " + CACHE_FILE_PATH +
+                " (" + cache.size() + " entries)");
+
+        } catch (IOException e) {
+            System.err.println("[MarketDataCache] Error saving cache to file: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("[MarketDataCache] Unexpected error saving cache: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            cacheLock.unlock();
+        }
+    }
+
+    /**
+     * Manual method to save cache (useful for periodic saves)
+     */
+    public void saveCacheManually() {
+        System.out.println("[MarketDataCache] Manual cache save triggered");
+        saveCacheToFile();
+    }
+
+    /**
+     * Set market data in cache and save to file
+     */
+    public void setMarketData(String coinGeckoId, MarketData marketData) {
+        cacheLock.lock();
+        try {
+            cache.put(coinGeckoId, new CachedMarketData(marketData));
+            System.out.println("[MarketDataCache] Updated cache for " + coinGeckoId);
+
+            // Save to file after updating cache
+            saveCacheToFile();
+
+        } finally {
+            cacheLock.unlock();
         }
     }
 
@@ -95,6 +244,10 @@ public class MarketDataCacheService {
             MarketData freshData = fetchMarketDataDirect(coinGeckoId);
             cache.put(coinGeckoId, new CachedMarketData(freshData));
             System.out.println("[MarketDataCache] Successfully refreshed cache for " + coinGeckoId);
+
+            // Save to file after refresh
+            saveCacheToFile();
+
         } catch (Exception e) {
             System.err.println("[MarketDataCache] Failed to refresh cache for " + coinGeckoId + ": " + e.getMessage());
         } finally {
@@ -128,7 +281,7 @@ public class MarketDataCacheService {
             if (coinData.has("usd_24h_vol")) {
                 marketData.setVolume24h(coinData.get("usd_24h_vol").asDouble());
             }
-            Thread.sleep(1000); // To respect API rate limits
+            Thread.sleep(30000); // To respect API rate limits
 
             // Get historical data for technical indicators
             String historyUrl = String.format("https://api.coingecko.com/api/v3/coins/%s/market_chart?vs_currency=usd&days=200&interval=daily",
@@ -146,6 +299,7 @@ public class MarketDataCacheService {
             for (JsonNode pricePoint : pricesArray) {
                 historicalPrices.add(pricePoint.get(1).asDouble());
             }
+            Thread.sleep(30000); // To respect API rate limits
 
             marketData.setPrices(historicalPrices);
 
@@ -265,13 +419,21 @@ public class MarketDataCacheService {
     }
 
     /**
-     * Clear all cache entries
+     * Clear all cache entries and delete cache file
      */
     public void clearCache() {
         cacheLock.lock();
         try {
             int clearedCount = cache.size();
             cache.clear();
+
+            // Delete cache file
+            File cacheFile = new File(CACHE_FILE_PATH);
+            if (cacheFile.exists()) {
+                cacheFile.delete();
+                System.out.println("[MarketDataCache] Cache file deleted");
+            }
+
             System.out.println("[MarketDataCache] Cleared " + clearedCount + " cache entries");
         } finally {
             cacheLock.unlock();
@@ -279,7 +441,7 @@ public class MarketDataCacheService {
     }
 
     /**
-     * Remove expired cache entries
+     * Remove expired cache entries and save to file
      */
     public void cleanupExpiredEntries() {
         cacheLock.lock();
@@ -290,6 +452,8 @@ public class MarketDataCacheService {
 
             if (removedCount > 0) {
                 System.out.println("[MarketDataCache] Cleaned up " + removedCount + " expired cache entries");
+                // Save to file after cleanup
+                saveCacheToFile();
             }
         } finally {
             cacheLock.unlock();
@@ -297,12 +461,14 @@ public class MarketDataCacheService {
     }
 
     /**
-     * Scheduled cleanup of expired entries every 6 hours
+     * Scheduled task to save cache every 30 minutes
      */
-    @Scheduled(fixedRate = 6 * 60 * 60 * 1000) // 6 hours in milliseconds
-    public void scheduledCleanup() {
-        System.out.println("[MarketDataCache] Running scheduled cleanup of expired entries");
-        cleanupExpiredEntries();
+    @Scheduled(fixedRate = 30 * 60 * 1000) // 30 minutes in milliseconds
+    public void scheduledCacheSave() {
+        if (!cache.isEmpty()) {
+            System.out.println("[MarketDataCache] Running scheduled cache save");
+            saveCacheToFile();
+        }
     }
 
     /**

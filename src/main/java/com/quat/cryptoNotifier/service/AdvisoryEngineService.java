@@ -2419,4 +2419,266 @@ public class AdvisoryEngineService {
 
         return parsed;
     }
+    public Map<String, Object> generatePortfolioTable(List<Holding> holdings) {
+        Map<String, Object> portfolioData = new HashMap<>();
+        List<Map<String, Object>> portfolioRows = new ArrayList<>();
+
+        double totalInitialValue = 0;
+        double totalCurrentValue = 0;
+        double totalProfitLoss = 0;
+
+        try {
+            for (Holding holding : holdings) {
+                Map<String, Object> row = new HashMap<>();
+
+                // Get current market data
+                MarketData marketData = dataProviderService.getMarketData(holding.getId());
+                double currentPrice = marketData != null ? marketData.getCurrentPrice() : 0;
+
+                // Basic holding information
+                row.put("symbol", holding.getSymbol());
+                row.put("name", holding.getName());
+                row.put("holdings", holding.getHoldings());
+                row.put("averagePrice", holding.getAveragePrice());
+                row.put("currentPrice", currentPrice);
+
+                // Target prices
+                row.put("expectedEntry", holding.getExpectedEntry());
+                row.put("expectedPrice", holding.getExpectedPrice());
+                row.put("targetPrice3Month", holding.getTargetPrice3Month());
+                row.put("targetPriceLongTerm", holding.getTargetPriceLongTerm());
+
+                // Financial calculations
+                double initialValue = holding.getInitialValue();
+                double currentValue = holding.getHoldings() * currentPrice;
+                double profitLoss = currentValue - initialValue;
+                double profitLossPercentage = initialValue > 0 ? (profitLoss / initialValue) * 100 : 0;
+
+                row.put("initialValue", initialValue);
+                row.put("currentValue", currentValue);
+                row.put("profitLoss", profitLoss);
+                row.put("profitLossPercentage", profitLossPercentage);
+
+                // Distance to targets
+                double distanceTo3MonthTarget = currentPrice > 0 ?
+                        ((holding.getTargetPrice3Month() - currentPrice) / currentPrice) * 100 : 0;
+                double distanceToLongTarget = currentPrice > 0 ?
+                        ((holding.getTargetPriceLongTerm() - currentPrice) / currentPrice) * 100 : 0;
+
+                row.put("distanceTo3MonthTarget", distanceTo3MonthTarget);
+                row.put("distanceToLongTarget", distanceToLongTarget);
+
+                // Market data and technical indicators
+                if (marketData != null) {
+                    row.put("priceChange24h", marketData.getPriceChangePercentage24h());
+                    row.put("volume24h", marketData.getVolume24h());
+                    row.put("marketCap", marketData.getMarketCap());
+                    row.put("rsi", marketData.getRsi());
+                    row.put("macd", marketData.getMacd());
+                    row.put("sma20", marketData.getSma20());
+                    row.put("sma50", marketData.getSma50());
+                    row.put("sma200", marketData.getSma200());
+
+                    // Trend analysis
+                    String trend = analyzeTrend(currentPrice, marketData);
+                    row.put("trend", trend);
+
+                    // Support and resistance levels
+                    Map<String, Double> levels = calculateSupportResistanceLevels(marketData);
+                    row.put("supportLevel", levels.get("support"));
+                    row.put("resistanceLevel", levels.get("resistance"));
+                } else {
+                    // Default values when market data is not available
+                    row.put("priceChange24h", 0.0);
+                    row.put("volume24h", 0.0);
+                    row.put("marketCap", 0.0);
+                    row.put("trend", "UNKNOWN");
+                    row.put("supportLevel", 0.0);
+                    row.put("resistanceLevel", 0.0);
+                }
+
+                // Portfolio weight
+                double portfolioWeight = totalInitialValue > 0 ? (initialValue / getTotalPortfolioValue(holdings)) * 100 : 0;
+                row.put("portfolioWeight", portfolioWeight);
+
+                // Risk assessment
+                String riskLevel = assessRiskLevel(holding, marketData);
+                row.put("riskLevel", riskLevel);
+
+                // Action recommendation
+                String recommendation = getActionRecommendation(holding, marketData, profitLossPercentage);
+                row.put("recommendation", recommendation);
+
+                portfolioRows.add(row);
+
+                // Accumulate totals
+                totalInitialValue += initialValue;
+                totalCurrentValue += currentValue;
+                totalProfitLoss += profitLoss;
+            }
+
+            // Portfolio summary
+            double totalProfitLossPercentage = totalInitialValue > 0 ? (totalProfitLoss / totalInitialValue) * 100 : 0;
+
+            Map<String, Object> summary = new HashMap<>();
+            summary.put("totalInitialValue", totalInitialValue);
+            summary.put("totalCurrentValue", totalCurrentValue);
+            summary.put("totalProfitLoss", totalProfitLoss);
+            summary.put("totalProfitLossPercentage", totalProfitLossPercentage);
+            summary.put("numberOfHoldings", holdings.size());
+
+            // Risk distribution
+            Map<String, Integer> riskDistribution = calculateRiskDistribution(portfolioRows);
+            summary.put("riskDistribution", riskDistribution);
+
+            portfolioData.put("portfolioRows", portfolioRows);
+            portfolioData.put("summary", summary);
+            portfolioData.put("timestamp", java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        } catch (Exception e) {
+            logger.error("Error generating portfolio table", e);
+            portfolioData.put("error", "Failed to generate portfolio table: " + e.getMessage());
+        }
+
+        return portfolioData;
+    }
+
+
+    private Map<String, Integer> calculateRiskDistribution(List<Map<String, Object>> portfolioRows) {
+        Map<String, Integer> distribution = new HashMap<>();
+        distribution.put("LOW", 0);
+        distribution.put("MEDIUM", 0);
+        distribution.put("HIGH", 0);
+        distribution.put("UNKNOWN", 0);
+
+        for (Map<String, Object> row : portfolioRows) {
+            String risk = (String) row.get("riskLevel");
+            distribution.put(risk, distribution.get(risk) + 1);
+        }
+
+        return distribution;
+    }
+
+
+
+    private String analyzeTrend(double currentPrice, MarketData marketData) {
+        try {
+            if (marketData.getSma20() != null && marketData.getSma50() != null) {
+                if (currentPrice > marketData.getSma20() && marketData.getSma20() > marketData.getSma50()) {
+                    return "BULLISH";
+                } else if (currentPrice < marketData.getSma20() && marketData.getSma20() < marketData.getSma50()) {
+                    return "BEARISH";
+                } else {
+                    return "SIDEWAYS";
+                }
+            }
+
+            // Fallback to 24h change
+            if (marketData.getPriceChangePercentage24h() > 5) {
+                return "BULLISH";
+            } else if (marketData.getPriceChangePercentage24h() < -5) {
+                return "BEARISH";
+            } else {
+                return "SIDEWAYS";
+            }
+        } catch (Exception e) {
+            return "UNKNOWN";
+        }
+    }
+
+    private Map<String, Double> calculateSupportResistanceLevels(MarketData marketData) {
+        Map<String, Double> levels = new HashMap<>();
+        try {
+            double currentPrice = marketData.getCurrentPrice();
+
+            // Simple support/resistance calculation based on SMAs
+            if (marketData.getSma20() != null && marketData.getSma50() != null) {
+                double support = Math.min(marketData.getSma20(), marketData.getSma50());
+                double resistance = Math.max(marketData.getSma20(), marketData.getSma50());
+
+                // Adjust based on current price position
+                if (currentPrice < support) {
+                    resistance = support;
+                    support = currentPrice * 0.95; // 5% below current
+                } else if (currentPrice > resistance) {
+                    support = resistance;
+                    resistance = currentPrice * 1.05; // 5% above current
+                }
+
+                levels.put("support", support);
+                levels.put("resistance", resistance);
+            } else {
+                // Fallback calculation
+                levels.put("support", currentPrice * 0.95);
+                levels.put("resistance", currentPrice * 1.05);
+            }
+        } catch (Exception e) {
+            levels.put("support", 0.0);
+            levels.put("resistance", 0.0);
+        }
+
+        return levels;
+    }
+
+    private String assessRiskLevel(Holding holding, MarketData marketData) {
+        try {
+            // Risk assessment based on volatility, RSI, and position size
+            int riskScore = 0;
+
+            // RSI-based risk
+            if (marketData != null && marketData.getRsi() != null) {
+                if (marketData.getRsi() > 80) riskScore += 2; // Overbought
+                else if (marketData.getRsi() > 70) riskScore += 1;
+                else if (marketData.getRsi() < 20) riskScore += 2; // Oversold
+                else if (marketData.getRsi() < 30) riskScore += 1;
+            }
+
+            // 24h change based risk
+            if (marketData != null) {
+                double change = Math.abs(marketData.getPriceChangePercentage24h());
+                if (change > 20) riskScore += 3;
+                else if (change > 10) riskScore += 2;
+                else if (change > 5) riskScore += 1;
+            }
+
+            // Position value risk (higher value = higher risk)
+            double positionValue = holding.getInitialValue();
+            if (positionValue > 50000) riskScore += 2;
+            else if (positionValue > 20000) riskScore += 1;
+
+            if (riskScore >= 5) return "HIGH";
+            else if (riskScore >= 3) return "MEDIUM";
+            else return "LOW";
+
+        } catch (Exception e) {
+            return "UNKNOWN";
+        }
+    }
+
+    private String getActionRecommendation(Holding holding, MarketData marketData, double profitLossPercentage) {
+        try {
+            // Simple recommendation logic
+            if (profitLossPercentage > 50) {
+                return "TAKE_PARTIAL_PROFIT";
+            } else if (profitLossPercentage > 20) {
+                return "HOLD_STRONG";
+            } else if (profitLossPercentage < -20) {
+                return "CONSIDER_AVERAGING_DOWN";
+            } else if (marketData != null && marketData.getRsi() != null) {
+                if (marketData.getRsi() > 80) {
+                    return "WAIT_FOR_DIP";
+                } else if (marketData.getRsi() < 30) {
+                    return "CONSIDER_BUYING";
+                }
+            }
+            return "HOLD";
+        } catch (Exception e) {
+            return "REVIEW";
+        }
+    }
+    private double getTotalPortfolioValue(List<Holding> holdings) {
+        return holdings.stream()
+                .mapToDouble(Holding::getInitialValue)
+                .sum();
+    }
 }

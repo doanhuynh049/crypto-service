@@ -9,6 +9,7 @@ public class MarketData {
     private double priceChange24h;
     private double priceChangePercentage24h;
     private double volume24h;
+    private double marketCap;  // Added missing field
     private List<Double> prices;  // For technical indicators
     private LocalDateTime timestamp;
 
@@ -67,6 +68,15 @@ public class MarketData {
 
     public void setVolume24h(double volume24h) {
         this.volume24h = volume24h;
+    }
+
+    // Added missing marketCap getter and setter
+    public double getMarketCap() {
+        return marketCap;
+    }
+
+    public void setMarketCap(double marketCap) {
+        this.marketCap = marketCap;
     }
 
     public List<Double> getPrices() {

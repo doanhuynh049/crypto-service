@@ -63,6 +63,16 @@ public class SchedulerService {
     }
 
     public void buildAndSendOverviewAdvisory(List<Holding> holdings) throws InterruptedException {
+        // Generate and send portfolio table
+        try {
+            Map<String, Object> portfolioTableData = advisoryEngineService.generatePortfolioTable(holdings);
+            emailService.sendPortfolioTable(holdings, portfolioTableData);
+        } catch (Exception e) {
+            System.err.println("Portfolio Table generation failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
+
         try {
             Map<String, Object> riskAdvisories = advisoryEngineService.generateRiskOpportunityAnalysis(holdings);
             emailService.sendRiskOpportunityAnalysis(holdings, riskAdvisories);

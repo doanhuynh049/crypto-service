@@ -58,7 +58,7 @@ public class DataProviderService {
             if (coinData.has("usd_24h_vol")) {
                 marketData.setVolume24h(coinData.get("usd_24h_vol").asDouble());
             }
-            Thread.sleep(1000); // To respect API rate limits
+            Thread.sleep(30000); // To respect API rate limits
             // Get historical data for technical indicators
             String historyUrl = String.format("https://api.coingecko.com/api/v3/coins/%s/market_chart?vs_currency=usd&days=200&interval=daily", 
                 coinGeckoId);
@@ -75,6 +75,7 @@ public class DataProviderService {
             for (JsonNode pricePoint : pricesArray) {
                 historicalPrices.add(pricePoint.get(1).asDouble());
             }
+            Thread.sleep(30000); // To respect API rate limits
 
             marketData.setPrices(historicalPrices);
 
