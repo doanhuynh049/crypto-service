@@ -519,8 +519,9 @@
                 <div class="strategy-header">
                     <h3 th:text="${strategy.symbol}"></h3>
                     <span class="action-badge"
-                          th:classappend="'action-' + ${#strings.toLowerCase(#strings.replace(strategy.action ?: 'hold', '_', '_'))}"
-                          th:text="${strategy.action ?: 'HOLD'}">
+                          th:with="act=${strategy.action != null ? strategy.action : 'HOLD'}"
+                          th:classappend="' action-' + ${#strings.toLowerCase(act)}"
+                          th:text="${act}">
                     </span>
                 </div>
 
@@ -560,16 +561,25 @@
                             </div>
                         </div>
 
-                        <div th:if="${strategy.exit.stop}" class="stop-loss-info">
+                        <div th:if="${strategy.exit.stop}" class="stop-loss-info"
+                             th:with="stop=${strategy.exit.stop},
+                                      stopType=${stop instanceof T(java.util.Map) ? stop['type'] : (stop != null ? stop.type : null)},
+                                      stopValue=${stop instanceof T(java.util.Map) ? stop['value'] : (stop != null ? stop.value : null)}
+                                     ">
                             <strong>Stop Loss:</strong>
-                            <span th:text="${strategy.exit.stop.type}"></span> at
-                            <span th:text="${strategy.exit.stop.value}"></span>
+                            <span th:text="${stopType != null ? stopType : 'N/A'}">N/A</span> at
+                            <span th:text="${stopValue != null ? stopValue : 'N/A'}">N/A</span>
                         </div>
 
-                        <div th:if="${strategy.exit.trailing}" style="margin-top: 10px;">
+                        <div th:if="${strategy.exit.trailing}" style="margin-top: 10px;"
+                             th:with="
+                                   trailing=${strategy.exit.trailing},
+                                   trailingType=${trailing instanceof T(java.util.Map) ? trailing['type'] : (trailing != null ? trailing.type : null)},
+                                   trailingValue=${trailing instanceof T(java.util.Map) ? trailing['value'] : (trailing != null ? trailing.value : null)}
+                                 ">
                             <strong>Trailing Stop:</strong>
-                            <span th:text="${strategy.exit.trailing.type}"></span> -
-                            <span th:text="${strategy.exit.trailing.value}"></span>
+                            <span th:text="${trailingType != null ? trailingType : 'N/A'}">N/A</span> -
+                            <span th:text="${trailingValue != null ? trailingValue : 'N/A'}">N/A</span>
                         </div>
 
                         <div th:if="${strategy.exit.invalidations}">
