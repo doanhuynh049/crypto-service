@@ -10,7 +10,7 @@ public class Holding {
     @JsonProperty("avgBuyPrice")
     private double averagePrice;
     private double expectedEntry;
-    private double expectedPrice;
+    private double expectedDeepEntry;
     @JsonProperty("targetPrice3Month")
     private double targetPrice3Month;
     @JsonProperty("targetPriceLongTerm")
@@ -20,14 +20,14 @@ public class Holding {
     public Holding() {}
 
     public Holding(String id, String symbol, String name, double holdings, double averagePrice, 
-                   double expectedEntry, double expectedPrice, double targetPrice3Month, double targetPriceLongTerm) {
+                   double expectedEntry, double expectedDeepEntry, double targetPrice3Month, double targetPriceLongTerm) {
         this.id = id;
         this.symbol = symbol;
         this.name = name;
         this.holdings = holdings;
         this.averagePrice = averagePrice;
         this.expectedEntry = expectedEntry;
-        this.expectedPrice = expectedPrice;
+        this.expectedDeepEntry = expectedDeepEntry;
         this.targetPrice3Month = targetPrice3Month;
         this.targetPriceLongTerm = targetPriceLongTerm;
     }
@@ -92,12 +92,12 @@ public class Holding {
         this.expectedEntry = expectedEntry;
     }
 
-    public double getExpectedPrice() {
-        return expectedPrice;
+    public double getExpectedDeepEntry() {
+        return expectedDeepEntry;
     }
 
-    public void setExpectedPrice(double expectedPrice) {
-        this.expectedPrice = expectedPrice;
+    public void setDeepEntry(double expectedDeepEntry) {
+        this.expectedDeepEntry = expectedDeepEntry;
     }
 
     public double getTargetPrice3Month() {
@@ -171,7 +171,7 @@ public class Holding {
                 ", holdings=" + holdings +
                 ", averagePrice=" + averagePrice +
                 ", expectedEntry=" + expectedEntry +
-                ", expectedPrice=" + expectedPrice +
+                ", expectedDeepEntry=" + expectedDeepEntry +
                 ", targetPrice3Month=" + targetPrice3Month +
                 ", targetPriceLongTerm=" + targetPriceLongTerm +
                 '}';

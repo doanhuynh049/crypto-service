@@ -31,7 +31,7 @@ The application now uses an enhanced portfolio structure with detailed crypto in
         "averagePrice": 45000.0,
         "initialValue": 11250.0,
         "expectedEntry": 43000.0,
-        "expectedPrice": 75000.0,
+        "expectedDeepEntry": 75000.0,
         "targetPrice3Month": 65000.0,
         "targetPriceLongTerm": 100000.0
       }
@@ -104,7 +104,7 @@ Update `src/main/resources/holdings.json` with your crypto positions using the n
         "averagePrice": 45000.0,
         "initialValue": 11250.0,
         "expectedEntry": 43000.0,
-        "expectedPrice": 75000.0,
+        "expectedDeepEntry": 75000.0,
         "targetPrice3Month": 65000.0,
         "targetPriceLongTerm": 100000.0
       },
@@ -116,7 +116,7 @@ Update `src/main/resources/holdings.json` with your crypto positions using the n
         "averagePrice": 3100.0,
         "initialValue": 15500.0,
         "expectedEntry": 2900.0,
-        "expectedPrice": 4200.0,
+        "expectedDeepEntry": 4200.0,
         "targetPrice3Month": 3800.0,
         "targetPriceLongTerm": 6000.0
       }
