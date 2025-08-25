@@ -1,6 +1,6 @@
 {
   "portfolio": {
-    "lastBackup": "Sun Aug 17 10:31:44 ICT 2025",
+    "lastBackup": "Mon Aug 25 10:31:44 ICT 2025",
     "cryptos": [
       {
         "id": "ethereum",
@@ -21,8 +21,8 @@
         "avgBuyPrice": 115667.15,
         "expectedEntry": 107000.0,
         "expectedPrice": 70000.0,
-        "targetPrice3Month": 140000.0,
-        "targetPriceLongTerm": 250000.0
+        "targetPrice3Month": 130000.0,
+        "targetPriceLongTerm": 200000.0
       },
       {
         "id": "solana",
@@ -39,7 +39,7 @@
         "id": "binancecoin",
         "symbol": "BNB",
         "name": "Binance Coin",
-        "holdings": 0.02094746,
+        "holdings": 0.02681911,
         "avgBuyPrice": 783.04,
         "expectedEntry": 800.0,
         "expectedPrice": 400.0,
@@ -50,12 +50,12 @@
         "id": "tether",
         "symbol": "USDT",
         "name": "Tether",
-        "holdings": 16.383,
+        "holdings": 71.0105111,
         "avgBuyPrice": 1.0,
-        "expectedEntry": null,
-        "expectedPrice": null,
-        "targetPrice3Month": null,
-        "targetPriceLongTerm": null
+        "expectedEntry": 1.0,
+        "expectedPrice": 1.0,
+        "targetPrice3Month": 1.0,
+        "targetPriceLongTerm": 1.0
       },
       {
         "id": "chainlink",
@@ -86,7 +86,7 @@
         "holdings": 17.3007,
         "avgBuyPrice": 0.5933,
         "expectedEntry": 0.75,
-        "expectedPrice": 0.0,
+        "expectedPrice": 0.6,
         "targetPrice3Month": 1.0,
         "targetPriceLongTerm": 1.5
       },
@@ -188,6 +188,28 @@
         "expectedPrice": 0.2097,
         "targetPrice3Month": 0.216,
         "targetPriceLongTerm": 0.487
+      },
+      {
+        "id": "polkadot",
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "holdings": 1.33,
+        "avgBuyPrice": 3.90,
+        "expectedEntry": 4.20,
+        "expectedPrice": 3.80,
+        "targetPrice3Month": 5.0,
+        "targetPriceLongTerm": 7.0
+      },
+      {
+        "id": "ondo-finance",
+        "symbol": "ONDO",
+        "name": "Ondo Finance",
+        "holdings": 5.4,
+        "avgBuyPrice": 0.9505,
+        "expectedEntry": 0.95,
+        "expectedPrice": 0.75,
+        "targetPrice3Month": 1.15,
+        "targetPriceLongTerm": 2.0
       }
     ]
   }
