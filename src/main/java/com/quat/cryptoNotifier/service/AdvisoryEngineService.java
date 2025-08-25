@@ -138,6 +138,23 @@ public class AdvisoryEngineService {
         return parsedAnalysis;
     }
 
+    public Map<String, Object> generateUSDTAllocationStrategy(List<Holding> holdings) {
+        double usdtAmount = holdings.stream()
+                .filter(h -> h.getSymbol().equalsIgnoreCase("USDT"))
+                .findFirst()
+                .map(Holding::getHoldings)
+                .orElse(0.0);
+
+        String prompt = buildUSDTAllocationPrompt(holdings, usdtAmount);
+        System.out.println("USDT Allocation Strategy Analysis Prompt: " + prompt);
+        String aiResponse = callGeminiAPI(prompt);
+        System.out.println("USDT Allocation Strategy AI Response: " + aiResponse);
+
+        // Parse the AI response and return structured data
+        Map<String, Object> parsedAnalysis = parseUSDTAllocationResponse(aiResponse);
+        return parsedAnalysis;
+    }
+
     //=============================================================================================
     private String buildRiskOpportunityPrompt(List<Holding> holdings) {
         StringBuilder prompt = new StringBuilder();
@@ -637,7 +654,7 @@ public class AdvisoryEngineService {
             requestBody.put("contents", new Object[]{content});
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
+
             String response = restTemplate.exchange(
                 appConfig.getLlmProvider(),
                 HttpMethod.POST,
@@ -657,7 +674,7 @@ public class AdvisoryEngineService {
                     }
                 }
             }
-            
+
             return "{}"; // Return empty JSON if parsing fails
 
         } catch (Exception e) {
@@ -672,13 +689,13 @@ public class AdvisoryEngineService {
             String jsonResponse = response;
             int jsonStart = response.indexOf("{");
             int jsonEnd = response.lastIndexOf("}");
-            
+
             if (jsonStart >= 0 && jsonEnd > jsonStart) {
                 jsonResponse = response.substring(jsonStart, jsonEnd + 1);
             }
 
             JsonNode responseNode = objectMapper.readTree(jsonResponse);
-            
+
             if (responseNode.has("action")) {
                 advisory.setAction(responseNode.get("action").asText());
             }
@@ -704,27 +721,27 @@ public class AdvisoryEngineService {
 
     private Map<String, Object> parseRiskOpportunityResponse(String response) {
         Map<String, Object> parsedData = new HashMap<>();
-        
+
         try {
             // Remove markdown code blocks if present
             String cleanResponse = response.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
-            
+
             // Extract JSON from response (in case there's extra text)
             String jsonResponse = cleanResponse;
             int jsonStart = cleanResponse.indexOf("{");
             int jsonEnd = cleanResponse.lastIndexOf("}");
-            
+
             if (jsonStart >= 0 && jsonEnd > jsonStart) {
                 jsonResponse = cleanResponse.substring(jsonStart, jsonEnd + 1);
             }
 
             JsonNode responseNode = objectMapper.readTree(jsonResponse);
-            
+
             // Parse individual analysis
             if (responseNode.has("individual_analysis")) {
                 List<Map<String, String>> individualAnalysis = new ArrayList<>();
                 JsonNode individualArray = responseNode.get("individual_analysis");
-                
+
                 for (JsonNode analysis : individualArray) {
                     Map<String, String> coin = new HashMap<>();
                     coin.put("symbol", analysis.has("symbol") ? analysis.get("symbol").asText() : "");
@@ -738,12 +755,12 @@ public class AdvisoryEngineService {
                 }
                 parsedData.put("individual_analysis", individualAnalysis);
             }
-            
+
             // Parse portfolio analysis
             if (responseNode.has("portfolio_analysis")) {
                 JsonNode portfolioNode = responseNode.get("portfolio_analysis");
                 Map<String, Object> portfolioAnalysis = new HashMap<>();
-                
+
                 // Parse sector diversification
                 if (portfolioNode.has("sector_diversification")) {
                     JsonNode sectorNode = portfolioNode.get("sector_diversification");
@@ -755,16 +772,16 @@ public class AdvisoryEngineService {
                     sectorDiv.put("other_sectors", sectorNode.has("other_sectors") ? sectorNode.get("other_sectors").asText() : "");
                     portfolioAnalysis.put("sector_diversification", sectorDiv);
                 }
-                
+
                 portfolioAnalysis.put("correlation_risks", portfolioNode.has("correlation_risks") ? portfolioNode.get("correlation_risks").asText() : "");
                 portfolioAnalysis.put("overexposure_concerns", portfolioNode.has("overexposure_concerns") ? portfolioNode.get("overexposure_concerns").asText() : "");
                 portfolioAnalysis.put("diversification_score", portfolioNode.has("diversification_score") ? portfolioNode.get("diversification_score").asText() : "FAIR");
-                
+
                 // Parse recommended adjustments
                 if (portfolioNode.has("recommended_adjustments")) {
                     List<Map<String, String>> adjustments = new ArrayList<>();
                     JsonNode adjustmentsArray = portfolioNode.get("recommended_adjustments");
-                    
+
                     for (JsonNode adjustment : adjustmentsArray) {
                         Map<String, String> adj = new HashMap<>();
                         adj.put("action", adjustment.has("action") ? adjustment.get("action").asText() : "");
@@ -774,9 +791,9 @@ public class AdvisoryEngineService {
                     }
                     portfolioAnalysis.put("recommended_adjustments", adjustments);
                 }
-                
+
                 portfolioAnalysis.put("risk_reward_balance", portfolioNode.has("risk_reward_balance") ? portfolioNode.get("risk_reward_balance").asText() : "");
-                
+
                 // Parse missing sectors
                 if (portfolioNode.has("missing_sectors")) {
                     List<String> missingSectors = new ArrayList<>();
@@ -786,60 +803,60 @@ public class AdvisoryEngineService {
                     }
                     portfolioAnalysis.put("missing_sectors", missingSectors);
                 }
-                
+
                 parsedData.put("portfolio_analysis", portfolioAnalysis);
             }
-            
+
             // Parse top-level fields
             parsedData.put("overall_recommendation", responseNode.has("overall_recommendation") ? responseNode.get("overall_recommendation").asText() : "BALANCED_GROWTH");
             parsedData.put("summary", responseNode.has("summary") ? responseNode.get("summary").asText() : "Risk and opportunity analysis completed");
-            
+
         } catch (Exception e) {
             System.err.println("Error parsing risk opportunity analysis response: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Set default values if parsing fails
             parsedData.put("overall_recommendation", "BALANCED_GROWTH");
             parsedData.put("summary", "Unable to parse risk analysis due to API response parsing error");
             parsedData.put("individual_analysis", new ArrayList<>());
             parsedData.put("portfolio_analysis", new HashMap<>());
         }
-        
+
         return parsedData;
     }
 
     private Map<String, Object> parsePortfolioHealthCheckResponse(String response) {
         Map<String, Object> parsedData = new HashMap<>();
-        
+
         try {
             // Remove markdown code blocks if present
             String cleanResponse = response.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
-            
+
             // Extract JSON from response (in case there's extra text)
             String jsonResponse = cleanResponse;
             int jsonStart = cleanResponse.indexOf("{");
             int jsonEnd = cleanResponse.lastIndexOf("}");
-            
+
             if (jsonStart >= 0 && jsonEnd > jsonStart) {
                 jsonResponse = cleanResponse.substring(jsonStart, jsonEnd + 1);
             }
 
             JsonNode responseNode = objectMapper.readTree(jsonResponse);
-            
+
             // Parse top-level fields
             parsedData.put("overall_health_score", responseNode.has("overall_health_score") ? responseNode.get("overall_health_score").asText() : "FAIR");
             parsedData.put("health_summary", responseNode.has("health_summary") ? responseNode.get("health_summary").asText() : "Portfolio health check completed");
-            
+
             // Parse weight analysis
             if (responseNode.has("weight_analysis")) {
                 JsonNode weightNode = responseNode.get("weight_analysis");
                 Map<String, Object> weightAnalysis = new HashMap<>();
-                
+
                 // Parse overweighted coins
                 if (weightNode.has("overweighted_coins")) {
                     List<Map<String, String>> overweighted = new ArrayList<>();
                     JsonNode overweightedArray = weightNode.get("overweighted_coins");
-                    
+
                     for (JsonNode coin : overweightedArray) {
                         Map<String, String> coinData = new HashMap<>();
                         coinData.put("symbol", coin.has("symbol") ? coin.get("symbol").asText() : "");
@@ -851,12 +868,12 @@ public class AdvisoryEngineService {
                     }
                     weightAnalysis.put("overweighted_coins", overweighted);
                 }
-                
+
                 // Parse underweighted coins
                 if (weightNode.has("underweighted_coins")) {
                     List<Map<String, String>> underweighted = new ArrayList<>();
                     JsonNode underweightedArray = weightNode.get("underweighted_coins");
-                    
+
                     for (JsonNode coin : underweightedArray) {
                         Map<String, String> coinData = new HashMap<>();
                         coinData.put("symbol", coin.has("symbol") ? coin.get("symbol").asText() : "");
@@ -868,21 +885,21 @@ public class AdvisoryEngineService {
                     }
                     weightAnalysis.put("underweighted_coins", underweighted);
                 }
-                
+
                 weightAnalysis.put("optimal_weights", weightNode.has("optimal_weights") ? weightNode.get("optimal_weights").asText() : "");
                 parsedData.put("weight_analysis", weightAnalysis);
             }
-            
+
             // Parse target price analysis
             if (responseNode.has("target_price_analysis")) {
                 JsonNode targetNode = responseNode.get("target_price_analysis");
                 Map<String, Object> targetAnalysis = new HashMap<>();
-                
+
                 // Parse unrealistic targets
                 if (targetNode.has("unrealistic_targets")) {
                     List<Map<String, String>> unrealistic = new ArrayList<>();
                     JsonNode unrealisticArray = targetNode.get("unrealistic_targets");
-                    
+
                     for (JsonNode target : unrealisticArray) {
                         Map<String, String> targetData = new HashMap<>();
                         targetData.put("symbol", target.has("symbol") ? target.get("symbol").asText() : "");
@@ -895,12 +912,12 @@ public class AdvisoryEngineService {
                     }
                     targetAnalysis.put("unrealistic_targets", unrealistic);
                 }
-                
+
                 // Parse conservative targets
                 if (targetNode.has("conservative_targets")) {
                     List<Map<String, String>> conservative = new ArrayList<>();
                     JsonNode conservativeArray = targetNode.get("conservative_targets");
-                    
+
                     for (JsonNode target : conservativeArray) {
                         Map<String, String> targetData = new HashMap<>();
                         targetData.put("symbol", target.has("symbol") ? target.get("symbol").asText() : "");
@@ -911,20 +928,20 @@ public class AdvisoryEngineService {
                     }
                     targetAnalysis.put("conservative_targets", conservative);
                 }
-                
+
                 parsedData.put("target_price_analysis", targetAnalysis);
             }
-            
+
             // Parse profit taking strategy
             if (responseNode.has("profit_taking_strategy")) {
                 JsonNode profitNode = responseNode.get("profit_taking_strategy");
                 Map<String, Object> profitStrategy = new HashMap<>();
-                
+
                 // Parse immediate candidates
                 if (profitNode.has("immediate_candidates")) {
                     List<Map<String, String>> immediate = new ArrayList<>();
                     JsonNode immediateArray = profitNode.get("immediate_candidates");
-                    
+
                     for (JsonNode candidate : immediateArray) {
                         Map<String, String> candidateData = new HashMap<>();
                         candidateData.put("symbol", candidate.has("symbol") ? candidate.get("symbol").asText() : "");
@@ -935,12 +952,12 @@ public class AdvisoryEngineService {
                     }
                     profitStrategy.put("immediate_candidates", immediate);
                 }
-                
+
                 // Parse future candidates
                 if (profitNode.has("future_candidates")) {
                     List<Map<String, String>> future = new ArrayList<>();
                     JsonNode futureArray = profitNode.get("future_candidates");
-                    
+
                     for (JsonNode candidate : futureArray) {
                         Map<String, String> candidateData = new HashMap<>();
                         candidateData.put("symbol", candidate.has("symbol") ? candidate.get("symbol").asText() : "");
@@ -951,21 +968,21 @@ public class AdvisoryEngineService {
                     }
                     profitStrategy.put("future_candidates", future);
                 }
-                
+
                 profitStrategy.put("overall_strategy", profitNode.has("overall_strategy") ? profitNode.get("overall_strategy").asText() : "");
                 parsedData.put("profit_taking_strategy", profitStrategy);
             }
-            
+
             // Parse stablecoin recommendation
             if (responseNode.has("stablecoin_recommendation")) {
                 JsonNode stablecoinNode = responseNode.get("stablecoin_recommendation");
                 Map<String, Object> stablecoinRec = new HashMap<>();
-                
+
                 stablecoinRec.put("recommended_percentage", stablecoinNode.has("recommended_percentage") ? stablecoinNode.get("recommended_percentage").asText() : "10%");
                 stablecoinRec.put("reasoning", stablecoinNode.has("reasoning") ? stablecoinNode.get("reasoning").asText() : "");
                 stablecoinRec.put("deployment_strategy", stablecoinNode.has("deployment_strategy") ? stablecoinNode.get("deployment_strategy").asText() : "");
                 stablecoinRec.put("yield_opportunities", stablecoinNode.has("yield_opportunities") ? stablecoinNode.get("yield_opportunities").asText() : "");
-                
+
                 // Parse suggested stablecoins
                 if (stablecoinNode.has("suggested_stablecoins")) {
                     List<String> suggestedStablecoins = new ArrayList<>();
@@ -975,15 +992,15 @@ public class AdvisoryEngineService {
                     }
                     stablecoinRec.put("suggested_stablecoins", suggestedStablecoins);
                 }
-                
+
                 parsedData.put("stablecoin_recommendation", stablecoinRec);
             }
-            
+
             // Parse action priorities
             if (responseNode.has("action_priorities")) {
                 List<Map<String, String>> priorities = new ArrayList<>();
                 JsonNode prioritiesArray = responseNode.get("action_priorities");
-                
+
                 for (JsonNode priority : prioritiesArray) {
                     Map<String, String> priorityData = new HashMap<>();
                     priorityData.put("priority", priority.has("priority") ? priority.get("priority").asText() : "MEDIUM");
@@ -994,7 +1011,7 @@ public class AdvisoryEngineService {
                 }
                 parsedData.put("action_priorities", priorities);
             }
-            
+
             // Parse risk warnings
             if (responseNode.has("risk_warnings")) {
                 List<String> riskWarnings = new ArrayList<>();
@@ -1004,11 +1021,11 @@ public class AdvisoryEngineService {
                 }
                 parsedData.put("risk_warnings", riskWarnings);
             }
-            
+
         } catch (Exception e) {
             System.err.println("Error parsing portfolio health check response: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Set default values if parsing fails
             parsedData.put("overall_health_score", "FAIR");
             parsedData.put("health_summary", "Unable to parse health check due to API response parsing error");
@@ -1019,42 +1036,42 @@ public class AdvisoryEngineService {
             parsedData.put("action_priorities", new ArrayList<>());
             parsedData.put("risk_warnings", new ArrayList<>());
         }
-        
+
         return parsedData;
     }
 
     private Map<String, Object> parseOpportunityFinderResponse(String response) {
         Map<String, Object> parsedData = new HashMap<>();
-        
+
         try {
             // Remove markdown code blocks if present
             String cleanResponse = response.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
-            
+
             // Extract JSON from response (in case there's extra text)
             String jsonResponse = cleanResponse;
             int jsonStart = cleanResponse.indexOf("{");
             int jsonEnd = cleanResponse.lastIndexOf("}");
-            
+
             if (jsonStart >= 0 && jsonEnd > jsonStart) {
                 jsonResponse = cleanResponse.substring(jsonStart, jsonEnd + 1);
             }
 
             JsonNode responseNode = objectMapper.readTree(jsonResponse);
-            
+
             // Parse top-level fields
             parsedData.put("portfolio_grade", responseNode.has("portfolio_grade") ? responseNode.get("portfolio_grade").asText() : "C");
             parsedData.put("opportunity_summary", responseNode.has("opportunity_summary") ? responseNode.get("opportunity_summary").asText() : "Opportunity analysis completed");
-            
+
             // Parse fundamental strength analysis
             if (responseNode.has("fundamental_strength_analysis")) {
                 JsonNode strengthNode = responseNode.get("fundamental_strength_analysis");
                 Map<String, Object> strengthAnalysis = new HashMap<>();
-                
+
                 // Parse strongest coins
                 if (strengthNode.has("strongest_coins")) {
                     List<Map<String, String>> strongest = new ArrayList<>();
                     JsonNode strongestArray = strengthNode.get("strongest_coins");
-                    
+
                     for (JsonNode coin : strongestArray) {
                         Map<String, String> coinData = new HashMap<>();
                         coinData.put("symbol", coin.has("symbol") ? coin.get("symbol").asText() : "");
@@ -1067,12 +1084,12 @@ public class AdvisoryEngineService {
                     }
                     strengthAnalysis.put("strongest_coins", strongest);
                 }
-                
+
                 // Parse moderate coins
                 if (strengthNode.has("moderate_coins")) {
                     List<Map<String, String>> moderate = new ArrayList<>();
                     JsonNode moderateArray = strengthNode.get("moderate_coins");
-                    
+
                     for (JsonNode coin : moderateArray) {
                         Map<String, String> coinData = new HashMap<>();
                         coinData.put("symbol", coin.has("symbol") ? coin.get("symbol").asText() : "");
@@ -1085,20 +1102,20 @@ public class AdvisoryEngineService {
                     }
                     strengthAnalysis.put("moderate_coins", moderate);
                 }
-                
+
                 parsedData.put("fundamental_strength_analysis", strengthAnalysis);
             }
-            
+
             // Parse risk assessment
             if (responseNode.has("risk_assessment")) {
                 JsonNode riskNode = responseNode.get("risk_assessment");
                 Map<String, Object> riskAssessment = new HashMap<>();
-                
+
                 // Parse speculative coins
                 if (riskNode.has("speculative_coins")) {
                     List<Map<String, String>> speculative = new ArrayList<>();
                     JsonNode speculativeArray = riskNode.get("speculative_coins");
-                    
+
                     for (JsonNode coin : speculativeArray) {
                         Map<String, String> coinData = new HashMap<>();
                         coinData.put("symbol", coin.has("symbol") ? coin.get("symbol").asText() : "");
@@ -1112,29 +1129,29 @@ public class AdvisoryEngineService {
                     }
                     riskAssessment.put("speculative_coins", speculative);
                 }
-                
+
                 riskAssessment.put("portfolio_risks", riskNode.has("portfolio_risks") ? riskNode.get("portfolio_risks").asText() : "");
                 riskAssessment.put("concentration_concerns", riskNode.has("concentration_concerns") ? riskNode.get("concentration_concerns").asText() : "");
                 parsedData.put("risk_assessment", riskAssessment);
             }
-            
+
             // Parse diversification opportunities
             if (responseNode.has("diversification_opportunities")) {
                 JsonNode diversificationNode = responseNode.get("diversification_opportunities");
                 Map<String, Object> diversification = new HashMap<>();
-                
+
                 // Parse missing sectors
                 if (diversificationNode.has("missing_sectors")) {
                     List<Map<String, Object>> missingSectors = new ArrayList<>();
                     JsonNode missingSectorsArray = diversificationNode.get("missing_sectors");
-                    
+
                     for (JsonNode sector : missingSectorsArray) {
                         Map<String, Object> sectorData = new HashMap<>();
                         sectorData.put("sector", sector.has("sector") ? sector.get("sector").asText() : "");
                         sectorData.put("rationale", sector.has("rationale") ? sector.get("rationale").asText() : "");
                         sectorData.put("allocation_suggestion", sector.has("allocation_suggestion") ? sector.get("allocation_suggestion").asText() : "5%");
                         sectorData.put("priority", sector.has("priority") ? sector.get("priority").asText() : "MEDIUM");
-                        
+
                         // Parse suggested assets
                         if (sector.has("suggested_assets")) {
                             List<String> suggestedAssets = new ArrayList<>();
@@ -1144,24 +1161,24 @@ public class AdvisoryEngineService {
                             }
                             sectorData.put("suggested_assets", suggestedAssets);
                         }
-                        
+
                         missingSectors.add(sectorData);
                     }
                     diversification.put("missing_sectors", missingSectors);
                 }
-                
+
                 // Parse underrepresented areas
                 if (diversificationNode.has("underrepresented_areas")) {
                     List<Map<String, Object>> underrepresented = new ArrayList<>();
                     JsonNode underrepresentedArray = diversificationNode.get("underrepresented_areas");
-                    
+
                     for (JsonNode area : underrepresentedArray) {
                         Map<String, Object> areaData = new HashMap<>();
                         areaData.put("area", area.has("area") ? area.get("area").asText() : "");
                         areaData.put("current_allocation", area.has("current_allocation") ? area.get("current_allocation").asText() : "0%");
                         areaData.put("suggested_allocation", area.has("suggested_allocation") ? area.get("suggested_allocation").asText() : "5%");
                         areaData.put("benefits", area.has("benefits") ? area.get("benefits").asText() : "");
-                        
+
                         // Parse suggested assets
                         if (area.has("suggested_assets")) {
                             List<String> suggestedAssets = new ArrayList<>();
@@ -1171,26 +1188,26 @@ public class AdvisoryEngineService {
                             }
                             areaData.put("suggested_assets", suggestedAssets);
                         }
-                        
+
                         underrepresented.add(areaData);
                     }
                     diversification.put("underrepresented_areas", underrepresented);
                 }
-                
+
                 diversification.put("market_cap_gaps", diversificationNode.has("market_cap_gaps") ? diversificationNode.get("market_cap_gaps").asText() : "");
                 parsedData.put("diversification_opportunities", diversification);
             }
-            
+
             // Parse exit/reduce recommendations
             if (responseNode.has("exit_reduce_recommendations")) {
                 JsonNode exitNode = responseNode.get("exit_reduce_recommendations");
                 Map<String, Object> exitRecommendations = new HashMap<>();
-                
+
                 // Parse immediate exits
                 if (exitNode.has("immediate_exits")) {
                     List<Map<String, String>> immediateExits = new ArrayList<>();
                     JsonNode exitsArray = exitNode.get("immediate_exits");
-                    
+
                     for (JsonNode exit : exitsArray) {
                         Map<String, String> exitData = new HashMap<>();
                         exitData.put("symbol", exit.has("symbol") ? exit.get("symbol").asText() : "");
@@ -1202,12 +1219,12 @@ public class AdvisoryEngineService {
                     }
                     exitRecommendations.put("immediate_exits", immediateExits);
                 }
-                
+
                 // Parse position reductions
                 if (exitNode.has("position_reductions")) {
                     List<Map<String, String>> reductions = new ArrayList<>();
                     JsonNode reductionsArray = exitNode.get("position_reductions");
-                    
+
                     for (JsonNode reduction : reductionsArray) {
                         Map<String, String> reductionData = new HashMap<>();
                         reductionData.put("symbol", reduction.has("symbol") ? reduction.get("symbol").asText() : "");
@@ -1220,15 +1237,15 @@ public class AdvisoryEngineService {
                     }
                     exitRecommendations.put("position_reductions", reductions);
                 }
-                
+
                 parsedData.put("exit_reduce_recommendations", exitRecommendations);
             }
-            
+
             // Parse action plan
             if (responseNode.has("action_plan")) {
                 JsonNode actionNode = responseNode.get("action_plan");
                 Map<String, Object> actionPlan = new HashMap<>();
-                
+
                 // Parse immediate actions
                 if (actionNode.has("immediate_actions")) {
                     List<String> immediateActions = new ArrayList<>();
@@ -1238,7 +1255,7 @@ public class AdvisoryEngineService {
                     }
                     actionPlan.put("immediate_actions", immediateActions);
                 }
-                
+
                 // Parse medium term actions
                 if (actionNode.has("medium_term_actions")) {
                     List<String> mediumTermActions = new ArrayList<>();
@@ -1248,18 +1265,18 @@ public class AdvisoryEngineService {
                     }
                     actionPlan.put("medium_term_actions", mediumTermActions);
                 }
-                
+
                 actionPlan.put("long_term_strategy", actionNode.has("long_term_strategy") ? actionNode.get("long_term_strategy").asText() : "");
                 parsedData.put("action_plan", actionPlan);
             }
-            
+
             // Parse market timing considerations
             parsedData.put("market_timing_considerations", responseNode.has("market_timing_considerations") ? responseNode.get("market_timing_considerations").asText() : "");
-            
+
         } catch (Exception e) {
             System.err.println("Error parsing opportunity finder response: " + e.getMessage());
             e.printStackTrace();
-            
+
             // Set default values if parsing fails
             parsedData.put("portfolio_grade", "C");
             parsedData.put("opportunity_summary", "Unable to parse opportunity analysis due to API response parsing error");
@@ -1270,7 +1287,7 @@ public class AdvisoryEngineService {
             parsedData.put("action_plan", new HashMap<>());
             parsedData.put("market_timing_considerations", "Market analysis unavailable");
         }
-        
+
         return parsedData;
     }
 
@@ -2680,5 +2697,409 @@ public class AdvisoryEngineService {
         return holdings.stream()
                 .mapToDouble(Holding::getInitialValue)
                 .sum();
+    }
+    private String buildUSDTAllocationPrompt(List<Holding> holdings, double usdtAmount) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("USDT Allocation Strategy Analysis Prompt\n");
+        prompt.append("I currently hold USDT in my portfolio and need actionable suggestions for how to best use this capital.\n\n");
+
+        prompt.append(String.format("Available USDT for deployment: $%.2f\n\n", usdtAmount));
+
+        prompt.append("Current Portfolio Overview:\n");
+
+        // Calculate total portfolio value for context
+        double totalPortfolioValue = 0;
+        for (Holding holding : holdings) {
+            totalPortfolioValue += holding.getInitialValue();
+        }
+
+        // Add detailed portfolio information
+        for (Holding holding : holdings) {
+            double currentWeight = (holding.getInitialValue() / totalPortfolioValue) * 100;
+
+            prompt.append(String.format("--- %s (%s) ---\n", holding.getSymbol(), holding.getName()));
+            prompt.append(String.format("Holdings: %.6f %s\n", holding.getHoldings(), holding.getSymbol()));
+            prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
+            prompt.append(String.format("Initial Investment: $%.2f (%.1f%% of portfolio)\n", holding.getInitialValue(), currentWeight));
+            prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
+            prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
+            prompt.append("\n");
+        }
+
+        // Add market data context for key holdings where possible
+        prompt.append("--- Current Market Context ---\n");
+        try {
+            for (Holding holding : holdings) {
+                MarketData marketData = dataProviderService.getMarketData(holding.getId());
+                if (marketData != null) {
+                    double currentPrice = marketData.getCurrentPrice();
+                    double priceChange24h = marketData.getPriceChangePercentage24h();
+                    prompt.append(String.format("%s: $%.2f (%.2f%% 24h)\n", holding.getSymbol(), currentPrice, priceChange24h));
+                }
+            }
+        } catch (Exception e) {
+            prompt.append("Market data temporarily unavailable for analysis\n");
+        }
+        prompt.append("\n");
+
+        prompt.append("--- Investment Context & Preferences ---\n");
+        prompt.append("- Timeframe: 6 months to 3 years\n");
+        prompt.append("- Risk Tolerance: Moderate\n");
+        prompt.append("- Preferences: Projects with strong fundamentals, real-world utility, and sustainable long-term value\n");
+        prompt.append("- Exclusions: No meme coins or highly speculative low-cap tokens\n\n");
+
+        prompt.append("--- Analysis Requirements ---\n");
+        prompt.append("Please provide insights on:\n");
+        prompt.append("1. How much of my USDT should I keep as a safety buffer (stablecoin reserve for future dips) vs. how much should be deployed now?\n");
+        prompt.append("2. Which existing portfolio assets should I increase exposure to with part of my USDT?\n");
+        prompt.append("3. Which new sectors or coins (AI, DeFi, interoperability, RWA, staking, decentralized infra) are worth entering with a portion of my USDT?\n");
+        prompt.append("4. Give me specific allocation suggestions (e.g., 40% keep in USDT, 30% into ETH, 20% into RWA, 10% into AI infra)\n");
+        prompt.append("5. Highlight if now is a good time to deploy capital immediately or if I should keep more stablecoins and wait for better entry opportunities\n\n");
+        prompt.append("6. Ensure that the suggested USDT allocation is realistic, taking into account my current USDT holdings and the total value of my existing investments.\n\n");
+
+        prompt.append("--- Output Format ---\n");
+        prompt.append("Please structure your analysis in the following JSON format:\n");
+        prompt.append("{\n");
+        prompt.append("  \"deployment_recommendation\": \"DEPLOY_NOW|WAIT_FOR_DIP|GRADUAL_DEPLOYMENT|MIXED_APPROACH\",\n");
+        prompt.append("  \"market_timing_assessment\": \"Current market conditions and timing considerations\",\n");
+        prompt.append("  \"reserve_strategy\": {\n");
+        prompt.append("    \"recommended_reserve_percentage\": \"30-40%\",\n");
+        prompt.append("    \"reserve_amount\": \"$15,000\",\n");
+        prompt.append("    \"reasoning\": \"Why this reserve level is appropriate\",\n");
+        prompt.append("    \"deployment_triggers\": [\"Market conditions that would trigger reserve deployment\"]\n");
+        prompt.append("  },\n");
+        prompt.append("  \"existing_positions_enhancement\": [\n");
+        prompt.append("    {\n");
+        prompt.append("      \"symbol\": \"ETH\",\n");
+        prompt.append("      \"allocation_percentage\": \"25%\",\n");
+        prompt.append("      \"allocation_amount\": \"$10,000\",\n");
+        prompt.append("      \"current_weight_in_portfolio\": \"15%\",\n");
+        prompt.append("      \"target_weight_after_addition\": \"20%\",\n");
+        prompt.append("      \"rationale\": \"Why increasing this position makes sense\",\n");
+        prompt.append("      \"entry_strategy\": \"DCA over 4 weeks or lump sum on dips\",\n");
+        prompt.append("      \"target_entry_price\": \"$3,200-3,400 range\"\n");
+        prompt.append("    }\n");
+        prompt.append("  ],\n");
+        prompt.append("  \"new_opportunities\": [\n");
+        prompt.append("    {\n");
+        prompt.append("      \"sector\": \"Real World Assets (RWA)\",\n");
+        prompt.append("      \"allocation_percentage\": \"15%\",\n");
+        prompt.append("      \"allocation_amount\": \"$6,000\",\n");
+        prompt.append("      \"suggested_assets\": [\"ONDO\", \"RWA\", \"BUIDL\"],\n");
+        prompt.append("      \"primary_recommendation\": \"ONDO\",\n");
+        prompt.append("      \"rationale\": \"Why this sector/asset is attractive now\",\n");
+        prompt.append("      \"risk_level\": \"LOW|MEDIUM|HIGH\",\n");
+        prompt.append("      \"entry_strategy\": \"Specific entry approach\",\n");
+        prompt.append("      \"target_allocation_in_portfolio\": \"3-5%\"\n");
+        prompt.append("    }\n");
+        prompt.append("  ],\n");
+        prompt.append("  \"allocation_breakdown\": {\n");
+        prompt.append("    \"keep_as_usdt_reserve\": {\n");
+        prompt.append("      \"percentage\": \"35%\",\n");
+        prompt.append("      \"amount\": \"$14,000\",\n");
+        prompt.append("      \"purpose\": \"Safety buffer and opportunity fund\"\n");
+        prompt.append("    },\n");
+        prompt.append("    \"add_to_existing_positions\": {\n");
+        prompt.append("      \"percentage\": \"40%\",\n");
+        prompt.append("      \"amount\": \"$16,000\",\n");
+        prompt.append("      \"breakdown\": [\n");
+        prompt.append("        {\"symbol\": \"ETH\", \"percentage\": \"25%\", \"amount\": \"$10,000\"},\n");
+        prompt.append("        {\"symbol\": \"SOL\", \"percentage\": \"15%\", \"amount\": \"$6,000\"}\n");
+        prompt.append("      ]\n");
+        prompt.append("    },\n");
+        prompt.append("    \"new_positions\": {\n");
+        prompt.append("      \"percentage\": \"25%\",\n");
+        prompt.append("      \"amount\": \"$10,000\",\n");
+        prompt.append("      \"breakdown\": [\n");
+        prompt.append("        {\"sector\": \"AI Infrastructure\", \"percentage\": \"10%\", \"amount\": \"$4,000\"},\n");
+        prompt.append("        {\"sector\": \"RWA\", \"percentage\": \"15%\", \"amount\": \"$6,000\"}\n");
+        prompt.append("      ]\n");
+        prompt.append("    }\n");
+        prompt.append("  },\n");
+        prompt.append("  \"execution_timeline\": {\n");
+        prompt.append("    \"immediate_actions\": [\"Actions to take within 1-2 weeks\"],\n");
+        prompt.append("    \"short_term_actions\": [\"Actions for next 1-3 months\"],\n");
+        prompt.append("    \"contingency_plans\": [\"What to do if market conditions change\"]\n");
+        prompt.append("  },\n");
+        prompt.append("  \"risk_considerations\": {\n");
+        prompt.append("    \"main_risks\": [\"Key risks to monitor\"],\n");
+        prompt.append("    \"risk_mitigation_strategies\": [\"How to manage identified risks\"],\n");
+        prompt.append("    \"portfolio_impact\": \"How these changes will affect overall portfolio risk/return profile\"\n");
+        prompt.append("  },\n");
+        prompt.append("  \"key_recommendations\": [\n");
+        prompt.append("    \"Top 3-5 actionable recommendations with specific dollar amounts and timelines\"\n");
+        prompt.append("  ]\n");
+        prompt.append("}\n\n");
+
+        prompt.append("Ensure your recommendations are:\n");
+        prompt.append("- Specific with exact dollar amounts and percentages\n");
+        prompt.append("- Tailored to current market conditions\n");
+        prompt.append("- Aligned with moderate risk tolerance and 6 months to 3 years timeframe\n");
+        prompt.append("- Focused on projects with strong fundamentals and real-world utility\n");
+        prompt.append("- Considerate of portfolio diversification and risk management\n");
+        prompt.append("- Actionable with clear next steps and timing\n");
+
+        return prompt.toString();
+    }
+
+    private Map<String, Object> parseUSDTAllocationResponse(String response) {
+        Map<String, Object> parsedData = new HashMap<>();
+
+        try {
+            // Remove markdown code blocks if present
+            String cleanResponse = response.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
+
+            // Extract JSON from response (in case there's extra text)
+            String jsonResponse = cleanResponse;
+            int jsonStart = cleanResponse.indexOf("{");
+            int jsonEnd = cleanResponse.lastIndexOf("}");
+
+            if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                jsonResponse = cleanResponse.substring(jsonStart, jsonEnd + 1);
+            }
+
+            JsonNode responseNode = objectMapper.readTree(jsonResponse);
+
+            // Parse top-level fields
+            parsedData.put("deployment_recommendation", responseNode.has("deployment_recommendation") ? responseNode.get("deployment_recommendation").asText() : "GRADUAL_DEPLOYMENT");
+            parsedData.put("market_timing_assessment", responseNode.has("market_timing_assessment") ? responseNode.get("market_timing_assessment").asText() : "Market conditions assessment pending");
+
+            // Parse reserve strategy
+            if (responseNode.has("reserve_strategy")) {
+                JsonNode reserveNode = responseNode.get("reserve_strategy");
+                Map<String, Object> reserveStrategy = new HashMap<>();
+
+                reserveStrategy.put("recommended_reserve_percentage", reserveNode.has("recommended_reserve_percentage") ? reserveNode.get("recommended_reserve_percentage").asText() : "30-40%");
+                reserveStrategy.put("reserve_amount", reserveNode.has("reserve_amount") ? reserveNode.get("reserve_amount").asText() : "TBD");
+                reserveStrategy.put("reasoning", reserveNode.has("reasoning") ? reserveNode.get("reasoning").asText() : "Reserve reasoning pending");
+
+                // Parse deployment triggers
+                if (reserveNode.has("deployment_triggers")) {
+                    List<String> triggers = new ArrayList<>();
+                    JsonNode triggersArray = reserveNode.get("deployment_triggers");
+                    for (JsonNode trigger : triggersArray) {
+                        triggers.add(trigger.asText());
+                    }
+                    reserveStrategy.put("deployment_triggers", triggers);
+                } else {
+                    reserveStrategy.put("deployment_triggers", new ArrayList<>());
+                }
+
+                parsedData.put("reserve_strategy", reserveStrategy);
+            }
+
+            // Parse existing positions enhancement
+            if (responseNode.has("existing_positions_enhancement")) {
+                List<Map<String, String>> existingEnhancements = new ArrayList<>();
+                JsonNode enhancementArray = responseNode.get("existing_positions_enhancement");
+
+                for (JsonNode enhancement : enhancementArray) {
+                    Map<String, String> enhancementData = new HashMap<>();
+                    enhancementData.put("symbol", enhancement.has("symbol") ? enhancement.get("symbol").asText() : "");
+                    enhancementData.put("allocation_percentage", enhancement.has("allocation_percentage") ? enhancement.get("allocation_percentage").asText() : "0%");
+                    enhancementData.put("allocation_amount", enhancement.has("allocation_amount") ? enhancement.get("allocation_amount").asText() : "$0");
+                    enhancementData.put("current_weight_in_portfolio", enhancement.has("current_weight_in_portfolio") ? enhancement.get("current_weight_in_portfolio").asText() : "0%");
+                    enhancementData.put("target_weight_after_addition", enhancement.has("target_weight_after_addition") ? enhancement.get("target_weight_after_addition").asText() : "0%");
+                    enhancementData.put("rationale", enhancement.has("rationale") ? enhancement.get("rationale").asText() : "Enhancement rationale");
+                    enhancementData.put("entry_strategy", enhancement.has("entry_strategy") ? enhancement.get("entry_strategy").asText() : "Gradual entry");
+                    enhancementData.put("target_entry_price", enhancement.has("target_entry_price") ? enhancement.get("target_entry_price").asText() : "Market price");
+                    existingEnhancements.add(enhancementData);
+                }
+                parsedData.put("existing_positions_enhancement", existingEnhancements);
+            }
+
+            // Parse new opportunities
+            if (responseNode.has("new_opportunities")) {
+                List<Map<String, Object>> newOpportunities = new ArrayList<>();
+                JsonNode opportunitiesArray = responseNode.get("new_opportunities");
+
+                for (JsonNode opportunity : opportunitiesArray) {
+                    Map<String, Object> opportunityData = new HashMap<>();
+                    opportunityData.put("sector", opportunity.has("sector") ? opportunity.get("sector").asText() : "");
+                    opportunityData.put("allocation_percentage", opportunity.has("allocation_percentage") ? opportunity.get("allocation_percentage").asText() : "0%");
+                    opportunityData.put("allocation_amount", opportunity.has("allocation_amount") ? opportunity.get("allocation_amount").asText() : "$0");
+                    opportunityData.put("primary_recommendation", opportunity.has("primary_recommendation") ? opportunity.get("primary_recommendation").asText() : "");
+                    opportunityData.put("rationale", opportunity.has("rationale") ? opportunity.get("rationale").asText() : "Opportunity rationale");
+                    opportunityData.put("risk_level", opportunity.has("risk_level") ? opportunity.get("risk_level").asText() : "MEDIUM");
+                    opportunityData.put("entry_strategy", opportunity.has("entry_strategy") ? opportunity.get("entry_strategy").asText() : "Gradual entry");
+                    opportunityData.put("target_allocation_in_portfolio", opportunity.has("target_allocation_in_portfolio") ? opportunity.get("target_allocation_in_portfolio").asText() : "3-5%");
+
+                    // Parse suggested assets
+                    if (opportunity.has("suggested_assets")) {
+                        List<String> suggestedAssets = new ArrayList<>();
+                        JsonNode assetsArray = opportunity.get("suggested_assets");
+                        for (JsonNode asset : assetsArray) {
+                            suggestedAssets.add(asset.asText());
+                        }
+                        opportunityData.put("suggested_assets", suggestedAssets);
+                    } else {
+                        opportunityData.put("suggested_assets", new ArrayList<>());
+                    }
+
+                    newOpportunities.add(opportunityData);
+                }
+                parsedData.put("new_opportunities", newOpportunities);
+            }
+
+            // Parse allocation breakdown
+            if (responseNode.has("allocation_breakdown")) {
+                JsonNode allocationNode = responseNode.get("allocation_breakdown");
+                Map<String, Object> allocationBreakdown = new HashMap<>();
+
+                // Parse USDT reserve
+                if (allocationNode.has("keep_as_usdt_reserve")) {
+                    JsonNode reserveNode = allocationNode.get("keep_as_usdt_reserve");
+                    Map<String, String> usdtReserve = new HashMap<>();
+                    usdtReserve.put("percentage", reserveNode.has("percentage") ? reserveNode.get("percentage").asText() : "0%");
+                    usdtReserve.put("amount", reserveNode.has("amount") ? reserveNode.get("amount").asText() : "$0");
+                    usdtReserve.put("purpose", reserveNode.has("purpose") ? reserveNode.get("purpose").asText() : "Safety buffer");
+                    allocationBreakdown.put("keep_as_usdt_reserve", usdtReserve);
+                }
+
+                // Parse existing positions additions
+                if (allocationNode.has("add_to_existing_positions")) {
+                    JsonNode existingNode = allocationNode.get("add_to_existing_positions");
+                    Map<String, Object> existingPositions = new HashMap<>();
+                    existingPositions.put("percentage", existingNode.has("percentage") ? existingNode.get("percentage").asText() : "0%");
+                    existingPositions.put("amount", existingNode.has("amount") ? existingNode.get("amount").asText() : "$0");
+
+                    // Parse breakdown
+                    if (existingNode.has("breakdown")) {
+                        List<Map<String, String>> breakdown = new ArrayList<>();
+                        JsonNode breakdownArray = existingNode.get("breakdown");
+                        for (JsonNode item : breakdownArray) {
+                            Map<String, String> itemData = new HashMap<>();
+                            itemData.put("symbol", item.has("symbol") ? item.get("symbol").asText() : "");
+                            itemData.put("percentage", item.has("percentage") ? item.get("percentage").asText() : "0%");
+                            itemData.put("amount", item.has("amount") ? item.get("amount").asText() : "$0");
+                            breakdown.add(itemData);
+                        }
+                        existingPositions.put("breakdown", breakdown);
+                    }
+
+                    allocationBreakdown.put("add_to_existing_positions", existingPositions);
+                }
+
+                // Parse new positions
+                if (allocationNode.has("new_positions")) {
+                    JsonNode newNode = allocationNode.get("new_positions");
+                    Map<String, Object> newPositions = new HashMap<>();
+                    newPositions.put("percentage", newNode.has("percentage") ? newNode.get("percentage").asText() : "0%");
+                    newPositions.put("amount", newNode.has("amount") ? newNode.get("amount").asText() : "$0");
+
+                    // Parse breakdown
+                    if (newNode.has("breakdown")) {
+                        List<Map<String, String>> breakdown = new ArrayList<>();
+                        JsonNode breakdownArray = newNode.get("breakdown");
+                        for (JsonNode item : breakdownArray) {
+                            Map<String, String> itemData = new HashMap<>();
+                            itemData.put("sector", item.has("sector") ? item.get("sector").asText() : "");
+                            itemData.put("percentage", item.has("percentage") ? item.get("percentage").asText() : "0%");
+                            itemData.put("amount", item.has("amount") ? item.get("amount").asText() : "$0");
+                            breakdown.add(itemData);
+                        }
+                        newPositions.put("breakdown", breakdown);
+                    }
+
+                    allocationBreakdown.put("new_positions", newPositions);
+                }
+
+                parsedData.put("allocation_breakdown", allocationBreakdown);
+            }
+
+            // Parse execution timeline
+            if (responseNode.has("execution_timeline")) {
+                JsonNode timelineNode = responseNode.get("execution_timeline");
+                Map<String, Object> timeline = new HashMap<>();
+
+                // Parse immediate actions
+                if (timelineNode.has("immediate_actions")) {
+                    List<String> immediateActions = new ArrayList<>();
+                    JsonNode actionsArray = timelineNode.get("immediate_actions");
+                    for (JsonNode action : actionsArray) {
+                        immediateActions.add(action.asText());
+                    }
+                    timeline.put("immediate_actions", immediateActions);
+                }
+
+                // Parse short term actions
+                if (timelineNode.has("short_term_actions")) {
+                    List<String> shortTermActions = new ArrayList<>();
+                    JsonNode actionsArray = timelineNode.get("short_term_actions");
+                    for (JsonNode action : actionsArray) {
+                        shortTermActions.add(action.asText());
+                    }
+                    timeline.put("short_term_actions", shortTermActions);
+                }
+
+                // Parse contingency plans
+                if (timelineNode.has("contingency_plans")) {
+                    List<String> contingencyPlans = new ArrayList<>();
+                    JsonNode plansArray = timelineNode.get("contingency_plans");
+                    for (JsonNode plan : plansArray) {
+                        contingencyPlans.add(plan.asText());
+                    }
+                    timeline.put("contingency_plans", contingencyPlans);
+                }
+
+                parsedData.put("execution_timeline", timeline);
+            }
+
+            // Parse risk considerations
+            if (responseNode.has("risk_considerations")) {
+                JsonNode riskNode = responseNode.get("risk_considerations");
+                Map<String, Object> riskConsiderations = new HashMap<>();
+
+                // Parse main risks
+                if (riskNode.has("main_risks")) {
+                    List<String> mainRisks = new ArrayList<>();
+                    JsonNode risksArray = riskNode.get("main_risks");
+                    for (JsonNode risk : risksArray) {
+                        mainRisks.add(risk.asText());
+                    }
+                    riskConsiderations.put("main_risks", mainRisks);
+                }
+
+                // Parse risk mitigation strategies
+                if (riskNode.has("risk_mitigation_strategies")) {
+                    List<String> mitigationStrategies = new ArrayList<>();
+                    JsonNode strategiesArray = riskNode.get("risk_mitigation_strategies");
+                    for (JsonNode strategy : strategiesArray) {
+                        mitigationStrategies.add(strategy.asText());
+                    }
+                    riskConsiderations.put("risk_mitigation_strategies", mitigationStrategies);
+                }
+
+                riskConsiderations.put("portfolio_impact", riskNode.has("portfolio_impact") ? riskNode.get("portfolio_impact").asText() : "Portfolio impact assessment");
+                parsedData.put("risk_considerations", riskConsiderations);
+            }
+
+            // Parse key recommendations
+            if (responseNode.has("key_recommendations")) {
+                List<String> keyRecommendations = new ArrayList<>();
+                JsonNode recommendationsArray = responseNode.get("key_recommendations");
+                for (JsonNode recommendation : recommendationsArray) {
+                    keyRecommendations.add(recommendation.asText());
+                }
+                parsedData.put("key_recommendations", keyRecommendations);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error parsing USDT allocation response: " + e.getMessage());
+            e.printStackTrace();
+
+            // Set default values if parsing fails
+            parsedData.put("deployment_recommendation", "GRADUAL_DEPLOYMENT");
+            parsedData.put("market_timing_assessment", "Unable to parse market timing assessment");
+            parsedData.put("reserve_strategy", new HashMap<>());
+            parsedData.put("existing_positions_enhancement", new ArrayList<>());
+            parsedData.put("new_opportunities", new ArrayList<>());
+            parsedData.put("allocation_breakdown", new HashMap<>());
+            parsedData.put("execution_timeline", new HashMap<>());
+            parsedData.put("risk_considerations", new HashMap<>());
+            parsedData.put("key_recommendations", new ArrayList<>());
+        }
+
+        return parsedData;
     }
 }

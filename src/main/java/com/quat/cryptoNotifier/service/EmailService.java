@@ -300,6 +300,33 @@ public class EmailService {
         }
     }
 
+    public void sendUSDTAllocationStrategy(List<Holding> holdings, Map<String, Object> analysisData) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(appConfig.getMailFrom());
+            helper.setTo(appConfig.getMailTo());
+            helper.setSubject(String.format("💰 USDT Allocation Strategy - %s",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))));
+
+            Context context = new Context();
+            context.setVariable("holdings", holdings);
+            context.setVariable("analysisData", analysisData);
+            context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+            String content = templateEngine.process("usdt-allocation-strategy", context);
+            helper.setText(content, true);
+
+            mailSender.send(message);
+
+            System.out.println("USDT Allocation Strategy email sent successfully");
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send USDT allocation strategy email", e);
+        }
+    }
+
     public void sendPortfolioTable(List<Holding> holdings, Map<String, Object> portfolioData) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
