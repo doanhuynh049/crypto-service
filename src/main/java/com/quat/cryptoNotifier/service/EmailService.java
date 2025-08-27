@@ -193,7 +193,7 @@ public class EmailService {
 
             helper.setFrom(appConfig.getMailFrom());
             helper.setTo(appConfig.getMailTo());
-            helper.setSubject(String.format("\uD83D\uDD16 Opportunity Finder Analysis - %s",
+            helper.setSubject(String.format("🔖 Opportunity Finder Analysis - %s",
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))));
 
             Context context = new Context();

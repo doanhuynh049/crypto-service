@@ -178,7 +178,7 @@ public class AdvisoryEngineService {
             prompt.append(String.format("Holdings: %.6f %s\n", holding.getHoldings(), holding.getSymbol()));
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
-            prompt.append(String.format("Expected Target Price: $%.2f\n", holding.getExpectedPrice()));
+            prompt.append(String.format("Expected Deep Entry Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
             prompt.append(String.format("Initial Investment Value: $%.2f\n", holding.getInitialValue()));
@@ -347,7 +347,7 @@ public class AdvisoryEngineService {
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
             prompt.append(String.format("Initial Investment: $%.2f (%.1f%% of portfolio)\n", holding.getInitialValue(), currentWeight));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
-            prompt.append(String.format("Expected Target Price: $%.2f\n", holding.getExpectedPrice()));
+            prompt.append(String.format("Expected Target Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
             
@@ -499,7 +499,7 @@ public class AdvisoryEngineService {
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
             prompt.append(String.format("Initial Investment: $%.2f (%.1f%% of portfolio)\n", holding.getInitialValue(), currentWeight));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
-            prompt.append(String.format("Expected Target Price: $%.2f\n", holding.getExpectedPrice()));
+            prompt.append(String.format("Expected Target Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
             
@@ -1327,7 +1327,7 @@ public class AdvisoryEngineService {
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
             prompt.append(String.format("Initial Investment: $%.2f (%.1f%% of portfolio)\n", holding.getInitialValue(), currentWeight));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
-            prompt.append(String.format("Expected Target Price: $%.2f\n", holding.getExpectedPrice()));
+            prompt.append(String.format("Expected Deep Entry Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
             
@@ -2461,7 +2461,7 @@ public class AdvisoryEngineService {
 
                 // Target prices
                 row.put("expectedEntry", holding.getExpectedEntry());
-                row.put("expectedPrice", holding.getExpectedPrice());
+                row.put("deepEntryPrice", holding.getDeepEntryPrice());
                 row.put("targetPrice3Month", holding.getTargetPrice3Month());
                 row.put("targetPriceLongTerm", holding.getTargetPriceLongTerm());
 
