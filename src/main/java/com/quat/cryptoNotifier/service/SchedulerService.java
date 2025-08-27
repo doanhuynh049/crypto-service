@@ -120,7 +120,7 @@ public class SchedulerService {
 
         try {
             Map<String, Object> entryExitStrategies = advisoryEngineService.generateUSDTAllocationStrategy(holdings);
-            emailService.sendUSDTAllocationStrategyAnalysis(holdings, entryExitStrategies);
+            emailService.sendUSDTAllocationStrategy(holdings, entryExitStrategies);
         } catch (Exception e) {
             System.err.println("USDT Allocation Strategy Analysis failed: " + e.getMessage());
             e.printStackTrace();

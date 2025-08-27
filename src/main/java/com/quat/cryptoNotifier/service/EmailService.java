@@ -285,18 +285,6 @@ public class EmailService {
 
             Context context = new Context();
             context.setVariable("holdings", holdings);
-            
-            // Ensure analysisData has required keys to prevent template errors
-            if (analysisData == null) {
-                analysisData = new HashMap<>();
-            }
-            if (!analysisData.containsKey("strategies")) {
-                analysisData.put("strategies", new ArrayList<>());
-            }
-            if (!analysisData.containsKey("portfolio")) {
-                analysisData.put("portfolio", new HashMap<>());
-            }
-            
             context.setVariable("analysisData", analysisData);
             context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
