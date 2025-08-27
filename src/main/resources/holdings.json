@@ -10,7 +10,6 @@
         "avgBuyPrice": 3067.9,
         "expectedEntry": 4200.0,
         "deepEntryPrice": 3800.0,
-        "expectedPrice": 3000.0,
         "targetPrice3Month": 5000.0,
         "targetPriceLongTerm": 10000.0
       },
@@ -22,7 +21,6 @@
         "avgBuyPrice": 115667.15,
         "expectedEntry": 107000.0,
         "deepEntryPrice": 70000.0,
-        "expectedPrice": 70000.0,
         "targetPrice3Month": 125000.0,
         "targetPriceLongTerm": 150000.0
       },
@@ -34,7 +32,6 @@
         "avgBuyPrice": 159.79,
         "expectedEntry": 185.0,
         "deepEntryPrice": 100.0,
-        "expectedPrice": 100.0,
         "targetPrice3Month": 220.0,
         "targetPriceLongTerm": 450.0
       },
@@ -46,7 +43,6 @@
         "avgBuyPrice": 20.46,
         "expectedEntry": 19.5,
         "deepEntryPrice": 20.0,
-        "expectedPrice": 20.0,
         "targetPrice3Month": 27.0,
         "targetPriceLongTerm": 40.0
       },
@@ -58,7 +54,6 @@
         "avgBuyPrice": 803.53,
         "expectedEntry": 800.0,
         "deepEntryPrice": 400.0,
-        "expectedPrice": 400.0,
         "targetPrice3Month": 970.0,
         "targetPriceLongTerm": 1200.0
       },
@@ -70,7 +65,6 @@
         "avgBuyPrice": 0.6250722,
         "expectedEntry": 0.75,
         "deepEntryPrice": 0.6,
-        "expectedPrice": 0.6,
         "targetPrice3Month": 1.0,
         "targetPriceLongTerm": 1.5
       },
@@ -82,7 +76,6 @@
         "avgBuyPrice": 20.28,
         "expectedEntry": 22.0,
         "deepEntryPrice": 23.5,
-        "expectedPrice": 23.5,
         "targetPrice3Month": 35.0,
         "targetPriceLongTerm": 55.0
       },
@@ -94,7 +87,6 @@
         "avgBuyPrice": 0.4597,
         "expectedEntry": 0.48,
         "deepEntryPrice": 0.4,
-        "expectedPrice": 0.0,
         "targetPrice3Month": 0.65,
         "targetPriceLongTerm": 1.2
       },
@@ -106,7 +98,6 @@
         "avgBuyPrice": 303.93,
         "expectedEntry": 303.93,
         "deepEntryPrice": 290.64,
-        "expectedPrice": 290.64,
         "targetPrice3Month": 337.09,
         "targetPriceLongTerm": 370.66
       },
@@ -118,7 +109,6 @@
         "avgBuyPrice": 0.08655,
         "expectedEntry": 0.09,
         "deepEntryPrice": 0.09,
-        "expectedPrice": 0.09,
         "targetPrice3Month": 0.105,
         "targetPriceLongTerm": 0.2
       },
@@ -130,7 +120,6 @@
         "avgBuyPrice": 0.924324,
         "expectedEntry": 0.95,
         "deepEntryPrice": 0.75,
-        "expectedPrice": 0.75,
         "targetPrice3Month": 1.15,
         "targetPriceLongTerm": 2.0
       },
@@ -142,7 +131,6 @@
         "avgBuyPrice": 3.74,
         "expectedEntry": 3.6,
         "deepEntryPrice": 3.85,
-        "expectedPrice": 3.85,
         "targetPrice3Month": 5.0,
         "targetPriceLongTerm": 12.0
       },
@@ -154,7 +142,6 @@
         "avgBuyPrice": 0.67483,
         "expectedEntry": 0.6,
         "deepEntryPrice": 0.6755,
-        "expectedPrice": 0.6755,
         "targetPrice3Month": 0.8,
         "targetPriceLongTerm": 1.5
       },
@@ -166,7 +153,6 @@
         "avgBuyPrice": 10.61,
         "expectedEntry": 10.61,
         "deepEntryPrice": 10.31,
-        "expectedPrice": 10.31,
         "targetPrice3Month": 12.62,
         "targetPriceLongTerm": 19.37
       },
@@ -178,7 +164,6 @@
         "avgBuyPrice": 2.78,
         "expectedEntry": 3.5,
         "deepEntryPrice": 3.0,
-        "expectedPrice": 3.0,
         "targetPrice3Month": 4.35,
         "targetPriceLongTerm": 6.0
       },
@@ -190,7 +175,6 @@
         "avgBuyPrice": 0.7003,
         "expectedEntry": 0.8,
         "deepEntryPrice": 1.0,
-        "expectedPrice": 1.0,
         "targetPrice3Month": 1.18,
         "targetPriceLongTerm": 3.0
       },
@@ -202,7 +186,6 @@
         "avgBuyPrice": 0.34,
         "expectedEntry": 0.33,
         "deepEntryPrice": 0.3,
-        "expectedPrice": 0.3,
         "targetPrice3Month": 0.37,
         "targetPriceLongTerm": 0.45
       },
@@ -214,7 +197,6 @@
         "avgBuyPrice": 3.90,
         "expectedEntry": 4.2,
         "deepEntryPrice": 3.8,
-        "expectedPrice": 3.8,
         "targetPrice3Month": 5.0,
         "targetPriceLongTerm": 7.0
       },
@@ -226,7 +208,6 @@
         "avgBuyPrice": 0.3678,
         "expectedEntry": 0.3678,
         "deepEntryPrice": 0.2097,
-        "expectedPrice": 0.2097,
         "targetPrice3Month": 0.216,
         "targetPriceLongTerm": 0.487
       },
@@ -238,7 +219,6 @@
         "avgBuyPrice": 1.0,
         "expectedEntry": 1.0,
         "deepEntryPrice": 1.0,
-        "expectedPrice": 1.0,
         "targetPrice3Month": 1.0,
         "targetPriceLongTerm": 1.0
       }

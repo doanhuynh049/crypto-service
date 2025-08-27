@@ -2326,6 +2326,8 @@ public class AdvisoryEngineService {
         Map<String, Object> parsed = new HashMap<>();
 
         try {
+            System.out.println("DEBUG: Raw AI response: " + response);
+            
             // Strip code fences if present
             String clean = response.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
 
@@ -2333,6 +2335,8 @@ public class AdvisoryEngineService {
             int start = clean.indexOf("{");
             int end = clean.lastIndexOf("}");
             String json = (start >= 0 && end > start) ? clean.substring(start, end + 1) : clean;
+            
+            System.out.println("DEBUG: Extracted JSON: " + json);
 
             JsonNode root = objectMapper.readTree(json);
 
@@ -2434,6 +2438,11 @@ public class AdvisoryEngineService {
             parsed.put("portfolio", new HashMap<>());
         }
 
+        System.out.println("DEBUG: Final parsed data: " + parsed);
+        System.out.println("DEBUG: Contains strategies key: " + parsed.containsKey("strategies"));
+        if (parsed.containsKey("strategies")) {
+            System.out.println("DEBUG: Strategies value: " + parsed.get("strategies"));
+        }
         return parsed;
     }
     public Map<String, Object> generatePortfolioTable(List<Holding> holdings) {

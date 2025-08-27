@@ -510,12 +510,12 @@
         </div>
 
         <!-- Individual Strategies -->
-        <div th:if="${analysisData.strategies}">
+        <div th:if="${analysisData['strategies'] != null and not #lists.isEmpty(analysisData['strategies'])}">
             <h2 style="color: #333; display: flex; align-items: center; gap: 15px;">
                 <span>💰</span> Individual Asset Strategies
             </h2>
 
-            <div th:each="strategy : ${analysisData.strategies}" class="strategy-card">
+            <div th:each="strategy : ${analysisData['strategies']}" class="strategy-card">
                 <div class="strategy-header">
                     <h3 th:text="${strategy.symbol}"></h3>
                     <span class="action-badge"
@@ -601,20 +601,20 @@
         </div>
 
         <!-- Portfolio Strategy -->
-        <div class="portfolio-summary" th:if="${analysisData.portfolio}">
+        <div class="portfolio-summary" th:if="${analysisData['portfolio'] != null}">
             <h2>Portfolio Management</h2>
             <div class="summary-grid">
-                <div class="summary-item" th:if="${analysisData.portfolio.cash_buffer}">
+                <div class="summary-item" th:if="${analysisData['portfolio']['cash_buffer'] != null}">
                     <h4>💵 Cash Buffer</h4>
-                    <p th:text="${analysisData.portfolio.cash_buffer}"></p>
+                    <p th:text="${analysisData['portfolio']['cash_buffer']}"></p>
                 </div>
-                <div class="summary-item" th:if="${analysisData.portfolio.rebalance_trigger}">
+                <div class="summary-item" th:if="${analysisData['portfolio']['rebalance_trigger'] != null}">
                     <h4>⚖️ Rebalancing</h4>
-                    <p th:text="${analysisData.portfolio.rebalance_trigger}"></p>
+                    <p th:text="${analysisData['portfolio']['rebalance_trigger']}"></p>
                 </div>
-                <div class="summary-item" th:if="${analysisData.portfolio.risk_guardrails}">
+                <div class="summary-item" th:if="${analysisData['portfolio']['risk_guardrails'] != null}">
                     <h4>🛡️ Risk Guardrails</h4>
-                    <p th:text="${analysisData.portfolio.risk_guardrails}"></p>
+                    <p th:text="${analysisData['portfolio']['risk_guardrails']}"></p>
                 </div>
             </div>
         </div>
