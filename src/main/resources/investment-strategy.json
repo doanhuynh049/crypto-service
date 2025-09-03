@@ -1,0 +1,110 @@
+{
+  "investmentStrategy": {
+    "profile": {
+      "timeframe": "6 months to 3 years",
+      "riskTolerance": "Moderate",
+      "investmentPhilosophy": "Strong fundamentals, real-world utility, and sustainable long-term value",
+      "exclusions": "No meme coins or highly speculative low-cap tokens"
+    },
+    "portfolioTargets": {
+      "btcAllocation": "30%",
+      "ethAllocation": "30%",
+      "largCapAltcoins": "10-20%",
+      "stablecoins": "20%",
+      "smallCapSpeculative": "5-10%"
+    },
+    "sectorDiversification": {
+      "layer1": "45-50%",
+      "layer2": "10-15%",
+      "defi": "15-20%",
+      "aiMachineLearning": "8-12%",
+      "infrastructure": "5-10%",
+      "realWorldAssets": "3-8%",
+      "stablecoinsYield": "15-20%"
+    },
+    "riskManagement": {
+      "maxSingleAssetConcentration": "15%",
+      "maxCorrelatedSectorExposure": "30%",
+      "recommendedStablecoinBuffer": "15-25%",
+      "profitTakingThreshold": "50%",
+      "stopLossGuideline": "Based on individual risk tolerance and technical levels"
+    },
+    "analysisFramework": {
+      "fundamentalCriteria": [
+        "Technology innovation and adoption metrics",
+        "Development activity and community strength",
+        "Institutional backing and partnerships", 
+        "Competitive positioning and sustainable advantages",
+        "Tokenomics and governance structure",
+        "Real-world utility and use case validation"
+      ],
+      "technicalFactors": [
+        "Current price relative to moving averages (SMA20, SMA50, SMA200)",
+        "RSI levels for overbought/oversold conditions",
+        "MACD signals for momentum analysis",
+        "Support and resistance levels",
+        "Volume patterns and market structure"
+      ],
+      "riskAssessment": [
+        "Volatility patterns and correlation risks",
+        "Regulatory and technological risks",
+        "Market cycle positioning",
+        "Liquidity and market depth",
+        "Concentration and diversification analysis"
+      ]
+    },
+    "decisionCriteria": {
+      "buySignals": [
+        "Strong fundamentals with attractive valuation",
+        "Technical breakout above key resistance",
+        "Positive catalyst convergence",
+        "Underweight in portfolio allocation"
+      ],
+      "holdSignals": [
+        "Fundamentals intact with fair valuation",
+        "Within target allocation range",
+        "Awaiting catalyst or technical confirmation",
+        "Market conditions uncertain"
+      ],
+      "sellTakeProfitSignals": [
+        "Significant overvaluation vs fundamentals",
+        "Technical breakdown below key support",
+        "Fundamental deterioration",
+        "Overweight position needs rebalancing"
+      ]
+    },
+    "marketContext": {
+      "macroFactors": [
+        "Federal Reserve policy and interest rates",
+        "Regulatory developments and clarity",
+        "Institutional adoption trends",
+        "Global economic conditions",
+        "Technology adoption cycles"
+      ],
+      "cryptoSpecific": [
+        "Market cycle stage (accumulation/bull/distribution/bear)",
+        "Bitcoin dominance trends",
+        "DeFi and ecosystem development",
+        "Scaling solutions adoption",
+        "Cross-chain interoperability progress"
+      ]
+    },
+    "actionPriorities": {
+      "immediate": [
+        "Maintain adequate stablecoin buffer for opportunities",
+        "Monitor overweight positions for profit-taking",
+        "Assess new fundamental developments"
+      ],
+      "shortTerm": [
+        "Rebalance allocations based on performance",
+        "Add to underweight quality positions on dips",
+        "Evaluate emerging sector opportunities"
+      ],
+      "longTerm": [
+        "Build core positions in infrastructure plays",
+        "Diversify across uncorrelated sectors",
+        "Maintain disciplined risk management approach"
+      ]
+    }
+  }
+}

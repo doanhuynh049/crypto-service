@@ -33,6 +33,9 @@ public class AdvisoryEngineService {
     @Autowired
     private DataProviderService dataProviderService;
 
+    @Autowired
+    private InvestmentStrategyService investmentStrategyService;
+
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -187,10 +190,7 @@ public class AdvisoryEngineService {
         
         // Add context and output format
         prompt.append("--- Context ---\n");
-        prompt.append("Investment timeframe: 6 months – 3 years\n");
-        prompt.append("Risk tolerance: Moderate\n");
-        prompt.append("Focus: Strong fundamentals, real-world utility, sustainable long-term value\n");
-        prompt.append("Exclusions: No meme coins or highly speculative low-cap tokens\n\n");
+        prompt.append(investmentStrategyService.getInvestmentContextSection());
         
         prompt.append("--- Output Format ---\n");
         prompt.append("Please provide your analysis in the following structured JSON format:\n");
@@ -237,7 +237,7 @@ public class AdvisoryEngineService {
     private String buildPromptForOverview(List<Holding> holdings) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("You are a crypto investment advisor. Analyze the following portfolio and provide structured advice.\n\n");
-
+        prompt.append(investmentStrategyService.getPortfolioTargetsSection());
         for (Holding holding : holdings) {
             prompt.append(String.format("Symbol: %s\n", holding.getSymbol()));
             prompt.append(String.format("Amount: %.4f\n", holding.getHoldings()));
@@ -255,10 +255,7 @@ public class AdvisoryEngineService {
 
         // --- Context & Preferences ---
         prompt.append("⚠️ Context & Preferences:\n");
-        prompt.append("- Investment timeframe: 6 months – 3 years\n");
-        prompt.append("- Risk tolerance: Moderate\n");
-        prompt.append("- Focus: Strong fundamentals, real-world utility, and sustainable long-term value\n");
-        prompt.append("- Exclusions: No meme coins or highly speculative low-cap tokens\n\n");
+        prompt.append(investmentStrategyService.getInvestmentContextSection());
 
         // --- Output Format ---
         prompt.append("👉 Please provide a balanced, data-driven analysis in the following structured JSON format:\n");
@@ -382,10 +379,8 @@ public class AdvisoryEngineService {
         prompt.append("- Account for emergency liquidity needs\n\n");
         
         prompt.append("--- Context ---\n");
-        prompt.append("Investment timeframe: 6 months – 3 years\n");
-        prompt.append("Risk tolerance: Moderate\n");
-        prompt.append("Portfolio size: $" + String.format("%.0f", totalPortfolioValue) + "\n");
-        prompt.append("Focus: Strong fundamentals, sustainable growth, risk management\n\n");
+        prompt.append(investmentStrategyService.getInvestmentContextSection());
+        prompt.append("Portfolio size: $" + String.format("%.0f", totalPortfolioValue) + "\n\n");
         
         prompt.append("--- Output Format ---\n");
         prompt.append("Please provide your health check analysis in the following structured JSON format:\n");
@@ -512,37 +507,12 @@ public class AdvisoryEngineService {
         }
         
         // Add analysis framework
-        prompt.append("--- Analysis Framework ---\n");
-        prompt.append("For fundamental strength assessment:\n");
-        prompt.append("- Evaluate technology innovation, adoption metrics, partnerships\n");
-        prompt.append("- Consider development activity, community strength, institutional backing\n");
-        prompt.append("- Assess competitive positioning and sustainable competitive advantages\n");
-        prompt.append("- Review tokenomics, governance, and long-term value proposition\n\n");
-        
-        prompt.append("For risk assessment:\n");
-        prompt.append("- Identify speculative elements (hype-driven, unproven use cases)\n");
-        prompt.append("- Evaluate regulatory risks, technical risks, market risks\n");
-        prompt.append("- Consider concentration risk within portfolio\n");
-        prompt.append("- Assess volatility patterns and correlation risks\n\n");
-        
-        prompt.append("For diversification opportunities:\n");
-        prompt.append("- Identify missing sectors (AI, DeFi, Gaming, Infrastructure, etc.)\n");
-        prompt.append("- Consider geographic diversification (different blockchain ecosystems)\n");
-        prompt.append("- Evaluate market cap diversification (large-cap vs mid-cap opportunities)\n");
-        prompt.append("- Suggest defensive assets or yield-generating opportunities\n\n");
-        
-        prompt.append("For exit/reduce recommendations:\n");
-        prompt.append("- Identify assets with deteriorating fundamentals\n");
-        prompt.append("- Consider overvalued positions or profit-taking opportunities\n");
-        prompt.append("- Evaluate portfolio concentration risks\n");
-        prompt.append("- Assess assets that no longer fit investment thesis\n\n");
+        prompt.append(investmentStrategyService.getAnalysisFrameworkSection());
+        prompt.append(investmentStrategyService.getDecisionCriteriaSection());
         
         prompt.append("--- Investment Context ---\n");
-        prompt.append("Investment timeframe: 6 months – 3 years\n");
-        prompt.append("Risk tolerance: Moderate\n");
+        prompt.append(investmentStrategyService.getInvestmentContextSection());
         prompt.append("Portfolio size: $" + String.format("%.0f", totalPortfolioValue) + "\n");
-        prompt.append("Focus: Strong fundamentals, real-world utility, sustainable long-term value\n");
-        prompt.append("Exclusions: No meme coins or highly speculative low-cap tokens\n");
         prompt.append("Market conditions: Consider current crypto market cycle and macro environment\n\n");
         
         prompt.append("--- Output Format ---\n");
@@ -1303,10 +1273,9 @@ public class AdvisoryEngineService {
         prompt.append("5. Are there any **key sectors or assets missing** that I should consider for better diversification? (e.g., stablecoins, staking coins, interoperability tokens, or blue-chip infrastructure projects).\n\n");
         
         prompt.append("⚠️ **Context & Preferences:**\n");
-        prompt.append("- Investment timeframe: **6 months to 3 years**\n");
-        prompt.append("- Risk tolerance: **Moderate**\n");
-        prompt.append("- I prefer projects with **strong fundamentals**, **real-world utility**, and **sustainable long-term value**\n");
-        prompt.append("- Please **exclude meme coins** or highly speculative low-cap tokens from any recommendations\n\n");
+        prompt.append(investmentStrategyService.getInvestmentContextSection());
+        prompt.append(investmentStrategyService.getPortfolioTargetsSection());
+        prompt.append(investmentStrategyService.getRiskManagementSection());
         
         prompt.append("I'm seeking a thoughtful, data-driven analysis to optimize my portfolio for both growth and risk management.\n\n");
         
@@ -2282,10 +2251,7 @@ public class AdvisoryEngineService {
 
         // --- Context & Preferences ---
         prompt.append("⚠️ Context & Preferences:\n");
-        prompt.append("- Investment timeframe: 6 months – 3 years\n");
-        prompt.append("- Risk tolerance: Moderate\n");
-        prompt.append("- Focus: Strong fundamentals, real-world utility, sustainable long-term value\n");
-        prompt.append("- Exclusions: No meme coins or highly speculative low-cap tokens\n\n");
+        prompt.append(investmentStrategyService.getInvestmentContextSection());
 
         // --- Output Format ---
         prompt.append("👉 Please provide your analysis in the following structured JSON format:\n");
@@ -2752,9 +2718,7 @@ public class AdvisoryEngineService {
         prompt.append("\n");
 
         prompt.append("--- Investment Context & Preferences ---\n");
-        prompt.append("- Timeframe: 6 months to 3 years\n");
-        prompt.append("- Risk Tolerance: Moderate\n");
-        prompt.append("- Preferences: Projects with strong fundamentals, real-world utility, and sustainable long-term value\n");
+        prompt.append(investmentStrategyService.getInvestmentContextSection());
         prompt.append("- Exclusions: No meme coins or highly speculative low-cap tokens\n\n");
 
         prompt.append("--- Analysis Requirements ---\n");
