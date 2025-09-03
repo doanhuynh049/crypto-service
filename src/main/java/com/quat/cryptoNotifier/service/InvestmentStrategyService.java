@@ -174,6 +174,43 @@ public class InvestmentStrategyService {
     }
 
     /**
+     * Get investment profile section for prompts
+     */
+    public String getInvestmentProfileSection() {
+        StringBuilder profile = new StringBuilder();
+        
+        profile.append("--- Investment Profile ---\n");
+        profile.append("- Timeframe: ").append(getTimeframe()).append("\n");
+        profile.append("- Risk Tolerance: ").append(getRiskTolerance()).append("\n");
+        profile.append("- Investment Philosophy: ").append(getInvestmentPhilosophy()).append("\n");
+        profile.append("- Exclusions: ").append(getExclusions()).append("\n\n");
+        
+        return profile.toString();
+    }
+
+    /**
+     * Get complete investment strategy overview section for prompts
+     */
+    public String getCompleteInvestmentStrategySection() {
+        StringBuilder strategy = new StringBuilder();
+        strategy.append(getInvestmentProfileSection());
+        strategy.append(getPortfolioTargetsSection());
+        strategy.append("\nSector Allocation Guidelines:\n");
+        strategy.append("- Layer 1 Blockchains: ").append(getLayer1Allocation()).append("\n");
+        strategy.append("- Layer 2 Solutions: ").append(getLayer2Allocation()).append("\n");
+        strategy.append("- DeFi Protocols: ").append(getDefiAllocation()).append("\n");
+        strategy.append("- AI/ML Infrastructure: ").append(getAiAllocation()).append("\n");
+        strategy.append("- Infrastructure/Oracles: ").append(getInfrastructureAllocation()).append("\n");
+        strategy.append("\nRisk Management Rules:\n");
+        strategy.append("- Max Single Asset: ").append(getMaxSingleAssetConcentration()).append("\n");
+        strategy.append("- Max Sector Exposure: ").append(getMaxCorrelatedSectorExposure()).append("\n");
+        strategy.append("- Stablecoin Buffer: ").append(getRecommendedStablecoinBuffer()).append("\n");
+        strategy.append("- Profit-Taking Threshold: ").append(getProfitTakingThreshold()).append("\n\n");
+        
+        return strategy.toString();
+    }
+
+    /**
      * Get complete common instructions section that can be added to any prompt
      */
     public String getCompleteCommonInstructions() {
