@@ -193,6 +193,7 @@ public class InvestmentStrategyService {
      */
     public String getCompleteInvestmentStrategySection() {
         StringBuilder strategy = new StringBuilder();
+        strategy.append("\n--- My Investment Strategy ---\n");
         strategy.append(getInvestmentProfileSection());
         strategy.append(getPortfolioTargetsSection());
         strategy.append("\nSector Allocation Guidelines:\n");
