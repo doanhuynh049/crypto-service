@@ -41,6 +41,9 @@ public class AdvisoryEngineService {
     
     @Autowired
     private OpportunityFinderAnalysisService opportunityFinderAnalysisService;
+    
+    @Autowired
+    private EntryExitStrategyAnalysisService entryExitStrategyAnalysisService;
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -137,13 +140,13 @@ public class AdvisoryEngineService {
     }
 
     public Map<String, Object> generateEntryExitStrategy(List<Holding> holdings) {
-        String prompt = buildEntryExitStrategyPrompt(holdings);
+        String prompt = entryExitStrategyAnalysisService.buildEntryExitStrategyPrompt(holdings);
         System.out.println("Entry & Exit Strategy Analysis Prompt: " + prompt);
         String aiResponse = callGeminiAPI(prompt);
         System.out.println("Entry & Exit Strategy Analysis AI Response: " + aiResponse);
 
-        // Parse the AI response and return structured data
-        Map<String, Object> parsedAnalysis = parseEntryExitStrategyResponse(aiResponse);
+        // Parse the AI response and return structured data using dedicated service
+        Map<String, Object> parsedAnalysis = entryExitStrategyAnalysisService.parseEntryExitStrategyResponse(aiResponse);
         return parsedAnalysis;
     }
 
@@ -1610,240 +1613,6 @@ public class AdvisoryEngineService {
         return parsedData;
     }
 
-    private String buildEntryExitStrategyPrompt(List<Holding> holdings) {
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Entry & Exit Strategy Analysis Prompt\n");
-        prompt.append("Provide comprehensive entry and exit strategy recommendations for my cryptocurrency portfolio holdings.\n\n");
-
-        prompt.append("For each cryptocurrency, provide:\n");
-        prompt.append("1. Entry Strategy Analysis - Optimal entry points, market timing, DCA strategy, risk management\n");
-        prompt.append("2. Exit Strategy Analysis - Profit-taking levels, stop-loss strategy, time-based exits, market condition exits\n");
-        prompt.append("3. Market Context Analysis - Current market phase, sector rotation, correlation analysis, risk assessment\n");
-        prompt.append("4. Strategic Recommendations - Hold vs. trade, allocation suggestions, hedging strategies, timeline considerations\n\n");
-
-        prompt.append("Portfolio Holdings with Current Market Data:\n\n");
-
-        // Add detailed portfolio information WITH current market data
-        for (Holding holding : holdings) {
-            prompt.append(String.format("--- %s (%s) ---\n", holding.getSymbol(), holding.getName()));
-            prompt.append(String.format("Holdings: %.6f %s\n", holding.getHoldings(), holding.getSymbol()));
-            prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
-            prompt.append(String.format("Initial Investment Value: $%.2f\n", holding.getInitialValue()));
-
-            // Fetch and include current market data for each holding
-            try {
-                MarketData marketData = dataProviderService.getMarketData(holding.getId());
-                if (marketData != null) {
-                    prompt.append("\n--- Current Market Data ---\n");
-                    prompt.append(String.format("Current Price: $%.2f\n", marketData.getCurrentPrice()));
-                    prompt.append(String.format("24h Change: %.2f%%\n", marketData.getPriceChangePercentage24h()));
-                    prompt.append(String.format("24h Volume: $%.0f\n", marketData.getVolume24h()));
-
-                    // Calculate current P&L for context
-                    double currentValue = holding.getHoldings() * marketData.getCurrentPrice();
-                    double profitLoss = currentValue - holding.getInitialValue();
-                    double profitLossPercentage = (profitLoss / holding.getInitialValue()) * 100;
-                    prompt.append(String.format("Current Position Value: $%.2f\n", currentValue));
-                    prompt.append(String.format("Unrealized P&L: $%.2f (%.1f%%)\n", profitLoss, profitLossPercentage));
-
-                    // Include technical indicators if available
-                    if (marketData.getRsi() != null) {
-                        prompt.append(String.format("RSI (14): %.1f\n", marketData.getRsi()));
-                    }
-                    if (marketData.getMacd() != null) {
-                        prompt.append(String.format("MACD: %.4f\n", marketData.getMacd()));
-                    }
-                    if (marketData.getSma20() != null) {
-                        prompt.append(String.format("SMA 20: $%.2f\n", marketData.getSma20()));
-                    }
-                    if (marketData.getSma50() != null) {
-                        prompt.append(String.format("SMA 50: $%.2f\n", marketData.getSma50()));
-                    }
-                    if (marketData.getSma200() != null) {
-                        prompt.append(String.format("SMA 200: $%.2f\n", marketData.getSma200()));
-                    }
-
-                    // Price context relative to moving averages
-                    double currentPrice = marketData.getCurrentPrice();
-                    if (marketData.getSma20() != null) {
-                        double sma20Distance = ((currentPrice - marketData.getSma20()) / marketData.getSma20()) * 100;
-                        prompt.append(String.format("Distance from SMA20: %.1f%%\n", sma20Distance));
-                    }
-                    if (marketData.getSma50() != null) {
-                        double sma50Distance = ((currentPrice - marketData.getSma50()) / marketData.getSma50()) * 100;
-                        prompt.append(String.format("Distance from SMA50: %.1f%%\n", sma50Distance));
-                    }
-                }
-            } catch (Exception e) {
-                prompt.append("\n--- Market Data Unavailable ---\n");
-                System.err.println("Could not fetch market data for " + holding.getSymbol() + ": " + e.getMessage());
-            }
-
-            prompt.append("\n");
-        }
-
-        // --- Context & Preferences ---
-        prompt.append("⚠️ Context & Preferences:\n");
-        prompt.append(investmentStrategyService.getInvestmentContextSection());
-
-        // --- Output Format ---
-        prompt.append("👉 Please provide your analysis in the following structured JSON format:\n");
-        prompt.append("{\n");
-        prompt.append("  \"strategies\": [\n");
-        prompt.append("    {\n");
-        prompt.append("      \"symbol\": \"BTC\",\n");
-        prompt.append("      \"action\": \"BUY_NOW|WAIT|HOLD|TRIM\",\n");
-        prompt.append("      \"entry\": {\n");
-        prompt.append("        \"zones\": [\"$xxxxx\", \"$yyyyy\", \"$zzzzz\"],\n");
-        prompt.append("        \"dca\": \"frequency + amount/percent (optional)\",\n");
-        prompt.append("        \"confirmation\": \"e.g., reclaim 200D MA; RSI cross; structure break\"\n");
-        prompt.append("      },\n");
-        prompt.append("      \"exit\": {\n");
-        prompt.append("        \"take_profits\": [\n");
-        prompt.append("          {\"level\": \"$tp1\", \"sell_pct\": \"25%\"},\n");
-        prompt.append("          {\"level\": \"$tp2\", \"sell_pct\": \"25%\"},\n");
-        prompt.append("          {\"level\": \"$tp3\", \"sell_pct\": \"50%\"}\n");
-        prompt.append("        ],\n");
-        prompt.append("        \"stop\": {\"type\": \"hard\", \"value\": \"$or-%%\"},\n");
-        prompt.append("        \"trailing\": {\"type\": \"percent|ATR\", \"value\": \"e.g., 10%\"},\n");
-        prompt.append("        \"invalidations\": [\"one clear invalidation condition\"]\n");
-        prompt.append("      },\n");
-        prompt.append("      \"notes\": \"<= 2 short lines: key catalyst/risks impacting entries/exits\"\n");
-        prompt.append("    }\n");
-        prompt.append("  ],\n");
-        prompt.append("  \"portfolio\": {\n");
-        prompt.append("    \"cash_buffer\": \"suggested % for new entries\",\n");
-        prompt.append("    \"rebalance_trigger\": \"e.g., +/-5% drift or TP hit\",\n");
-        prompt.append("    \"risk_guardrails\": \"max position %; max portfolio drawdown rule\"\n");
-        prompt.append("  }\n");
-        prompt.append("}\n");
-
-        return prompt.toString();
-    }
-
-    private Map<String, Object> parseEntryExitStrategyResponse(String response) {
-        Map<String, Object> parsed = new HashMap<>();
-
-        try {
-            System.out.println("DEBUG: Raw AI response: " + response);
-            
-            // Strip code fences if present
-            String clean = response.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
-
-            // Extract the JSON block
-            int start = clean.indexOf("{");
-            int end = clean.lastIndexOf("}");
-            String json = (start >= 0 && end > start) ? clean.substring(start, end + 1) : clean;
-            
-            System.out.println("DEBUG: Extracted JSON: " + json);
-
-            JsonNode root = objectMapper.readTree(json);
-
-            // === strategies ===
-            List<Map<String, Object>> strategies = new ArrayList<>();
-            if (root.has("strategies") && root.get("strategies").isArray()) {
-                for (JsonNode s : root.get("strategies")) {
-                    Map<String, Object> one = new HashMap<>();
-                    one.put("symbol", s.has("symbol") ? s.get("symbol").asText() : "");
-                    one.put("action", s.has("action") ? s.get("action").asText() : "");
-
-                    // entry
-                    Map<String, Object> entry = new HashMap<>();
-                    if (s.has("entry") && s.get("entry").isObject()) {
-                        JsonNode e = s.get("entry");
-                        // zones
-                        List<String> zones = new ArrayList<>();
-                        if (e.has("zones") && e.get("zones").isArray()) {
-                            for (JsonNode z : e.get("zones")) zones.add(z.asText());
-                        }
-                        entry.put("zones", zones);
-                        entry.put("dca", e.has("dca") ? e.get("dca").asText() : "");
-                        entry.put("confirmation", e.has("confirmation") ? e.get("confirmation").asText() : "");
-                    }
-                    one.put("entry", entry);
-
-                    // exit
-                    Map<String, Object> exit = new HashMap<>();
-                    if (s.has("exit") && s.get("exit").isObject()) {
-                        JsonNode x = s.get("exit");
-
-                        // take_profits
-                        List<Map<String, String>> tps = new ArrayList<>();
-                        if (x.has("take_profits") && x.get("take_profits").isArray()) {
-                            for (JsonNode tp : x.get("take_profits")) {
-                                Map<String, String> tpMap = new HashMap<>();
-                                tpMap.put("level", tp.has("level") ? tp.get("level").asText() : "");
-                                tpMap.put("sell_pct", tp.has("sell_pct") ? tp.get("sell_pct").asText() : "");
-                                tps.add(tpMap);
-                            }
-                        }
-                        exit.put("take_profits", tps);
-
-                        // stop
-                        Map<String, String> stop = new HashMap<>();
-                        if (x.has("stop") && x.get("stop").isObject()) {
-                            JsonNode st = x.get("stop");
-                            stop.put("type", st.has("type") ? st.get("type").asText() : "");
-                            stop.put("value", st.has("value") ? st.get("value").asText() : "");
-                        }
-                        exit.put("stop", stop);
-
-                        // trailing
-                        Map<String, String> trailing = new HashMap<>();
-                        if (x.has("trailing") && x.get("trailing").isObject()) {
-                            JsonNode tr = x.get("trailing");
-                            trailing.put("type", tr.has("type") ? tr.get("type").asText() : "");
-                            trailing.put("value", tr.has("value") ? tr.get("value").asText() : "");
-                        }
-                        exit.put("trailing", trailing);
-
-                        // invalidations
-                        List<String> invalidations = new ArrayList<>();
-                        if (x.has("invalidations") && x.get("invalidations").isArray()) {
-                            for (JsonNode inv : x.get("invalidations")) invalidations.add(inv.asText());
-                        }
-                        exit.put("invalidations", invalidations);
-                    }
-                    one.put("exit", exit);
-
-                    one.put("notes", s.has("notes") ? s.get("notes").asText() : "");
-                    strategies.add(one);
-                }
-            }
-            parsed.put("strategies", strategies);
-
-            // === portfolio ===
-            Map<String, String> portfolio = new HashMap<>();
-            if (root.has("portfolio") && root.get("portfolio").isObject()) {
-                JsonNode p = root.get("portfolio");
-                portfolio.put("cash_buffer", p.has("cash_buffer") ? p.get("cash_buffer").asText() : "");
-                portfolio.put("rebalance_trigger", p.has("rebalance_trigger") ? p.get("rebalance_trigger").asText() : "");
-                portfolio.put("risk_guardrails", p.has("risk_guardrails") ? p.get("risk_guardrails").asText() : "");
-            }
-            parsed.put("portfolio", portfolio);
-
-            // Optional: minimal backward-compat shim (old responses)
-            if (strategies.isEmpty() && root.has("individual_strategies")) {
-                // Populate empty keys so downstream code doesn't break
-                parsed.putIfAbsent("portfolio", portfolio);
-            }
-
-        } catch (Exception e) {
-            System.err.println("Error parsing entry/exit strategy response: " + e.getMessage());
-            e.printStackTrace();
-
-            // Safe defaults on failure
-            parsed.put("strategies", new ArrayList<>());
-            parsed.put("portfolio", new HashMap<>());
-        }
-
-        System.out.println("DEBUG: Final parsed data: " + parsed);
-        System.out.println("DEBUG: Contains strategies key: " + parsed.containsKey("strategies"));
-        if (parsed.containsKey("strategies")) {
-            System.out.println("DEBUG: Strategies value: " + parsed.get("strategies"));
-        }
-        return parsed;
-    }
     public Map<String, Object> generatePortfolioTable(List<Holding> holdings) {
         Map<String, Object> portfolioData = new HashMap<>();
         List<Map<String, Object>> portfolioRows = new ArrayList<>();
