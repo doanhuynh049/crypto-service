@@ -1,13 +1,13 @@
 {
   "portfolio": {
-    "lastBackup": "Wed Aug 27 09:20:00 ICT 2025",
+    "lastBackup": "Wed Sep 03 2025",
     "cryptos": [
       {
         "id": "ethereum",
         "symbol": "ETH",
         "name": "Ethereum",
-        "holdings": 0.0184872,
-        "avgBuyPrice": 3067.9,
+        "holdings": 0.0196872,
+        "avgBuyPrice": 3126.3,
         "expectedEntry": 4200.0,
         "deepEntryPrice": 3800.0,
         "targetPrice3Month": 5000.0,
@@ -17,8 +17,8 @@
         "id": "bitcoin",
         "symbol": "BTC",
         "name": "Bitcoin",
-        "holdings": 0.00057973,
-        "avgBuyPrice": 115667.15,
+        "holdings": 0.00077973,
+        "avgBuyPrice": 114195.59,
         "expectedEntry": 107000.0,
         "deepEntryPrice": 70000.0,
         "targetPrice3Month": 125000.0,
@@ -34,6 +34,17 @@
         "deepEntryPrice": 100.0,
         "targetPrice3Month": 220.0,
         "targetPriceLongTerm": 450.0
+      },
+      {
+        "id": "avalanche-2",
+        "symbol": "AVAX",
+        "name": "Avalanche",
+        "holdings": 1.0097,
+        "avgBuyPrice": 21.64,
+        "expectedEntry": 22.0,
+        "deepEntryPrice": 23.5,
+        "targetPrice3Month": 35.0,
+        "targetPriceLongTerm": 55.0
       },
       {
         "id": "chainlink",
@@ -69,15 +80,26 @@
         "targetPriceLongTerm": 1.5
       },
       {
-        "id": "avalanche-2",
-        "symbol": "AVAX",
-        "name": "Avalanche",
-        "holdings": 0.5497,
-        "avgBuyPrice": 20.28,
-        "expectedEntry": 22.0,
-        "deepEntryPrice": 23.5,
-        "targetPrice3Month": 35.0,
-        "targetPriceLongTerm": 55.0
+        "id": "render-token",
+        "symbol": "RNDR",
+        "name": "Render Token",
+        "holdings": 4.29,
+        "avgBuyPrice": 3.62,
+        "expectedEntry": 3.6,
+        "deepEntryPrice": 3.85,
+        "targetPrice3Month": 5.0,
+        "targetPriceLongTerm": 12.0
+      },
+      {
+        "id": "fetch-ai",
+        "symbol": "FET",
+        "name": "Artificial Superintelligence Alliance",
+        "holdings": 23.8,
+        "avgBuyPrice": 0.64815,
+        "expectedEntry": 0.6,
+        "deepEntryPrice": 0.6755,
+        "targetPrice3Month": 0.8,
+        "targetPriceLongTerm": 1.5
       },
       {
         "id": "arbitrum",
@@ -124,26 +146,15 @@
         "targetPriceLongTerm": 2.0
       },
       {
-        "id": "render-token",
-        "symbol": "RNDR",
-        "name": "Render Token",
-        "holdings": 2.74,
-        "avgBuyPrice": 3.74,
-        "expectedEntry": 3.6,
-        "deepEntryPrice": 3.85,
+        "id": "polkadot",
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "holdings": 2.7,
+        "avgBuyPrice": 3.82,
+        "expectedEntry": 4.2,
+        "deepEntryPrice": 3.8,
         "targetPrice3Month": 5.0,
-        "targetPriceLongTerm": 12.0
-      },
-      {
-        "id": "fetch-ai",
-        "symbol": "FET",
-        "name": "Artificial Superintelligence Alliance",
-        "holdings": 15.2,
-        "avgBuyPrice": 0.67483,
-        "expectedEntry": 0.6,
-        "deepEntryPrice": 0.6755,
-        "targetPrice3Month": 0.8,
-        "targetPriceLongTerm": 1.5
+        "targetPriceLongTerm": 7.0
       },
       {
         "id": "uniswap",
@@ -190,17 +201,6 @@
         "targetPriceLongTerm": 0.45
       },
       {
-        "id": "polkadot",
-        "symbol": "DOT",
-        "name": "Polkadot",
-        "holdings": 1.33,
-        "avgBuyPrice": 3.90,
-        "expectedEntry": 4.2,
-        "deepEntryPrice": 3.8,
-        "targetPrice3Month": 5.0,
-        "targetPriceLongTerm": 7.0
-      },
-      {
         "id": "chainbase",
         "symbol": "C",
         "name": "Chainbase",
@@ -215,7 +215,7 @@
         "id": "tether",
         "symbol": "USDT",
         "name": "Tether",
-        "holdings": 66.0715,
+        "holdings": 50.09,
         "avgBuyPrice": 1.0,
         "expectedEntry": 1.0,
         "deepEntryPrice": 1.0,
