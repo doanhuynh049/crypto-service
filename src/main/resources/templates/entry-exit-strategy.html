@@ -5,703 +5,291 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Trading Recommendations</title>
     <style>
+        /* Simple email-safe styles with white background */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            line-height: 1.6;
+            padding: 0;
+            background-color: #ffffff;
+            line-height: 1.5;
+            color: #333333;
         }
         .container {
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
         }
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
-            color: white;
+            background-color: #2c3e50;
+            color: #ffffff;
             text-align: center;
-            padding: 30px 25px;
-            position: relative;
-            overflow: hidden;
-        }
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 4s ease-in-out infinite;
+            padding: 20px;
         }
         .header h1 {
             margin: 0 0 10px 0;
-            font-size: 2.8em;
-            font-weight: 800;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 2;
+            font-size: 24px;
+            font-weight: bold;
         }
         .header .date {
             margin: 0;
-            opacity: 0.9;
-            font-size: 1.1em;
-            position: relative;
-            z-index: 2;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.1; }
-            50% { transform: scale(1.1) rotate(180deg); opacity: 0.2; }
+            font-size: 14px;
         }
         .content {
-            padding: 25px;
+            padding: 20px;
+            background-color: #ffffff;
         }
+        
+        /* Market Overview */
         .market-overview {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 25px;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
         }
         .market-overview h2 {
-            margin: 0 0 20px 0;
-            font-size: 24px;
-            font-weight: 700;
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            font-weight: bold;
         }
-        .strategy-card {
-            background: #f8f9fa;
-            border-left: 5px solid #3498db;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-radius: 0 8px 8px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .strategy-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .strategy-header h3 {
-            margin: 0;
-            color: #2c3e50;
-            font-size: 24px;
-            font-weight: 700;
-        }
-        .action-badge {
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .action-buy_now {
-            background: #2ecc71;
-            color: white;
-        }
-        .action-hold {
-            background: #f39c12;
-            color: white;
-        }
-        .action-trim {
-            background: #e74c3c;
-            color: white;
-        }
-        .action-wait {
-            background: #95a5a6;
-            color: white;
-        }
-        .strategy-content {
-            padding: 0;
-        }
-        .strategy-section {
+        
+        /* Crypto Containers */
+        .crypto-container {
+            border: 2px solid #e74c3c;
             margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background: white;
-            border: 1px solid #e3e3e3;
+            background-color: #ffffff;
         }
-        .strategy-section h4 {
-            color: #2c3e50;
-            margin-top: 0;
+        .crypto-container.buy { 
+            border-color: #27ae60; 
+        }
+        .crypto-container.hold { 
+            border-color: #f39c12; 
+        }
+        
+        .crypto-header {
+            background-color: #e74c3c;
+            color: #ffffff;
+            padding: 15px 20px;
+        }
+        .crypto-header.buy { 
+            background-color: #27ae60; 
+        }
+        .crypto-header.hold { 
+            background-color: #f39c12; 
+        }
+        
+        .crypto-header h2 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .crypto-badges {
+            margin-top: 10px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            margin-right: 8px;
+            background-color: rgba(255,255,255,0.2);
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .crypto-content {
+            padding: 0;
+            background-color: #ffffff;
+        }
+        
+        .crypto-action-section {
+            background-color: #ffffff;
+        }
+        .crypto-action-section h3 {
+            background-color: #34495e;
+            color: #ffffff;
+            margin: 0;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .sell-section h3 { 
+            background-color: #e74c3c; 
+        }
+        .buy-section h3 { 
+            background-color: #27ae60; 
+        }
+        .hold-section h3 { 
+            background-color: #f39c12; 
+        }
+        
+        .action-details {
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        
+        .detail-item {
             margin-bottom: 15px;
-            font-size: 18px;
-            font-weight: 700;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #3498db;
         }
+        .detail-item strong {
+            color: #2c3e50;
+        }
+        
         .price-point {
-            background: #3498db;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 14px;
-            display: inline-block;
-            margin: 2px;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 3px 8px;
+            font-weight: bold;
+            font-size: 13px;
         }
-        .profit-level {
-            background: #2ecc71;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
+        
+        .urgency-section {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .urgency-section h5 {
+            margin: 0 0 8px 0;
+            color: #856404;
+            font-weight: bold;
+        }
+        
+        .take-profit-grid {
+            margin: 10px 0;
+        }
+        .take-profit-item {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
             margin-bottom: 8px;
-            display: block;
+            text-align: center;
         }
-        .invalidation-item {
-            background: linear-gradient(135deg, #ffe6e6, #ffcccc);
-            color: #cc0000;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            border: 2px solid #ffb3b3;
-            box-shadow: 0 2px 6px rgba(204,0,0,0.15);
+        .take-profit-price {
+            font-weight: bold;
+            color: #155724;
         }
-        .invalidation-item::before {
-            content: '⚠️';
-            margin-right: 5px;
+        .take-profit-gain {
+            color: #28a745;
+            font-weight: bold;
         }
-        .risk-level {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 700;
-            display: inline-block;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            transition: all 0.3s ease;
+        
+        .watch-levels {
+            margin-top: 10px;
         }
-        .risk-high {
-            background: linear-gradient(135deg, #ffebee, #ffcdd2);
-            color: #b71c1c;
-            border: 2px solid #ef5350;
-            box-shadow: 0 2px 8px rgba(183,28,28,0.2);
+        .watch-levels > div {
+            background-color: #e9ecef;
+            padding: 8px;
+            margin-bottom: 5px;
+            text-align: center;
+            border: 1px solid #dee2e6;
         }
-        .risk-moderate {
-            background: linear-gradient(135deg, #fff8e1, #ffecb3);
-            color: #e65100;
-            border: 2px solid #ff9800;
-            box-shadow: 0 2px 8px rgba(230,81,0,0.2);
+        
+        .dca-info, .stop-loss-info {
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
         }
-        .risk-low {
-            background: linear-gradient(135deg, #e8f5e8, #c8e6c8);
-            color: #2e7d32;
-            border: 2px solid #66bb6a;
-            box-shadow: 0 2px 8px rgba(46,125,50,0.2);
+        .dca-info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
         }
-        .risk-level:hover {
-            transform: translateY(-1px);
+        .stop-loss-info {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
         }
+        
+        /* Portfolio sections */
         .portfolio-summary {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 10px;
-            margin: 30px 0;
-            border-left: 5px solid #667eea;
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
         }
         .portfolio-summary h2 {
             color: #2c3e50;
             margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: bold;
         }
+        
         .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         .summary-item {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #3498db;
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #3498db;
         }
         .summary-item h4 {
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #2c3e50;
-            font-weight: 700;
-            font-size: 16px;
+            font-weight: bold;
+            font-size: 14px;
         }
+        
+        /* Timeline */
         .timeline-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin: 25px 0;
+            margin: 20px 0;
         }
-        .timeline-card {
-            background: white;
+        .timeline-header {
+            background-color: #3498db;
+            color: #ffffff;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #667eea;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .timeline-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .timeline-card {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #3498db;
         }
         .timeline-card h5 {
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #2c3e50;
-            font-weight: 700;
-            font-size: 16px;
+            font-weight: bold;
+            font-size: 14px;
         }
+        
+        /* Footer */
         .footer {
             text-align: center;
             margin-top: 30px;
             padding: 20px;
-            background: #f8f9fa;
+            background-color: #f8f9fa;
             color: #6c757d;
-            font-size: 14px;
-            border-radius: 8px;
+            font-size: 12px;
+            border-top: 1px solid #e9ecef;
         }
-        .warning-box {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            border: 2px solid #ffeaa7;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 25px 0;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(255,193,7,0.2);
-        }
-        .warning-box::before {
-            content: '⚠️';
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            font-size: 1.5em;
-        }
-        .warning-box h4 {
-            color: #856404;
-            margin-top: 0;
-            margin-left: 40px;
-            font-weight: 600;
-        }
-        .warning-box div {
-            margin-left: 40px;
-        }
-        .dca-info {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            padding: 18px;
-            border-radius: 12px;
-            border-left: 5px solid #2196f3;
-            margin: 15px 0;
-            box-shadow: 0 3px 10px rgba(33,150,243,0.15);
-            transition: all 0.3s ease;
-        }
-        .dca-info::before {
-            content: '📅 ';
-            font-size: 1.1em;
-        }
-        .dca-info:hover {
-            transform: translateX(2px);
-            box-shadow: 0 5px 15px rgba(33,150,243,0.2);
-        }
-        .stop-loss-info {
-            background: linear-gradient(135deg, #ffebee, #ffcdd2);
-            padding: 18px;
-            border-radius: 12px;
-            border-left: 5px solid #f44336;
-            margin: 15px 0;
-            box-shadow: 0 3px 10px rgba(244,67,54,0.15);
-            transition: all 0.3s ease;
-        }
-        .stop-loss-info::before {
-            content: '🛡️ ';
-            font-size: 1.1em;
-        }
-        .stop-loss-info:hover {
-            transform: translateX(2px);
-            box-shadow: 0 5px 15px rgba(244,67,54,0.2);
-        }
-        /* Enhanced responsive design */
-        @media (max-width: 768px) {
-            body {
+        
+        /* Mobile responsive */
+        @media (max-width: 600px) {
+            .container {
+                margin: 5px;
+            }
+            .content {
                 padding: 15px;
             }
-            .container {
-                padding: 25px;
-            }
             .header h1 {
-                font-size: 2.2em;
+                font-size: 20px;
             }
-            .strategy-header {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 20px;
+            .crypto-header h2 {
+                font-size: 18px;
             }
-            .strategy-header h3 {
-                margin-bottom: 15px;
-                font-size: 1.4em;
-            }
-            .timeline-grid, .summary-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .entry-points, .profit-levels, .invalidations {
-                flex-direction: column;
-            }
-            .price-point, .profit-level {
-                margin-bottom: 8px;
-            }
-        }
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.8em;
-            }
-            .strategy-content {
-                padding: 20px;
-            }
-            .strategy-section {
-                padding: 20px;
-            }
-        }
-        /* Enhanced smooth animations */
-        * {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .strategy-card, .summary-item, .timeline-card {
-            animation: fadeInUp 0.8s ease forwards;
-            opacity: 0;
-        }
-        .strategy-card:nth-child(1) { animation-delay: 0.1s; }
-        .strategy-card:nth-child(2) { animation-delay: 0.2s; }
-        .strategy-card:nth-child(3) { animation-delay: 0.3s; }
-        .summary-item:nth-child(1) { animation-delay: 0.1s; }
-        .summary-item:nth-child(2) { animation-delay: 0.2s; }
-        .summary-item:nth-child(3) { animation-delay: 0.3s; }
-        .summary-item:nth-child(4) { animation-delay: 0.4s; }
-        .timeline-card:nth-child(2) { animation-delay: 0.1s; }
-        .timeline-card:nth-child(3) { animation-delay: 0.2s; }
-        .timeline-card:nth-child(4) { animation-delay: 0.3s; }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Email-safe fallbacks */
-        .strategy-card:not(:hover),
-        .summary-item:not(:hover),
-        .timeline-card:not(:hover) {
-            transform: translateY(0) !important;
-        }
-        
-        /* Print styles */
-        @media print {
-            body {
-                background: white !important;
-            }
-            .container::before,
-            .market-overview::before,
-            .strategy-card::before,
-            .timeline-card::before,
-            .portfolio-summary::before {
-                display: none !important;
-            }
-            .action-badge:hover::before {
-                display: none !important;
-            }
-        }
-        /* Confidence and Priority Badge Styles */
-        .confidence-badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-            margin: 0 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        }
-        .confidence-high {
-            background: linear-gradient(135deg, #4caf50, #388e3c);
-            color: white;
-        }
-        .confidence-medium {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: white;
-        }
-        .confidence-low {
-            background: linear-gradient(135deg, #f44336, #d32f2f);
-            color: white;
-        }
-        .priority-badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: inline-block;
-            margin: 0 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        }
-        .priority-high {
-            background: linear-gradient(135deg, #e91e63, #ad1457);
-            color: white;
-        }
-        .priority-medium {
-            background: linear-gradient(135deg, #673ab7, #512da8);
-            color: white;
-        }
-        .priority-low {
-            background: linear-gradient(135deg, #607d8b, #455a64);
-            color: white;
-        }
-        .take-profit-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin: 15px 0;
-        }
-        .take-profit-item {
-            background: linear-gradient(135deg, #e8f5e8, #c8e6c8);
-            border: 2px solid #81c784;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .take-profit-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(27,94,32,0.3);
-        }
-        .take-profit-item::before {
-            content: '🎯';
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 1.2em;
-        }
-        .take-profit-price {
-            font-size: 1.1em;
-            font-weight: 700;
-            color: #2e7d32;
-            margin-bottom: 5px;
-        }
-        .take-profit-gain {
-            font-size: 0.9em;
-            color: #4caf50;
-            font-weight: 600;
-        }
-        .take-profit-amount {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 3px;
-        }
-        .risk-reward-badge {
-            background: linear-gradient(135deg, #3f51b5, #303f9f);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-weight: 700;
-            display: inline-block;
-            margin: 5px 0;
-            box-shadow: 0 3px 8px rgba(63,81,181,0.3);
-        }
-        .market-sentiment-badge {
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            display: inline-block;
-            margin: 10px 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .sentiment-bullish {
-            background: linear-gradient(135deg, #4caf50, #388e3c);
-            color: white;
-        }
-        .sentiment-bearish {
-            background: linear-gradient(135deg, #f44336, #d32f2f);
-            color: white;
-        }
-        .sentiment-neutral {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: white;
-        }
-        .urgency-section {
-            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-            border: 2px solid #ffb74d;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 15px 0;
-            position: relative;
-        }
-        .urgency-section::before {
-            content: '⏰';
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            font-size: 1.3em;
-        }
-        .urgency-section h5 {
-            margin: 0 0 8px 35px;
-            color: #e65100;
-            font-weight: 700;
-        }
-        .urgency-section p {
-            margin: 0 0 0 35px;
-            color: #bf360c;
-        }
-        /* Individual Crypto Container Styles */
-        .crypto-container {
-            margin: 25px 0;
-            border: 3px solid #4a90e2;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(74,144,226,0.25);
-            background: linear-gradient(135deg, rgba(74,144,226,0.1), rgba(142,68,173,0.1));
-            transition: all 0.3s ease;
-        }
-        .crypto-container:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(74,144,226,0.35);
-        }
-        .crypto-header {
-            background: linear-gradient(135deg, #4a90e2, #8e44ad);
-            padding: 20px;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        .crypto-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            animation: shimmer 3s ease-in-out infinite;
-        }
-        @keyframes shimmer {
-            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
-        .crypto-title {
-            position: relative;
-            z-index: 2;
-        }
-        .crypto-title h2 {
-            margin: 0 0 15px 0;
-            font-size: 2.5em;
-            font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: 1px;
-        }
-        .crypto-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-        .crypto-content {
-            padding: 0;
-        }
-        .crypto-action-section {
-            margin: 0;
-            border-radius: 0;
-            border: none;
-        }
-        .crypto-action-section h3 {
-            background: linear-gradient(135deg, #34495e, #2c3e50);
-            color: white;
-            margin: 0;
-            padding: 15px 20px;
-            font-size: 1.4em;
-            font-weight: 700;
-            border-bottom: 3px solid #3498db;
-        }
-        .sell-section h3 {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            border-bottom-color: #e74c3c;
-        }
-        .buy-section h3 {
-            background: linear-gradient(135deg, #27ae60, #229954);
-            border-bottom-color: #27ae60;
-        }
-        .hold-section h3 {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            border-bottom-color: #f39c12;
-        }
-        .action-details {
-            padding: 20px;
-        }
-        .detail-item {
-            margin: 15px 0;
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.7);
-            border-radius: 10px;
-            border-left: 4px solid #3498db;
-        }
-        .watch-levels {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .watch-levels > div {
-            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            border: 2px solid #95a5a6;
-        }
-        .dca-info {
-            background: linear-gradient(135deg, #e8f8f5, #d5f4e6);
-            border: 2px solid #52c788;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 15px 0;
-            position: relative;
-        }
-        .dca-info::before {
-            content: '📈';
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            font-size: 1.3em;
-        }
-        .dca-info strong {
-            color: #27ae60;
-            margin-left: 35px;
-        }
-        .stop-loss-info {
-            background: linear-gradient(135deg, #ffebee, #ffcdd2);
-            border: 2px solid #ef5350;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 15px 0;
-            position: relative;
-        }
-        .stop-loss-info::before {
-            content: '🛑';
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            font-size: 1.3em;
-        }
-        .stop-loss-info strong {
-            color: #d32f2f;
-            margin-left: 35px;
         }
     </style>
 </head>
@@ -717,64 +305,36 @@
             <!-- Market Overview -->
             <div th:if="${analysisData['market_overview'] != null}" class="market-overview">
                 <h2>📊 Market Overview</h2>
-                <div class="strategy-content" style="background: transparent; padding: 0; position: relative; z-index: 2;">
+                <div>
                     <div th:if="${analysisData['market_overview']['market_sentiment'] != null}">
                         <strong>Market Sentiment:</strong>
-                        <span th:class="${'market-sentiment-badge sentiment-' + #strings.toLowerCase(analysisData['market_overview']['market_sentiment'])}"
-                              th:text="${analysisData['market_overview']['market_sentiment']}"></span>
-                        <span th:if="${analysisData['market_overview']['sentiment_confidence'] != null}"
-                              th:class="${'confidence-badge confidence-' + #strings.toLowerCase(analysisData['market_overview']['sentiment_confidence'])}"
-                              th:text="${'(' + analysisData['market_overview']['sentiment_confidence'] + ' confidence)'}"></span>
+                        <span th:text="${analysisData['market_overview']['market_sentiment']}"></span>
                     </div>
-                    <div th:if="${analysisData['market_overview']['key_levels'] != null}" style="margin-top: 15px;">
-                        <strong>Key Levels to Watch:</strong>
-                        <p th:text="${analysisData['market_overview']['key_levels']}" style="color: #f0f0f0; margin-top: 5px;"></p>
+                    <div th:if="${analysisData['market_overview']['key_levels'] != null}" style="margin-top: 10px;">
+                        <strong>Key Levels:</strong>
+                        <div th:text="${analysisData['market_overview']['key_levels']}"></div>
                     </div>
-                    <div th:if="${analysisData['market_overview']['trend_alignment'] != null}" style="margin-top: 15px;">
-                        <strong>Trend Alignment:</strong>
-                        <p th:text="${analysisData['market_overview']['trend_alignment']}" style="color: #f0f0f0; margin-top: 5px;"></p>
-                    </div>
-                    <div th:if="${analysisData['market_overview']['volatility_expectation'] != null}" style="margin-top: 15px;">
-                        <strong>Volatility Expectation:</strong>
-                        <p th:text="${analysisData['market_overview']['volatility_expectation']}" style="color: #f0f0f0; margin-top: 5px;"></p>
-                    </div>
-                    <div th:if="${analysisData['market_overview']['best_trading_window'] != null}" style="margin-top: 15px;">
+                    <div th:if="${analysisData['market_overview']['best_trading_window'] != null}" style="margin-top: 10px;">
                         <strong>Best Trading Window:</strong>
-                        <span th:text="${analysisData['market_overview']['best_trading_window']}" style="color: #ffeb3b; font-weight: bold;"></span>
-                    </div>
-                    <div th:if="${analysisData['market_overview']['market_catalysts'] != null}" style="margin-top: 15px;">
-                        <strong>Market Catalysts:</strong>
-                        <p th:text="${analysisData['market_overview']['market_catalysts']}" style="color: #f0f0f0; margin-top: 5px;"></p>
-                    </div>
-                    <div th:if="${analysisData['market_overview']['overnight_alerts'] != null}" style="margin-top: 15px;">
-                        <strong>Overnight Alerts:</strong>
-                        <p th:text="${analysisData['market_overview']['overnight_alerts']}" style="color: #ff8a65; font-weight: bold; margin-top: 5px;"></p>
+                        <span th:text="${analysisData['market_overview']['best_trading_window']}" style="font-weight: bold;"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Individual Cryptocurrency Recommendations -->
             <!-- Sell Recommendations -->
             <div th:each="sellRec : ${analysisData['sell_recommendations'] ?: {}}">
-                <div class="crypto-container" th:id="'crypto-sell-' + ${sellRec['symbol']}">
+                <div class="crypto-container">
                     <!-- Crypto Header -->
                     <div class="crypto-header">
-                        <div class="crypto-title">
-                            <h2><span>🔴</span> <span th:text="${sellRec['symbol']}"></span></h2>
-                            <div class="crypto-badges">
-                                <span class="action-badge action-trim">SELL</span>
-                                <span th:if="${sellRec['confidence_level'] != null}"
-                                      th:class="${'confidence-badge confidence-' + #strings.toLowerCase(sellRec['confidence_level'])}"
-                                      th:text="${sellRec['confidence_level']}"></span>
-                                <span th:if="${sellRec['priority'] != null}"
-                                      th:class="${'priority-badge priority-' + #strings.toLowerCase(sellRec['priority'])}"
-                                      th:text="${sellRec['priority'] + ' Priority'}"></span>
-                            </div>
+                        <h2>🔴 <span th:text="${sellRec['symbol']}"></span></h2>
+                        <div class="crypto-badges">
+                            <span class="badge">SELL</span>
+                            <span th:if="${sellRec['confidence_level'] != null}" class="badge" th:text="${sellRec['confidence_level']}"></span>
+                            <span th:if="${sellRec['priority'] != null}" class="badge" th:text="${sellRec['priority'] + ' Priority'}"></span>
                         </div>
                     </div>
 
                     <div class="crypto-content">
-                        <!-- Sell Section -->
                         <div class="crypto-action-section sell-section">
                             <h3>🔴 Sell Strategy</h3>
                             
@@ -794,31 +354,14 @@
                                     <span th:text="${sellRec['current_price_vs_target']}"></span>
                                 </div>
 
-                                <div th:if="${sellRec['stop_loss_price'] != null}" class="detail-item">
-                                    <strong>Stop Loss:</strong>
-                                    <span class="price-point" th:text="${sellRec['stop_loss_price']}"></span>
-                                </div>
-                                
-                                <div th:if="${sellRec['watch_levels'] != null}" class="detail-item">
-                                    <strong>Watch Levels:</strong>
-                                    <div class="watch-levels">
-                                        <span th:if="${sellRec['watch_levels']['support'] != null}" 
-                                              class="support-level" 
-                                              th:text="'Support: ' + ${sellRec['watch_levels']['support']}"></span>
-                                        <span th:if="${sellRec['watch_levels']['resistance'] != null}" 
-                                              class="resistance-level" 
-                                              th:text="'Resistance: ' + ${sellRec['watch_levels']['resistance']}"></span>
-                                    </div>
+                                <div th:if="${sellRec['reason'] != null}" class="detail-item">
+                                    <strong>Analysis:</strong>
+                                    <div th:text="${sellRec['reason']}"></div>
                                 </div>
 
-                                <div th:if="${sellRec['rationale'] != null}" class="detail-item rationale">
-                                    <strong>Rationale:</strong>
-                                    <p th:text="${sellRec['rationale']}"></p>
-                                </div>
-
-                                <div th:if="${sellRec['timing'] != null}" class="detail-item">
-                                    <strong>Timing:</strong>
-                                    <span th:text="${sellRec['timing']}"></span>
+                                <div th:if="${sellRec['urgency'] != null}" class="urgency-section">
+                                    <h5>⏰ Execution Urgency</h5>
+                                    <div th:text="${sellRec['urgency']}"></div>
                                 </div>
                             </div>
                         </div>
@@ -828,25 +371,18 @@
 
             <!-- Buy Recommendations -->
             <div th:each="buyRec : ${analysisData['buy_recommendations'] ?: {}}">
-                <div class="crypto-container" th:id="'crypto-buy-' + ${buyRec['symbol']}">
+                <div class="crypto-container buy">
                     <!-- Crypto Header -->
-                    <div class="crypto-header">
-                        <div class="crypto-title">
-                            <h2><span>🟢</span> <span th:text="${buyRec['symbol']}"></span></h2>
-                            <div class="crypto-badges">
-                                <span class="action-badge action-buy">BUY</span>
-                                <span th:if="${buyRec['confidence_level'] != null}"
-                                      th:class="${'confidence-badge confidence-' + #strings.toLowerCase(buyRec['confidence_level'])}"
-                                      th:text="${buyRec['confidence_level']}"></span>
-                                <span th:if="${buyRec['priority'] != null}"
-                                      th:class="${'priority-badge priority-' + #strings.toLowerCase(buyRec['priority'])}"
-                                      th:text="${buyRec['priority'] + ' Priority'}"></span>
-                            </div>
+                    <div class="crypto-header buy">
+                        <h2>🟢 <span th:text="${buyRec['symbol']}"></span></h2>
+                        <div class="crypto-badges">
+                            <span class="badge">BUY</span>
+                            <span th:if="${buyRec['confidence_level'] != null}" class="badge" th:text="${buyRec['confidence_level']}"></span>
+                            <span th:if="${buyRec['priority'] != null}" class="badge" th:text="${buyRec['priority'] + ' Priority'}"></span>
                         </div>
                     </div>
 
                     <div class="crypto-content">
-                        <!-- Buy Section -->
                         <div class="crypto-action-section buy-section">
                             <h3>🟢 Buy Strategy</h3>
                             
@@ -866,42 +402,22 @@
                                     <span th:text="${buyRec['current_price_vs_target']}"></span>
                                 </div>
 
-                                <div th:if="${buyRec['risk_reward_ratio'] != null}" class="detail-item">
-                                    <strong>Risk/Reward Ratio:</strong>
-                                    <span class="risk-reward-badge" th:text="${buyRec['risk_reward_ratio']}"></span>
-                                </div>
-
-                                <div th:if="${buyRec['limit_order_price'] != null}" class="detail-item">
-                                    <strong>Limit Order Price:</strong>
-                                    <span class="price-point" th:text="${buyRec['limit_order_price']}"></span>
+                                <div th:if="${buyRec['reason'] != null}" class="detail-item">
+                                    <strong>Analysis:</strong>
+                                    <div th:text="${buyRec['reason']}"></div>
                                 </div>
 
                                 <div th:if="${buyRec['urgency'] != null}" class="urgency-section">
-                                    <h5>Execution Urgency</h5>
-                                    <p th:text="${buyRec['urgency']}"></p>
-                                    <div th:if="${buyRec['urgency_reasoning'] != null}" style="margin-top: 8px;">
-                                        <strong>Why urgent:</strong>
-                                        <span th:text="${buyRec['urgency_reasoning']}" style="font-style: italic; color: #d84315;"></span>
-                                    </div>
-                                </div>
-
-                                <div th:if="${buyRec['reason'] != null}" class="detail-item">
-                                    <strong>Analysis:</strong>
-                                    <p th:text="${buyRec['reason']}"></p>
-                                </div>
-
-                                <div th:if="${buyRec['dca_strategy'] != null}" class="dca-info">
-                                    <strong>DCA Strategy:</strong>
-                                    <span th:text="${buyRec['dca_strategy']}"></span>
+                                    <h5>⏰ Execution Urgency</h5>
+                                    <div th:text="${buyRec['urgency']}"></div>
                                 </div>
 
                                 <div th:if="${buyRec['take_profit_levels'] != null and not #lists.isEmpty(buyRec['take_profit_levels'])}" class="detail-item">
-                                    <strong>Enhanced Take Profit Strategy:</strong>
+                                    <strong>Take Profit Strategy:</strong>
                                     <div class="take-profit-grid">
                                         <div th:each="level : ${buyRec['take_profit_levels']}" class="take-profit-item">
                                             <div class="take-profit-price" th:text="${level['price']}"></div>
                                             <div class="take-profit-gain" th:text="${'+' + level['gain'] + ' gain'}"></div>
-                                            <div class="take-profit-amount" th:text="${'Sell ' + level['sell_amount']}"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -909,10 +425,6 @@
                                 <div th:if="${buyRec['stop_loss_level'] != null}" class="stop-loss-info">
                                     <strong>Stop Loss Level:</strong>
                                     <span th:text="${buyRec['stop_loss_level']}"></span>
-                                    <div th:if="${buyRec['stop_loss_reasoning'] != null}" style="margin-top: 8px;">
-                                        <strong>Technical reasoning:</strong>
-                                        <span th:text="${buyRec['stop_loss_reasoning']}" style="font-style: italic;"></span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -922,34 +434,23 @@
 
             <!-- Hold Recommendations -->
             <div th:each="holdRec : ${analysisData['hold_recommendations'] ?: {}}">
-                <div class="crypto-container" th:id="'crypto-hold-' + ${holdRec['symbol']}">
+                <div class="crypto-container hold">
                     <!-- Crypto Header -->
-                    <div class="crypto-header">
-                        <div class="crypto-title">
-                            <h2><span>🟡</span> <span th:text="${holdRec['symbol']}"></span></h2>
-                            <div class="crypto-badges">
-                                <span class="action-badge action-hold">HOLD</span>
-                                <span th:if="${holdRec['confidence_level'] != null}"
-                                      th:class="${'confidence-badge confidence-' + #strings.toLowerCase(holdRec['confidence_level'])}"
-                                      th:text="${holdRec['confidence_level']}"></span>
-                            </div>
+                    <div class="crypto-header hold">
+                        <h2>🟡 <span th:text="${holdRec['symbol']}"></span></h2>
+                        <div class="crypto-badges">
+                            <span class="badge">HOLD</span>
                         </div>
                     </div>
 
                     <div class="crypto-content">
-                        <!-- Hold Section -->
                         <div class="crypto-action-section hold-section">
                             <h3>🟡 Hold & Watch Strategy</h3>
                             
                             <div class="action-details">
                                 <div th:if="${holdRec['reason'] != null}" class="detail-item">
                                     <strong>Reason to Hold:</strong>
-                                    <p th:text="${holdRec['reason']}"></p>
-                                </div>
-
-                                <div th:if="${holdRec['expected_move_today'] != null}" class="detail-item">
-                                    <strong>Expected Move Today:</strong>
-                                    <span class="price-point" th:text="${holdRec['expected_move_today']}"></span>
+                                    <div th:text="${holdRec['reason']}"></div>
                                 </div>
 
                                 <div th:if="${holdRec['watch_levels'] != null}" class="detail-item">
@@ -963,27 +464,7 @@
                                             <strong>Sell Above:</strong>
                                             <span class="price-point" th:text="${holdRec['watch_levels']['sell_above']}"></span>
                                         </div>
-                                        <div th:if="${holdRec['watch_levels']['key_support'] != null and holdRec['watch_levels']['key_support'] != ''}">
-                                            <strong>Key Support:</strong>
-                                            <span class="price-point" th:text="${holdRec['watch_levels']['key_support']}"></span>
-                                        </div>
-                                        <div th:if="${holdRec['watch_levels']['key_resistance'] != null and holdRec['watch_levels']['key_resistance'] != ''}">
-                                            <strong>Key Resistance:</strong>
-                                            <span class="price-point" th:text="${holdRec['watch_levels']['key_resistance']}"></span>
-                                        </div>
                                     </div>
-                                </div>
-
-                                <div th:if="${holdRec['alerts_to_set'] != null and not #lists.isEmpty(holdRec['alerts_to_set'])}" class="detail-item">
-                                    <strong>Alerts to Configure:</strong>
-                                    <ul style="margin: 5px 0; padding-left: 20px;">
-                                        <li th:each="alert : ${holdRec['alerts_to_set']}" th:text="${alert}"></li>
-                                    </ul>
-                                </div>
-
-                                <div th:if="${holdRec['catalyst_watch'] != null}" class="detail-item">
-                                    <strong>Catalyst Watch:</strong>
-                                    <p th:text="${holdRec['catalyst_watch']}" style="color: #666; font-style: italic;"></p>
                                 </div>
                             </div>
                         </div>
@@ -991,148 +472,78 @@
                 </div>
             </div>
 
-        <!-- Portfolio Risk Check -->
-        <div class="portfolio-summary" th:if="${analysisData['portfolio_risk_check'] != null}">
-            <h2>🛡️ Portfolio Risk Assessment</h2>
-            <div class="summary-grid">
-                <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['current_allocation_warnings'] != null}">
-                    <h4>⚠️ Allocation Warnings</h4>
-                    <p th:text="${analysisData['portfolio_risk_check']['current_allocation_warnings']}"></p>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['stablecoin_buffer_status'] != null}">
-                    <h4>💵 Stablecoin Buffer</h4>
-                    <p th:text="${analysisData['portfolio_risk_check']['stablecoin_buffer_status']}"></p>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['position_size_compliance'] != null}">
-                    <h4>📏 Position Size Compliance</h4>
-                    <p th:text="${analysisData['portfolio_risk_check']['position_size_compliance']}"></p>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['post_trade_portfolio_health'] != null}">
-                    <h4>📊 Post-Trade Health</h4>
-                    <p th:text="${analysisData['portfolio_risk_check']['post_trade_portfolio_health']}"></p>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['risk_score'] != null}">
-                    <h4>🎯 Risk Score</h4>
-                    <span th:class="${'risk-' + #strings.toLowerCase(analysisData['portfolio_risk_check']['risk_score'])}"
-                          class="risk-level" th:text="${analysisData['portfolio_risk_check']['risk_score']}"></span>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['correlation_risk'] != null}">
-                    <h4>🔗 Correlation Risk</h4>
-                    <p th:text="${analysisData['portfolio_risk_check']['correlation_risk']}"></p>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['liquidity_buffer'] != null}">
-                    <h4>💧 Liquidity Buffer</h4>
-                    <p th:text="${analysisData['portfolio_risk_check']['liquidity_buffer']}"></p>
+            <!-- Portfolio Risk Check -->
+            <div class="portfolio-summary" th:if="${analysisData['portfolio_risk_check'] != null}">
+                <h2>🛡️ Portfolio Risk Assessment</h2>
+                <div class="summary-grid">
+                    <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['current_allocation_warnings'] != null}">
+                        <h4>⚠️ Allocation Warnings</h4>
+                        <p th:text="${analysisData['portfolio_risk_check']['current_allocation_warnings']}"></p>
+                    </div>
+                    <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['stablecoin_buffer_status'] != null}">
+                        <h4>💵 Stablecoin Buffer</h4>
+                        <p th:text="${analysisData['portfolio_risk_check']['stablecoin_buffer_status']}"></p>
+                    </div>
+                    <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['position_size_compliance'] != null}">
+                        <h4>📏 Position Size Compliance</h4>
+                        <p th:text="${analysisData['portfolio_risk_check']['position_size_compliance']}"></p>
+                    </div>
+                    <div class="summary-item" th:if="${analysisData['portfolio_risk_check']['post_trade_portfolio_health'] != null}">
+                        <h4>📊 Post-Trade Health</h4>
+                        <p th:text="${analysisData['portfolio_risk_check']['post_trade_portfolio_health']}"></p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Portfolio Actions -->
-        <div class="portfolio-summary" th:if="${analysisData['portfolio_actions'] != null}">
-            <h2>📋 Portfolio Actions</h2>
-            <div class="summary-grid">
-                <div class="summary-item" th:if="${analysisData['portfolio_actions']['rebalancing_needed'] != null}">
-                    <h4>⚖️ Rebalancing</h4>
-                    <p th:text="${analysisData['portfolio_actions']['rebalancing_needed']}"></p>
+            <!-- Portfolio Actions -->
+            <div class="portfolio-summary" th:if="${analysisData['portfolio_actions'] != null}">
+                <h2>📋 Portfolio Actions</h2>
+                <div class="summary-grid">
+                    <div class="summary-item" th:if="${analysisData['portfolio_actions']['rebalancing_needed'] != null}">
+                        <h4>⚖️ Rebalancing</h4>
+                        <p th:text="${analysisData['portfolio_actions']['rebalancing_needed']}"></p>
+                    </div>
+                    <div class="summary-item" th:if="${analysisData['portfolio_actions']['cash_deployment'] != null}">
+                        <h4>💵 Cash Deployment</h4>
+                        <p th:text="${analysisData['portfolio_actions']['cash_deployment']}"></p>
+                    </div>
+                    <div class="summary-item" th:if="${analysisData['portfolio_actions']['risk_management'] != null}">
+                        <h4>🛡️ Risk Management</h4>
+                        <p th:text="${analysisData['portfolio_actions']['risk_management']}"></p>
+                    </div>
+                    <div class="summary-item" th:if="${analysisData['portfolio_actions']['priority_order'] != null}">
+                        <h4>🎯 Priority Order</h4>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            <li th:each="priority : ${analysisData['portfolio_actions']['priority_order']}" 
+                                th:text="${priority}"></li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_actions']['cash_deployment'] != null}">
-                    <h4>💵 Cash Deployment</h4>
-                    <p th:text="${analysisData['portfolio_actions']['cash_deployment']}"></p>
+            </div>
+
+            <!-- Daily Execution Plan -->
+            <div th:if="${analysisData['daily_execution_plan'] != null}" class="timeline-grid">
+                <div class="timeline-header">
+                    <h2>⏰ Daily Execution Plan</h2>
                 </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_actions']['risk_management'] != null}">
-                    <h4>🛡️ Risk Management</h4>
-                    <p th:text="${analysisData['portfolio_actions']['risk_management']}"></p>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_actions']['total_capital_at_risk'] != null}">
-                    <h4>⚡ Capital at Risk</h4>
-                    <p th:text="${analysisData['portfolio_actions']['total_capital_at_risk']}"></p>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_actions']['expected_portfolio_changes'] != null}">
-                    <h4>🔄 Expected Changes</h4>
-                    <p th:text="${analysisData['portfolio_actions']['expected_portfolio_changes']}"></p>
-                </div>
-                <div class="summary-item" th:if="${analysisData['portfolio_actions']['priority_order'] != null}">
-                    <h4>🎯 Priority Order</h4>
+
+                <div th:if="${analysisData['daily_execution_plan']['morning_actions'] != null}" class="timeline-card">
+                    <h5>🌅 Morning Actions</h5>
                     <ul style="margin: 0; padding-left: 20px;">
-                        <li th:each="priority : ${analysisData['portfolio_actions']['priority_order']}" 
-                            th:text="${priority}"></li>
+                        <li th:each="action : ${analysisData['daily_execution_plan']['morning_actions']}" 
+                            th:text="${action}"></li>
+                    </ul>
+                </div>
+
+                <div th:if="${analysisData['daily_execution_plan']['alerts_to_configure'] != null}" class="timeline-card">
+                    <h5>🔔 Alerts to Configure</h5>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li th:each="alert : ${analysisData['daily_execution_plan']['alerts_to_configure']}" 
+                            th:text="${alert}"></li>
                     </ul>
                 </div>
             </div>
-        </div>
 
-        <!-- Daily Execution Plan -->
-        <div th:if="${analysisData['daily_execution_plan'] != null}" class="timeline-grid">
-            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; text-align: center; box-shadow: 0 5px 15px rgba(102,126,234,0.3); grid-column: 1 / -1;">
-                <h2 style="margin: 0; font-size: 1.8em; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 15px;">
-                    <span>⏰</span> Daily Execution Plan
-                </h2>
-            </div>
-
-            <div th:if="${analysisData['daily_execution_plan']['pre_market_preparation'] != null}" class="timeline-card">
-                <h5>🌄 Pre-Market Preparation</h5>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li th:each="action : ${analysisData['daily_execution_plan']['pre_market_preparation']}" 
-                        th:text="${action}"></li>
-                </ul>
-            </div>
-
-            <div th:if="${analysisData['daily_execution_plan']['morning_actions'] != null}" class="timeline-card">
-                <h5>🌅 Morning Actions</h5>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li th:each="action : ${analysisData['daily_execution_plan']['morning_actions']}" 
-                        th:text="${action}"></li>
-                </ul>
-            </div>
-
-            <div th:if="${analysisData['daily_execution_plan']['afternoon_monitoring'] != null}" class="timeline-card">
-                <h5>🕐 Afternoon Monitoring</h5>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li th:each="action : ${analysisData['daily_execution_plan']['afternoon_monitoring']}" 
-                        th:text="${action}"></li>
-                </ul>
-            </div>
-
-            <div th:if="${analysisData['daily_execution_plan']['evening_review'] != null}" class="timeline-card">
-                <h5>🌆 Evening Review</h5>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li th:each="action : ${analysisData['daily_execution_plan']['evening_review']}" 
-                        th:text="${action}"></li>
-                </ul>
-            </div>
-
-            <div th:if="${analysisData['daily_execution_plan']['limit_orders_to_set'] != null}" class="timeline-card">
-                <h5>📝 Limit Orders to Set</h5>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li th:each="order : ${analysisData['daily_execution_plan']['limit_orders_to_set']}" 
-                        th:text="${order}"></li>
-                </ul>
-            </div>
-
-            <div th:if="${analysisData['daily_execution_plan']['alerts_to_configure'] != null}" class="timeline-card">
-                <h5>🔔 Alerts to Configure</h5>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li th:each="alert : ${analysisData['daily_execution_plan']['alerts_to_configure']}" 
-                        th:text="${alert}"></li>
-                </ul>
-            </div>
-
-            <div th:if="${analysisData['daily_execution_plan']['overnight_monitoring'] != null}" class="timeline-card">
-                <h5>🌙 Overnight Monitoring</h5>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li th:each="item : ${analysisData['daily_execution_plan']['overnight_monitoring']}" 
-                        th:text="${item}"></li>
-                </ul>
-            </div>
-
-            <div th:if="${analysisData['daily_execution_plan']['risk_checkpoints'] != null}" class="timeline-card">
-                <h5>🛡️ Risk Checkpoints</h5>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li th:each="checkpoint : ${analysisData['daily_execution_plan']['risk_checkpoints']}" 
-                        th:text="${checkpoint}"></li>
-                </ul>
-                </div>
-            </div>
         </div>
 
         <!-- Footer -->
