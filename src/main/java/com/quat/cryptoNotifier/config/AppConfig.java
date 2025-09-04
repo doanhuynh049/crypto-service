@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
     
     private String llmProvider;
+    private String llmProviderOld;
     private String llmApiKey;
     private String smtpUser;
     private String smtpPass;
@@ -22,6 +23,14 @@ public class AppConfig {
 
     public void setLlmProvider(String llmProvider) {
         this.llmProvider = llmProvider;
+    }
+
+    public String getLlmProviderOld() {
+        return llmProviderOld;
+    }
+
+    public void setLlmProviderOld(String llmProviderOld) {
+        this.llmProviderOld = llmProviderOld;
     }
 
     public String getLlmApiKey() {

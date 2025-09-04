@@ -266,22 +266,50 @@ public class AdvisoryEngineService {
     }
 
     private String callGeminiAPI(String prompt) {
+        // First attempt with primary provider
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("x-goog-api-key", appConfig.getLlmApiKey());
+            return callGeminiAPIWithProvider(prompt, appConfig.getLlmProvider(), 1);
+        } catch (Exception e) {
+            logger.warn("First attempt failed with primary provider: {}", e.getMessage());
+            
+            // First retry with primary provider
+            try {
+                Thread.sleep(1000); // Wait 1 second before retry
+                return callGeminiAPIWithProvider(prompt, appConfig.getLlmProvider(), 2);
+            } catch (Exception e2) {
+                logger.warn("Second attempt failed with primary provider: {}", e2.getMessage());
+                
+                // Second retry with old provider
+                try {
+                    Thread.sleep(1000); // Wait 1 second before retry
+                    return callGeminiAPIWithProvider(prompt, appConfig.getLlmProviderOld(), 3);
+                } catch (Exception e3) {
+                    logger.error("All attempts failed. Final attempt with old provider failed: {}", e3.getMessage());
+                    return "{}";
+                }
+            }
+        }
+    }
 
-            Map<String, Object> requestBody = new HashMap<>();
-            Map<String, Object> content = new HashMap<>();
-            Map<String, String> part = new HashMap<>();
-            part.put("text", prompt);
-            content.put("parts", new Object[]{part});
-            requestBody.put("contents", new Object[]{content});
+    private String callGeminiAPIWithProvider(String prompt, String providerUrl, int attemptNumber) throws Exception {
+        logger.info("Attempting Gemini API call #{} with provider: {}", attemptNumber, providerUrl);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-goog-api-key", appConfig.getLlmApiKey());
 
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        Map<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> content = new HashMap<>();
+        Map<String, String> part = new HashMap<>();
+        part.put("text", prompt);
+        content.put("parts", new Object[]{part});
+        requestBody.put("contents", new Object[]{content});
 
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        try {
             String response = restTemplate.exchange(
-                appConfig.getLlmProvider(),
+                providerUrl,
                 HttpMethod.POST,
                 request,
                 String.class
@@ -295,6 +323,7 @@ public class AdvisoryEngineService {
                 if (content1 != null) {
                     JsonNode parts = content1.get("parts");
                     if (parts != null && parts.isArray() && parts.size() > 0) {
+                        logger.info("Successfully received response from attempt #{}", attemptNumber);
                         return parts.get(0).get("text").asText();
                     }
                 }
@@ -303,8 +332,20 @@ public class AdvisoryEngineService {
             return "{}"; // Return empty JSON if parsing fails
 
         } catch (Exception e) {
-            System.err.println("Error calling Gemini API: " + e.getMessage());
-            return "{}";
+            // Check if it's a 503 Service Unavailable error that indicates overload
+            if (e.getMessage() != null && (
+                e.getMessage().contains("503") || 
+                e.getMessage().contains("Service Unavailable") || 
+                e.getMessage().contains("overloaded") ||
+                e.getMessage().contains("UNAVAILABLE"))) {
+                
+                logger.warn("Provider overloaded (503 error) on attempt #{}: {}", attemptNumber, e.getMessage());
+                throw new RuntimeException("Provider overloaded: " + e.getMessage(), e);
+            }
+            
+            // For other errors, still throw to trigger retry
+            logger.error("API call failed on attempt #{}: {}", attemptNumber, e.getMessage());
+            throw e;
         }
     }
 

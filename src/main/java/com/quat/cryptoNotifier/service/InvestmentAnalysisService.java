@@ -204,6 +204,14 @@ public class InvestmentAnalysisService {
                 technicalLevels.put("key_breakout_level", techNode.has("key_breakout_level") ? techNode.get("key_breakout_level").asText() : "TBD");
                 technicalLevels.put("stop_loss_suggestion", techNode.has("stop_loss_suggestion") ? techNode.get("stop_loss_suggestion").asText() : "Set based on risk tolerance");
                 parsedData.put("technical_levels", technicalLevels);
+            } else {
+                // Provide default technical_levels structure when missing from response
+                Map<String, Object> defaultTechnicalLevels = new HashMap<>();
+                defaultTechnicalLevels.put("support_levels", new ArrayList<>());
+                defaultTechnicalLevels.put("resistance_levels", new ArrayList<>());
+                defaultTechnicalLevels.put("key_breakout_level", "TBD");
+                defaultTechnicalLevels.put("stop_loss_suggestion", "Set based on risk tolerance");
+                parsedData.put("technical_levels", defaultTechnicalLevels);
             }
             
             // Parse outlook
@@ -225,16 +233,24 @@ public class InvestmentAnalysisService {
                 strategy.put("risk_management", strategyNode.has("risk_management") ? strategyNode.get("risk_management").asText() : "Standard risk management principles");
                 
                 // Parse profit targets
+                List<String> profitTargets = new ArrayList<>();
                 if (strategyNode.has("profit_targets")) {
-                    List<String> profitTargets = new ArrayList<>();
                     JsonNode targetsArray = strategyNode.get("profit_targets");
                     for (JsonNode target : targetsArray) {
                         profitTargets.add(target.asText());
                     }
-                    strategy.put("profit_targets", profitTargets);
                 }
+                strategy.put("profit_targets", profitTargets);
                 
                 parsedData.put("strategy", strategy);
+            } else {
+                // Provide default strategy structure when missing from response
+                Map<String, Object> defaultStrategy = new HashMap<>();
+                defaultStrategy.put("entry_strategy", "Gradual entry recommended");
+                defaultStrategy.put("dca_schedule", "Weekly or bi-weekly");
+                defaultStrategy.put("risk_management", "Standard risk management principles");
+                defaultStrategy.put("profit_targets", new ArrayList<>());
+                parsedData.put("strategy", defaultStrategy);
             }
             
             // Parse market sentiment
@@ -266,37 +282,45 @@ public class InvestmentAnalysisService {
                 Map<String, Object> catalystsRisks = new HashMap<>();
                 
                 // Parse positive catalysts
+                List<String> positiveCatalysts = new ArrayList<>();
                 if (catalystsNode.has("positive_catalysts")) {
-                    List<String> positiveCatalysts = new ArrayList<>();
                     JsonNode catalystsArray = catalystsNode.get("positive_catalysts");
                     for (JsonNode catalyst : catalystsArray) {
                         positiveCatalysts.add(catalyst.asText());
                     }
-                    catalystsRisks.put("positive_catalysts", positiveCatalysts);
                 }
+                catalystsRisks.put("positive_catalysts", positiveCatalysts);
                 
                 // Parse risk factors
+                List<String> riskFactors = new ArrayList<>();
                 if (catalystsNode.has("risk_factors")) {
-                    List<String> riskFactors = new ArrayList<>();
                     JsonNode risksArray = catalystsNode.get("risk_factors");
                     for (JsonNode risk : risksArray) {
                         riskFactors.add(risk.asText());
                     }
-                    catalystsRisks.put("risk_factors", riskFactors);
                 }
+                catalystsRisks.put("risk_factors", riskFactors);
                 
                 // Parse upcoming events
+                List<String> upcomingEvents = new ArrayList<>();
                 if (catalystsNode.has("upcoming_events")) {
-                    List<String> upcomingEvents = new ArrayList<>();
                     JsonNode eventsArray = catalystsNode.get("upcoming_events");
                     for (JsonNode event : eventsArray) {
                         upcomingEvents.add(event.asText());
                     }
-                    catalystsRisks.put("upcoming_events", upcomingEvents);
                 }
+                catalystsRisks.put("upcoming_events", upcomingEvents);
                 
                 catalystsRisks.put("regulatory_outlook", catalystsNode.has("regulatory_outlook") ? catalystsNode.get("regulatory_outlook").asText() : "Regulatory outlook analysis");
                 parsedData.put("catalysts_and_risks", catalystsRisks);
+            } else {
+                // Provide default catalysts_and_risks structure when missing from response
+                Map<String, Object> defaultCatalystsRisks = new HashMap<>();
+                defaultCatalystsRisks.put("positive_catalysts", new ArrayList<>());
+                defaultCatalystsRisks.put("risk_factors", new ArrayList<>());
+                defaultCatalystsRisks.put("upcoming_events", new ArrayList<>());
+                defaultCatalystsRisks.put("regulatory_outlook", "Regulatory outlook analysis");
+                parsedData.put("catalysts_and_risks", defaultCatalystsRisks);
             }
             
             // Parse position sizing
@@ -316,54 +340,91 @@ public class InvestmentAnalysisService {
                 Map<String, Object> keyTriggers = new HashMap<>();
                 
                 // Parse buy triggers
+                List<String> buyTriggers = new ArrayList<>();
                 if (triggersNode.has("buy_triggers")) {
-                    List<String> buyTriggers = new ArrayList<>();
                     JsonNode buyArray = triggersNode.get("buy_triggers");
                     for (JsonNode trigger : buyArray) {
                         buyTriggers.add(trigger.asText());
                     }
-                    keyTriggers.put("buy_triggers", buyTriggers);
                 }
+                keyTriggers.put("buy_triggers", buyTriggers);
                 
                 // Parse sell triggers
+                List<String> sellTriggers = new ArrayList<>();
                 if (triggersNode.has("sell_triggers")) {
-                    List<String> sellTriggers = new ArrayList<>();
                     JsonNode sellArray = triggersNode.get("sell_triggers");
                     for (JsonNode trigger : sellArray) {
                         sellTriggers.add(trigger.asText());
                     }
-                    keyTriggers.put("sell_triggers", sellTriggers);
                 }
+                keyTriggers.put("sell_triggers", sellTriggers);
                 
                 // Parse reassessment triggers
+                List<String> reassessmentTriggers = new ArrayList<>();
                 if (triggersNode.has("reassessment_triggers")) {
-                    List<String> reassessmentTriggers = new ArrayList<>();
                     JsonNode reassessmentArray = triggersNode.get("reassessment_triggers");
                     for (JsonNode trigger : reassessmentArray) {
                         reassessmentTriggers.add(trigger.asText());
                     }
-                    keyTriggers.put("reassessment_triggers", reassessmentTriggers);
                 }
+                keyTriggers.put("reassessment_triggers", reassessmentTriggers);
                 
                 parsedData.put("key_triggers", keyTriggers);
+            } else {
+                // Provide default key_triggers structure when missing from response
+                Map<String, Object> defaultKeyTriggers = new HashMap<>();
+                defaultKeyTriggers.put("buy_triggers", new ArrayList<>());
+                defaultKeyTriggers.put("sell_triggers", new ArrayList<>());
+                defaultKeyTriggers.put("reassessment_triggers", new ArrayList<>());
+                parsedData.put("key_triggers", defaultKeyTriggers);
             }
             
         } catch (Exception e) {
             logger.error("Error parsing investment analysis response for {}: ", symbol, e);
-            // Return default structured response
+            // Return default structured response with proper list structures
             parsedData.put("symbol", symbol);
             parsedData.put("bottom_line", "WAIT - Unable to parse analysis response");
             parsedData.put("recommendation", "WAIT");
             parsedData.put("confidence", "LOW");
             parsedData.put("current_price_analysis", new HashMap<>());
-            parsedData.put("technical_levels", new HashMap<>());
+            
+            // Create default technical levels with empty lists
+            Map<String, Object> defaultTechnicalLevels = new HashMap<>();
+            defaultTechnicalLevels.put("support_levels", new ArrayList<>());
+            defaultTechnicalLevels.put("resistance_levels", new ArrayList<>());
+            defaultTechnicalLevels.put("key_breakout_level", "TBD");
+            defaultTechnicalLevels.put("stop_loss_suggestion", "Set based on risk tolerance");
+            parsedData.put("technical_levels", defaultTechnicalLevels);
+            
             parsedData.put("outlook", new HashMap<>());
-            parsedData.put("strategy", new HashMap<>());
+            
+            // Create default strategy with empty lists
+            Map<String, Object> defaultStrategy = new HashMap<>();
+            defaultStrategy.put("entry_strategy", "Gradual entry recommended");
+            defaultStrategy.put("dca_schedule", "Weekly or bi-weekly");
+            defaultStrategy.put("risk_management", "Standard risk management principles");
+            defaultStrategy.put("profit_targets", new ArrayList<>());
+            parsedData.put("strategy", defaultStrategy);
+            
             parsedData.put("market_sentiment", new HashMap<>());
             parsedData.put("fundamentals", new HashMap<>());
-            parsedData.put("catalysts_and_risks", new HashMap<>());
+            
+            // Create default catalysts and risks with empty lists
+            Map<String, Object> defaultCatalystsRisks = new HashMap<>();
+            defaultCatalystsRisks.put("positive_catalysts", new ArrayList<>());
+            defaultCatalystsRisks.put("risk_factors", new ArrayList<>());
+            defaultCatalystsRisks.put("upcoming_events", new ArrayList<>());
+            defaultCatalystsRisks.put("regulatory_outlook", "Regulatory outlook analysis");
+            parsedData.put("catalysts_and_risks", defaultCatalystsRisks);
+            
             parsedData.put("position_sizing", new HashMap<>());
-            parsedData.put("key_triggers", new HashMap<>());
+            
+            // Create default key triggers with empty lists
+            Map<String, Object> defaultKeyTriggers = new HashMap<>();
+            defaultKeyTriggers.put("buy_triggers", new ArrayList<>());
+            defaultKeyTriggers.put("sell_triggers", new ArrayList<>());
+            defaultKeyTriggers.put("reassessment_triggers", new ArrayList<>());
+            parsedData.put("key_triggers", defaultKeyTriggers);
         }
         
         return parsedData;
