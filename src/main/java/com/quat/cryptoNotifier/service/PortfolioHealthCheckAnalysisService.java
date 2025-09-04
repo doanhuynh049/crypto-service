@@ -31,6 +31,8 @@ public class PortfolioHealthCheckAnalysisService {
     public String buildPortfolioHealthCheckPrompt(List<Holding> holdings) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("Portfolio Health Check Prompt\n");
+        prompt.append("This analysis is based on my overall investment strategy and current portfolio holdings.\n\n");
+        prompt.append(investmentStrategyService.getCompleteInvestmentStrategySection());
         prompt.append("Check the health of my crypto portfolio. Based on the data, tell me:\n");
         prompt.append("- Which coins are over-weighted or under-weighted.\n");
         prompt.append("- Which target prices look unrealistic.\n");
