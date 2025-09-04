@@ -130,12 +130,24 @@ public class SchedulerService {
 
     public void sendAdvisoriesForEachCrypto(List<Holding> holdings) throws InterruptedException {
         for (int i = 0; i < holdings.size(); i++) {
-            Holding holding = holdings.get(i);
-            System.out.println("Generating AI advisory for " + holding.getSymbol());
-            Map<String, Object> riskAdvisories = advisoryEngineService.generateInvestmentAnalysis(holding);
-            emailService.sendInvestmentAnalysis(riskAdvisories);
-            Thread.sleep(30000);
-            System.out.println("Completed AI analysis for " + holding.getSymbol());
+            try {
+                Holding holding = holdings.get(i);
+                if (holding.getSymbol() == null || holding.getSymbol().isEmpty() || holding.getSymbol().equals("USDT)")) {
+                    System.out.println("Skipping holding with empty symbol at index " + i);
+                    continue;
+                }
+                System.out.println("Generating AI advisory for " + holding.getSymbol());
+                Map<String, Object> riskAdvisories = advisoryEngineService.generateInvestmentAnalysis(holding);
+                emailService.sendInvestmentAnalysis(riskAdvisories);
+                System.out.println("Completed AI analysis for " + holding.getSymbol());
+            } catch (Exception e) {
+                System.err.println("Error generating advisory for holding: " + holdings.get(i).getSymbol());
+                e.printStackTrace();
+                continue;
+            } finally {
+                // Pause between requests to avoid rate limits
+                Thread.sleep(30000);
+            }
         }
     }
 
