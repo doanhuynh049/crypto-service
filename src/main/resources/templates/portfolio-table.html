@@ -117,6 +117,14 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
+        .summary-card .vnd-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 5px;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
         .portfolio-table {
             margin: 30px;
             overflow-x: auto;
@@ -253,6 +261,39 @@
             font-weight: bold;
         }
 
+        .risk-very_high {
+            background: #8e44ad;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .risk-critical {
+            background: #c0392b;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+
+        .risk-unknown {
+            background: #95a5a6;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
         .recommendation {
             padding: 4px 8px;
             border-radius: 12px;
@@ -344,16 +385,21 @@
                 <div class="summary-card">
                     <h3>Total Value</h3>
                     <div class="value" th:text="${#numbers.formatCurrency(portfolioData.summary.totalCurrentValue)}">$0.00</div>
+                    <div class="vnd-value" th:text="${portfolioData.summary.totalCurrentValueVND}">₫0</div>
                 </div>
                 <div class="summary-card">
                     <h3>Initial Investment</h3>
                     <div class="value" th:text="${#numbers.formatCurrency(portfolioData.summary.totalInitialValue)}">$0.00</div>
+                    <div class="vnd-value" th:text="${portfolioData.summary.totalInitialValueVND}">₫0</div>
                 </div>
                 <div class="summary-card">
                     <h3>Total P&L</h3>
                     <div class="value"
                          th:text="${#numbers.formatCurrency(portfolioData.summary.totalProfitLoss)}"
                          th:class="${portfolioData.summary.totalProfitLoss >= 0 ? 'positive' : 'negative'}">$0.00</div>
+                    <div class="vnd-value"
+                         th:text="${portfolioData.summary.totalProfitLossVND}"
+                         th:class="${portfolioData.summary.totalProfitLoss >= 0 ? 'positive' : 'negative'}">₫0</div>
                 </div>
                 <div class="summary-card">
                     <h3>Total P&L %</h3>
@@ -375,24 +421,21 @@
                     <tr>
                         <th>Asset</th>
                         <th>Holdings</th>
+                        <th>Portfolio Weight</th>
                         <th>Avg Price</th>
-                        <th>Current Price</th>
-                        <th>24h Change</th>
+                        <th>Current Price<br><span style="font-size: 0.7rem; opacity: 0.8;">(24h Change)</span></th>
                         <th>Initial Value</th>
                         <th>Current Value</th>
-                        <th>P&L ($)</th>
-                        <th>P&L (%)</th>
+                        <th>P&L<br><span style="font-size: 0.7rem; opacity: 0.8;">($ / %)</span></th>
                         <th>Expected Entry</th>
-                        <th>3M Target</th>
-                        <th>Long Target</th>
-                        <th>To 3M Target</th>
-                        <th>To Long Target</th>
-                        <th>Trend</th>
-                        <th>Support</th>
-                        <th>Resistance</th>
+                        <th>3M Target<br><span style="font-size: 0.7rem; opacity: 0.8;">(Distance)</span></th>
+                        <th>Long Target<br><span style="font-size: 0.7rem; opacity: 0.8;">(Distance)</span></th>
+                        <th>Support/Resistance</th>
+                        <th>Stop Loss / Take Profit</th>
                         <th>Risk Level</th>
+                        <th>Trend</th>
+                        <th>Technical Indicators</th>
                         <th>Recommendation</th>
-                        <th>Technical</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -406,16 +449,20 @@
                         <!-- Holdings Amount -->
                         <td class="value-cell" th:text="${#numbers.formatDecimal(row.holdings, 1, 6)}">0.000000</td>
 
+                        <!-- Portfolio Weight -->
+                        <td class="percentage-cell" th:text="${#numbers.formatDecimal(row.portfolioWeight, 1, 1)} + '%'">0.0%</td>
+
                         <!-- Average Price -->
                         <td class="price-cell" th:text="${#numbers.formatCurrency(row.averagePrice)}">$0.00</td>
 
-                        <!-- Current Price -->
-                        <td class="price-cell" th:text="${#numbers.formatCurrency(row.currentPrice)}">$0.00</td>
-
-                        <!-- 24h Change -->
-                        <td class="percentage-cell"
-                            th:text="${#numbers.formatDecimal(row.priceChange24h, 1, 2)} + '%'"
-                            th:class="${row.priceChange24h >= 0 ? 'positive' : 'negative'}">0.00%</td>
+                        <!-- Current Price with 24h Change -->
+                        <td class="price-cell">
+                            <div th:text="${#numbers.formatCurrency(row.currentPrice)}">$0.00</div>
+                            <div class="percentage-cell"
+                                 th:text="'(' + ${#numbers.formatDecimal(row.priceChange24h, 1, 2)} + '%)'"
+                                 th:class="${row.priceChange24h >= 0 ? 'positive' : 'negative'}"
+                                 style="font-size: 0.8rem;">(0.00%)</div>
+                        </td>
 
                         <!-- Initial Value -->
                         <td class="value-cell" th:text="${#numbers.formatCurrency(row.initialValue)}">$0.00</td>
@@ -423,46 +470,48 @@
                         <!-- Current Value -->
                         <td class="value-cell" th:text="${#numbers.formatCurrency(row.currentValue)}">$0.00</td>
 
-                        <!-- P&L ($) -->
-                        <td class="value-cell"
-                            th:text="${#numbers.formatCurrency(row.profitLoss)}"
-                            th:class="${row.profitLoss >= 0 ? 'positive' : 'negative'}">$0.00</td>
-
-                        <!-- P&L (%) -->
-                        <td class="percentage-cell"
-                            th:text="${#numbers.formatDecimal(row.profitLossPercentage, 1, 2)} + '%'"
-                            th:class="${row.profitLossPercentage >= 0 ? 'positive' : 'negative'}">0.00%</td>
+                        <!-- Combined P&L ($ / %) -->
+                        <td class="value-cell">
+                            <div th:text="${#numbers.formatCurrency(row.profitLoss)}"
+                                 th:class="${row.profitLoss >= 0 ? 'positive' : 'negative'}">$0.00</div>
+                            <div class="percentage-cell"
+                                 th:text="'(' + ${#numbers.formatDecimal(row.profitLossPercentage, 1, 2)} + '%)'"
+                                 th:class="${row.profitLossPercentage >= 0 ? 'positive' : 'negative'}"
+                                 style="font-size: 0.8rem;">(0.00%)</div>
+                        </td>
 
                         <!-- Expected Entry -->
                         <td class="price-cell" th:text="${#numbers.formatCurrency(row.expectedEntry)}">$0.00</td>
 
-                        <!-- 3M Target -->
-                        <td class="price-cell" th:text="${#numbers.formatCurrency(row.targetPrice3Month)}">$0.00</td>
-
-                        <!-- Long Target -->
-                        <td class="price-cell" th:text="${#numbers.formatCurrency(row.targetPriceLongTerm)}">$0.00</td>
-
-                        <!-- Distance to 3M Target -->
-                        <td class="percentage-cell"
-                            th:text="${#numbers.formatDecimal(row.distanceTo3MonthTarget, 1, 1)} + '%'"
-                            th:class="${row.distanceTo3MonthTarget >= 0 ? 'positive' : 'negative'}">0.0%</td>
-
-                        <!-- Distance to Long Target -->
-                        <td class="percentage-cell"
-                            th:text="${#numbers.formatDecimal(row.distanceToLongTarget, 1, 1)} + '%'"
-                            th:class="${row.distanceToLongTarget >= 0 ? 'positive' : 'negative'}">0.0%</td>
-
-                        <!-- Trend -->
-                        <td>
-                            <span th:class="'trend-' + ${#strings.toLowerCase(row.trend)}"
-                                  th:text="${row.trend}">SIDEWAYS</span>
+                        <!-- 3M Target with Distance -->
+                        <td class="price-cell">
+                            <div th:text="${#numbers.formatCurrency(row.targetPrice3Month)}">$0.00</div>
+                            <div class="percentage-cell"
+                                 th:text="'(' + ${#numbers.formatDecimal(row.distanceTo3MonthTarget, 1, 1)} + '%)'"
+                                 th:class="${row.distanceTo3MonthTarget >= 0 ? 'positive' : 'negative'}"
+                                 style="font-size: 0.8rem;">(0.0%)</div>
                         </td>
 
-                        <!-- Support Level -->
-                        <td class="price-cell" th:text="${#numbers.formatCurrency(row.supportLevel)}">$0.00</td>
+                        <!-- Long Target with Distance -->
+                        <td class="price-cell">
+                            <div th:text="${#numbers.formatCurrency(row.targetPriceLongTerm)}">$0.00</div>
+                            <div class="percentage-cell"
+                                 th:text="'(' + ${#numbers.formatDecimal(row.distanceToLongTarget, 1, 1)} + '%)'"
+                                 th:class="${row.distanceToLongTarget >= 0 ? 'positive' : 'negative'}"
+                                 style="font-size: 0.8rem;">(0.0%)</div>
+                        </td>
 
-                        <!-- Resistance Level -->
-                        <td class="price-cell" th:text="${#numbers.formatCurrency(row.resistanceLevel)}">$0.00</td>
+                        <!-- Support/Resistance Levels -->
+                        <td class="price-levels">
+                            <div>S: <span th:text="${#numbers.formatCurrency(row.supportLevel)}">$0.00</span></div>
+                            <div>R: <span th:text="${#numbers.formatCurrency(row.resistanceLevel)}">$0.00</span></div>
+                        </td>
+
+                        <!-- Stop Loss / Take Profit -->
+                        <td class="price-levels">
+                            <div>SL: <span th:text="${row.stopLossLevel}">$0.00</span></div>
+                            <div>TP: <span th:text="${row.takeProfitLevel}">$0.00</span></div>
+                        </td>
 
                         <!-- Risk Level -->
                         <td>
@@ -470,11 +519,10 @@
                                   th:text="${row.riskLevel}">MEDIUM</span>
                         </td>
 
-                        <!-- Recommendation -->
+                        <!-- Trend -->
                         <td>
-                            <span class="recommendation"
-                                  th:class="'rec-' + ${#strings.toLowerCase(#strings.replace(row.recommendation, '_', '-'))}"
-                                  th:text="${#strings.replace(row.recommendation, '_', ' ')}">HOLD</span>
+                            <span th:class="'trend-' + ${#strings.toLowerCase(row.trend)}"
+                                  th:text="${row.trend}">SIDEWAYS</span>
                         </td>
 
                         <!-- Technical Indicators -->
@@ -482,6 +530,13 @@
                             <div th:if="${row.rsi != null}">RSI: <span th:text="${#numbers.formatDecimal(row.rsi, 1, 1)}">0.0</span></div>
                             <div th:if="${row.macd != null}">MACD: <span th:text="${#numbers.formatDecimal(row.macd, 1, 4)}">0.0000</span></div>
                             <div th:if="${row.sma20 != null}">SMA20: <span th:text="${#numbers.formatCurrency(row.sma20)}">$0.00</span></div>
+                        </td>
+
+                        <!-- Recommendation -->
+                        <td>
+                            <span class="recommendation"
+                                  th:class="'rec-' + ${#strings.toLowerCase(#strings.replace(row.recommendation, '_', '-'))}"
+                                  th:text="${#strings.replace(row.recommendation, '_', ' ')}">HOLD</span>
                         </td>
                     </tr>
                 </tbody>
