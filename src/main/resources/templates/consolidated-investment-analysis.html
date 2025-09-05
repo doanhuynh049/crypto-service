@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Investment Analysis Summary</title>
+    <style>
+        /* Email-safe CSS Reset */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            border-collapse: collapse !important;
+        }
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* Emoji-safe font stack */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji",
+                         Arial, Helvetica, sans-serif !important;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+            color: #333333;
+        }
+
+        .emoji {
+            font-family: "Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",
+                         -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Arial, Helvetica, sans-serif !important;
+        }
+
+        /* Layout */
+        .email-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .header-table {
+            width: 100%;
+            background-color: #2c5aa0;
+            color: #ffffff;
+        }
+
+        .header-cell {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .header-date {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content-table {
+            width: 100%;
+            background-color: #ffffff;
+        }
+
+        .content-cell {
+            padding: 20px;
+        }
+
+        /* Summary Stats Section */
+        .summary-stats {
+            width: 100%;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin: 0 0 30px 0;
+        }
+
+        .summary-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-title {
+            margin: 0;
+            color: #2c5aa0;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            width: 100%;
+        }
+
+        .stat-item {
+            width: 25%;
+            text-align: center;
+            padding: 20px;
+            vertical-align: top;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin: 0 0 5px 0;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666666;
+            margin: 0;
+        }
+
+        /* Crypto Analysis Cards */
+        .crypto-card {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin: 0 0 20px 0;
+            overflow: hidden;
+        }
+
+        .crypto-header {
+            width: 100%;
+            background-color: #2c5aa0;
+            color: #ffffff;
+        }
+
+        .crypto-header-cell {
+            padding: 15px 20px;
+        }
+
+        .crypto-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .crypto-content {
+            width: 100%;
+            background-color: #ffffff;
+        }
+
+        .crypto-content-cell {
+            padding: 20px;
+        }
+
+        /* Recommendation badges - matching investment-analysis.html style */
+        .recommendation-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0 0 15px 0;
+        }
+
+        .recommendation-buy { 
+            background-color: #4CAF50; 
+            color: #ffffff; 
+        }
+        .recommendation-dca { 
+            background-color: #ff9800; 
+            color: #ffffff; 
+        }
+        .recommendation-wait { 
+            background-color: #f44336; 
+            color: #ffffff; 
+        }
+
+        /* Confidence indicator */
+        .confidence {
+            font-size: 14px;
+            color: #666666;
+            margin: 0 0 10px 0;
+        }
+
+        /* Bottom line - matching investment-analysis.html style */
+        .bottom-line {
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 0 0 20px 0;
+            border-left: 4px solid #2c5aa0;
+        }
+
+        /* Two column layout - using tables for email compatibility */
+        .two-column {
+            width: 100%;
+        }
+
+        .column {
+            width: 50%;
+            padding: 0 10px;
+            vertical-align: top;
+        }
+
+        .column:first-child {
+            padding-left: 0;
+        }
+
+        .column:last-child {
+            padding-right: 0;
+        }
+
+        /* Lists - matching investment-analysis.html style */
+        .info-list {
+            margin: 10px 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .info-list li {
+            background-color: #f8f9fa;
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-left: 3px solid #2c5aa0;
+            font-size: 14px;
+        }
+
+        /* Section titles */
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin: 20px 0 10px 0;
+        }
+
+        /* Key metrics - matching investment-analysis.html style */
+        .key-metric {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 3px solid #2c5aa0;
+            border: 1px solid #e9ecef;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+
+        .metric-value {
+            font-size: 14px;
+            color: #333333;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer-table {
+            width: 100%;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .footer-cell {
+            padding: 20px;
+            text-align: center;
+            color: #666666;
+            font-size: 14px;
+        }
+
+        /* Responsive adjustments */
+        @media only screen and (max-width: 600px) {
+            .email-container { width: 100% !important; }
+            .column, .stat-item {
+                width: 100% !important;
+                display: block !important;
+                padding: 10px 0 !important;
+            }
+        }
+    </style>
+
+    <!--[if mso]>
+    <style type="text/css">
+      .emoji { font-family: "Segoe UI Emoji","Segoe UI Symbol",Arial,sans-serif !important; }
+    </style>
+    <![endif]-->
+</head>
+<body>
+    <table class="email-container" cellpadding="0" cellspacing="0" border="0" role="presentation">
+        <!-- Header -->
+        <tr>
+            <td>
+                <table class="header-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                    <tr>
+                        <td class="header-cell">
+                            <h1 class="header-title"><span class="emoji">📊</span> Daily Investment Analysis Summary</h1>
+                            <p class="header-date" th:text="${timestamp}">Date</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+            <td>
+                <table class="content-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                    <tr>
+                        <td class="content-cell">
+
+                            <!-- Summary Statistics -->
+                            <table class="summary-stats" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <tr>
+                                    <td class="summary-header">
+                                        <h2 class="summary-title"><span class="emoji">📈</span> Portfolio Analysis Overview</h2>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table class="stats-grid" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="stat-item">
+                                                    <div class="stat-number" th:text="${analysisSummaries != null ? analysisSummaries.size() : 0}">0</div>
+                                                    <div class="stat-label">Assets Analyzed</div>
+                                                </td>
+                                                <td class="stat-item">
+                                                    <div class="stat-number" th:text="${analysisSummaries != null ? #aggregates.sum(analysisSummaries.![recommendation == 'BUY' ? 1 : 0]) : 0}">0</div>
+                                                    <div class="stat-label">BUY Signals</div>
+                                                </td>
+                                                <td class="stat-item">
+                                                    <div class="stat-number" th:text="${analysisSummaries != null ? #aggregates.sum(analysisSummaries.![recommendation == 'DCA' ? 1 : 0]) : 0}">0</div>
+                                                    <div class="stat-label">DCA Signals</div>
+                                                </td>
+                                                <td class="stat-item">
+                                                    <div class="stat-number" th:text="${analysisSummaries != null ? #aggregates.sum(analysisSummaries.![confidence == 'HIGH' ? 1 : 0]) : 0}">0</div>
+                                                    <div class="stat-label">High Confidence</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Individual Crypto Analyses -->
+                            <table th:each="summary : ${analysisSummaries}" class="crypto-card" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                <!-- Crypto Header -->
+                                <tr>
+                                    <td>
+                                        <table class="crypto-header" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="crypto-header-cell">
+                                                    <h3 class="crypto-title">
+                                                        <span class="emoji">🪙</span> 
+                                                        <span th:text="${summary.symbol}">CRYPTO</span>
+                                                        <span th:if="${summary.name}" th:text="' - ' + ${summary.name}"></span>
+                                                    </h3>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                <!-- Crypto Content -->
+                                <tr>
+                                    <td>
+                                        <table class="crypto-content" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="crypto-content-cell">
+                                    <!-- Recommendation & Confidence -->
+                                    <div class="recommendation-badge"
+                                         th:classappend="${summary.recommendation == 'BUY'} ? 'recommendation-buy' :
+                                                        (${summary.recommendation == 'DCA'} ? 'recommendation-dca' : 'recommendation-wait')"
+                                         th:text="${summary.recommendation}">WAIT</div>
+                                    
+                                    <div class="confidence">
+                                        <span class="emoji">🎯</span> Confidence: <span th:text="${summary.confidence}">LOW</span>
+                                    </div>
+
+                                    <!-- Bottom Line -->
+                                    <div class="bottom-line">
+                                        <strong><span class="emoji">💡</span> Bottom Line:</strong>
+                                        <span th:text="${summary.bottomLine}">Analysis pending</span>
+                                    </div>
+
+                                    <!-- Key Metrics -->
+                                    <table class="two-column" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin: 15px 0;">
+                                        <tr>
+                                            <td class="column">
+                                                <div class="key-metric">
+                                                    <div class="metric-label">Entry Quality</div>
+                                                    <div class="metric-value" th:text="${summary.entryQuality}">FAIR</div>
+                                                </div>
+                                                <div class="key-metric">
+                                                    <div class="metric-label">Target Allocation</div>
+                                                    <div class="metric-value" th:text="${summary.targetAllocation}">5-10%</div>
+                                                </div>
+                                            </td>
+                                            <td class="column">
+                                                <div class="key-metric">
+                                                    <div class="metric-label">Market Sentiment</div>
+                                                    <div class="metric-value" th:text="${summary.currentSentiment}">NEUTRAL</div>
+                                                </div>
+                                                <div class="key-metric">
+                                                    <div class="metric-label">Entry Strategy</div>
+                                                    <div class="metric-value" th:text="${summary.entryStrategy}">Gradual entry</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Technical Levels -->
+                                    <div th:if="${not #lists.isEmpty(summary.supportLevels) or not #lists.isEmpty(summary.resistanceLevels)}">
+                                        <h4 class="section-title"><span class="emoji">📊</span> Key Technical Levels</h4>
+                                        <table class="two-column" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column" th:if="${not #lists.isEmpty(summary.supportLevels)}">
+                                                    <strong>Support Levels:</strong>
+                                                    <ul class="info-list">
+                                                        <li th:each="level : ${summary.supportLevels}" th:text="${level}">Support level</li>
+                                                    </ul>
+                                                </td>
+                                                <td class="column" th:if="${not #lists.isEmpty(summary.resistanceLevels)}">
+                                                    <strong>Resistance Levels:</strong>
+                                                    <ul class="info-list">
+                                                        <li th:each="level : ${summary.resistanceLevels}" th:text="${level}">Resistance level</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- Updated SpringEL expression to avoid type conversion errors -->
+                                        <div th:if="${summary.keyBreakoutLevel != null and summary.keyBreakoutLevel != 'TBD'}">
+                                            <strong>Key Breakout Level:</strong> <span th:text="${summary.keyBreakoutLevel}">TBD</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Outlook -->
+                                    <!-- Updated SpringEL expression to check for non-null and non-empty strings -->
+                                    <div th:if="${summary.shortTermOutlook != null and !summary.shortTermOutlook.isEmpty() or summary.mediumTermOutlook != null and !summary.mediumTermOutlook.isEmpty()}">
+                                        <h4 class="section-title"><span class="emoji">🔮</span> Outlook</h4>
+                                        <table class="two-column" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column" th:if="${summary.shortTermOutlook}">
+                                                    <strong><span class="emoji">📅</span> Short-term (1-3M):</strong>
+                                                    <p th:text="${summary.shortTermOutlook}">Short-term outlook</p>
+                                                </td>
+                                                <td class="column" th:if="${summary.mediumTermOutlook}">
+                                                    <strong><span class="emoji">📈</span> Medium-term (3-12M):</strong>
+                                                    <p th:text="${summary.mediumTermOutlook}">Medium-term outlook</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <!-- Catalysts & Risks -->
+                                    <div th:if="${not #lists.isEmpty(summary.positiveCatalysts) or not #lists.isEmpty(summary.riskFactors)}">
+                                        <h4 class="section-title"><span class="emoji">⚖️</span> Key Catalysts & Risks</h4>
+                                        <table class="two-column" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column" th:if="${not #lists.isEmpty(summary.positiveCatalysts)}">
+                                                    <strong><span class="emoji">🚀</span> Positive Catalysts:</strong>
+                                                    <ul class="info-list">
+                                                        <li th:each="catalyst : ${summary.positiveCatalysts}" th:text="${catalyst}">Catalyst</li>
+                                                    </ul>
+                                                </td>
+                                                <td class="column" th:if="${not #lists.isEmpty(summary.riskFactors)}">
+                                                    <strong><span class="emoji">⚠️</span> Risk Factors:</strong>
+                                                    <ul class="info-list">
+                                                        <li th:each="risk : ${summary.riskFactors}" th:text="${risk}">Risk factor</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <!-- Action Triggers -->
+                                    <div th:if="${not #lists.isEmpty(summary.buyTriggers) or not #lists.isEmpty(summary.sellTriggers)}">
+                                        <h4 class="section-title"><span class="emoji">🎯</span> Action Triggers</h4>
+                                        <table class="two-column" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                            <tr>
+                                                <td class="column" th:if="${not #lists.isEmpty(summary.buyTriggers)}">
+                                                    <strong><span class="emoji">💚</span> Buy Triggers:</strong>
+                                                    <ul class="info-list">
+                                                        <li th:each="trigger : ${summary.buyTriggers}" th:text="${trigger}">Buy trigger</li>
+                                                    </ul>
+                                                </td>
+                                                <td class="column" th:if="${not #lists.isEmpty(summary.sellTriggers)}">
+                                                    <strong><span class="emoji">❤️</span> Sell Triggers:</strong>
+                                                    <ul class="info-list">
+                                                        <li th:each="trigger : ${summary.sellTriggers}" th:text="${trigger}">Sell trigger</li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <!-- DCA Strategy -->
+                                    <!-- Updated SpringEL expression to avoid type conversion errors -->
+                                    <div th:if="${summary.dcaSchedule != null and summary.dcaSchedule != 'Weekly'}">
+                                        <h4 class="section-title"><span class="emoji">📊</span> Strategy</h4>
+                                        <p><strong>DCA Schedule:</strong> <span th:text="${summary.dcaSchedule}">Weekly</span></p>
+                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td>
+                <table class="footer-table" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                    <tr>
+                        <td class="footer-cell">
+                            <p style="margin: 0 0 10px 0;"><span class="emoji">📧</span> This consolidated analysis was generated automatically by your Crypto Advisory Service</p>
+                            <p style="margin: 0 0 10px 0;"><span class="emoji">⚠️</span> This is not financial advice. Always do your own research and consider your risk tolerance.</p>
+                            <p style="margin: 0;">Generated on <span th:text="${timestamp}">timestamp</span></p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

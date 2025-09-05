@@ -1,7 +1,6 @@
 package com.quat.cryptoNotifier.service;
 
 import com.quat.cryptoNotifier.config.AppConfig;
-import com.quat.cryptoNotifier.model.Advisory;
 import com.quat.cryptoNotifier.model.Holding;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -11,8 +10,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -142,6 +139,22 @@ public class EmailService {
             
         sendEmailWithTemplate(subject, "portfolio-table", variables);
         System.out.println("Portfolio Table email sent successfully");
+    }
+
+    /**
+     * Send consolidated investment analysis summary email with all crypto analyses
+     */
+    public void sendConsolidatedInvestmentAnalysis(List<InvestmentAnalysisCacheService.AnalysisSummary> analysisSummaries) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("analysisSummaries", analysisSummaries);
+        variables.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+        
+        String subject = String.format("📊 Daily Investment Analysis Summary - %s", 
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+            
+        sendEmailWithTemplate(subject, "consolidated-investment-analysis", variables);
+        System.out.println("Consolidated Investment Analysis Summary email sent successfully with " + 
+            analysisSummaries.size() + " crypto analyses");
     }
 
     /**

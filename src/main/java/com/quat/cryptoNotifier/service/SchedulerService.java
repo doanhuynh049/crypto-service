@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quat.cryptoNotifier.model.Advisory;
 import com.quat.cryptoNotifier.model.Holding;
 import com.quat.cryptoNotifier.model.Holdings;
-import com.quat.cryptoNotifier.model.MarketData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,13 +22,13 @@ import java.util.Map;
 public class SchedulerService {
 
     @Autowired
-    private DataProviderService dataProviderService;
-
-    @Autowired
     private AdvisoryEngineService advisoryEngineService;
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private InvestmentAnalysisCacheService investmentAnalysisCacheService;
 
     private final ObjectMapper objectMapper;
 
@@ -45,6 +44,7 @@ public class SchedulerService {
             // Load holdings
             List<Holding> holdings = loadHoldings();
             List<Advisory> advisoriesWithAI = new ArrayList<>();
+            
 
             // First pass: Generate basic advisories for portfolio overview
             buildAndSendOverviewAdvisory(holdings);
@@ -129,6 +129,8 @@ public class SchedulerService {
     }
 
     public void sendAdvisoriesForEachCrypto(List<Holding> holdings) throws InterruptedException {
+        // Clear old cache entries at the start of a new analysis session
+        investmentAnalysisCacheService.clearOldEntries();
         for (int i = 0; i < holdings.size(); i++) {
             try {
                 Holding holding = holdings.get(i);
@@ -137,8 +139,16 @@ public class SchedulerService {
                     continue;
                 }
                 System.out.println("Generating AI advisory for " + holding.getSymbol());
-                Map<String, Object> riskAdvisories = advisoryEngineService.generateInvestmentAnalysis(holding);
-                emailService.sendInvestmentAnalysis(riskAdvisories);
+                
+                // Generate investment analysis
+                Map<String, Object> analysisData = advisoryEngineService.generateInvestmentAnalysis(holding);
+                
+                // Cache the analysis summary for consolidated email
+                investmentAnalysisCacheService.cacheAnalysisSummary(holding.getSymbol(), analysisData);
+                
+                // Send individual analysis email
+                emailService.sendInvestmentAnalysis(analysisData);
+                
                 System.out.println("Completed AI analysis for " + holding.getSymbol());
             } catch (Exception e) {
                 System.err.println("Error generating advisory for holding: " + holdings.get(i).getSymbol());
@@ -148,6 +158,33 @@ public class SchedulerService {
                 // Pause between requests to avoid rate limits
                 Thread.sleep(30000);
             }
+        }
+        
+        // After all individual analyses are complete, send consolidated summary email
+        sendConsolidatedAnalysisSummary();
+    }
+
+    /**
+     * Send consolidated analysis summary email with all cached analysis summaries from today
+     */
+    private void sendConsolidatedAnalysisSummary() {
+        try {
+            List<InvestmentAnalysisCacheService.AnalysisSummary> summaries = 
+                investmentAnalysisCacheService.getTodaysAnalysisSummaries();
+            
+            if (summaries.isEmpty()) {
+                System.out.println("No analysis summaries available for consolidated email");
+                return;
+            }
+            
+            // Send consolidated email with all summaries
+            emailService.sendConsolidatedInvestmentAnalysis(summaries);
+            
+            System.out.println("Sent consolidated analysis summary email with " + summaries.size() + " crypto analyses");
+            
+        } catch (Exception e) {
+            System.err.println("Error sending consolidated analysis summary: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -172,6 +209,32 @@ public class SchedulerService {
     public void runManualAdvisory() {
         System.out.println("Running manual advisory...");
         runDailyAdvisory();
+    }
+
+    /**
+     * Manual trigger for testing the investment analysis caching and consolidated email
+     */
+    public void runInvestmentAnalysisWithConsolidatedEmail() {
+        System.out.println("Running manual investment analysis with consolidated email...");
+        
+        try {
+            List<Holding> holdings = loadHoldings();
+            
+            // Test with a smaller subset for quicker testing (first 3 holdings)
+            List<Holding> testHoldings = holdings.stream()
+                .filter(h -> h.getSymbol() != null && !h.getSymbol().isEmpty() && !h.getSymbol().equals("USDT"))
+                .limit(3)
+                .collect(java.util.stream.Collectors.toList());
+            
+            System.out.println("Testing with " + testHoldings.size() + " holdings: " + 
+                testHoldings.stream().map(Holding::getSymbol).collect(java.util.stream.Collectors.joining(", ")));
+            
+            sendAdvisoriesForEachCrypto(testHoldings);
+            
+        } catch (Exception e) {
+            System.err.println("Error in manual investment analysis test: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private List<Holding> loadHoldings() {
