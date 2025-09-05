@@ -524,10 +524,10 @@ public class PortfolioTableService {
         summary.put("totalProfitLossFormatted", String.format("$%.2f", totalProfitLoss));
         summary.put("totalProfitLossPercentageFormatted", String.format("%.2f%%", totalProfitLossPercentage));
         
-        // VND currency totals
-        summary.put("totalInitialValueVND", String.format("₫%.0f", totalInitialValue * USD_TO_VND));
-        summary.put("totalCurrentValueVND", String.format("₫%.0f", totalCurrentValue * USD_TO_VND));
-        summary.put("totalProfitLossVND", String.format("₫%.0f", totalProfitLoss * USD_TO_VND));
+        // VND currency totals with comma formatting
+        summary.put("totalInitialValueVND", String.format("₫%,.0f", totalInitialValue * USD_TO_VND));
+        summary.put("totalCurrentValueVND", String.format("₫%,.0f", totalCurrentValue * USD_TO_VND));
+        summary.put("totalProfitLossVND", String.format("₫%,.0f", totalProfitLoss * USD_TO_VND));
         
         summary.put("numberOfHoldings", numberOfHoldings);
 

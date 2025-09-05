@@ -117,12 +117,18 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
-        .summary-card .vnd-value {
+        .summary-card        .vnd-value {
             font-size: 1.1rem;
             font-weight: 600;
             margin-top: 5px;
             opacity: 0.9;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .vnd-value::before {
+            content: '≈ ';
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
 
         .portfolio-table {
@@ -204,6 +210,17 @@
             text-transform: uppercase;
         }
 
+        .trend-strong-bullish {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.9rem; /* Adjusted size */
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+        }
+
         .trend-bearish {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
@@ -214,6 +231,17 @@
             text-transform: uppercase;
         }
 
+        .trend-strong-bearish {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.9rem; /* Adjusted size */
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(192, 57, 43, 0.5);
+        }
+
         .trend-sideways {
             background: linear-gradient(135deg, #f39c12, #e67e22);
             color: white;
@@ -222,6 +250,28 @@
             font-size: 0.8rem;
             font-weight: bold;
             text-transform: uppercase;
+        }
+
+        .trend-slightly-bullish {
+            background: linear-gradient(135deg, #1e8449, #145a32);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(30, 132, 73, 0.6);
+        }
+
+        .trend-slightly-bearish {
+            background: linear-gradient(135deg, #a93226, #922b21);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(169, 50, 38, 0.6);
         }
 
         .trend-unknown {
@@ -308,6 +358,15 @@
         .rec-sell { background: #e74c3c; color: white; }
         .rec-wait { background: #f39c12; color: white; }
         .rec-profit { background: #9b59b6; color: white; }
+        .rec-take-major-profit { background: #8e44ad; color: white; }
+        .rec-take-partial-profit { background: #9b59b6; color: white; }
+        .rec-consider-stop-loss { background: #e67e22; color: white; }
+        .rec-urgent-review-consider-exit { background: #c0392b; color: white; animation: blink 1s infinite; }
+        .rec-near-target-consider-sell { background: #f39c12; color: white; }
+        .rec-far-from-target-monitor { background: #95a5a6; color: white; }
+        .rec-overbought-wait-for-dip { background: #e74c3c; color: white; }
+        .rec-oversold-consider-buying { background: #27ae60; color: white; }
+        .rec-review { background: #34495e; color: white; }
 
         .footer {
             background: #34495e;
@@ -321,11 +380,29 @@
         .technical-indicators {
             font-size: 0.8rem;
             line-height: 1.3;
+            font-weight: bold;
         }
 
         .price-levels {
             font-size: 0.8rem;
             line-height: 1.3;
+            font-weight: bold;
+        }
+
+        .price-levels .support {
+            color: #3498db;
+        }
+
+        .price-levels .resistance {
+            color: #e74c3c;
+        }
+
+        .price-levels .stop-loss {
+            color: #f39c12;
+        }
+
+        .price-levels .take-profit {
+            color: #2ecc71;
         }
 
         .price-cell {
@@ -503,14 +580,14 @@
 
                         <!-- Support/Resistance Levels -->
                         <td class="price-levels">
-                            <div>S: <span th:text="${#numbers.formatCurrency(row.supportLevel)}">$0.00</span></div>
-                            <div>R: <span th:text="${#numbers.formatCurrency(row.resistanceLevel)}">$0.00</span></div>
+                            <div>S: <span class="support" th:text="${#numbers.formatCurrency(row.supportLevel)}">$0.00</span></div>
+                            <div>R: <span class="resistance" th:text="${#numbers.formatCurrency(row.resistanceLevel)}">$0.00</span></div>
                         </td>
 
                         <!-- Stop Loss / Take Profit -->
                         <td class="price-levels">
-                            <div>SL: <span th:text="${row.stopLossLevel}">$0.00</span></div>
-                            <div>TP: <span th:text="${row.takeProfitLevel}">$0.00</span></div>
+                            <div>SL: <span class="stop-loss" th:text="${row.stopLossLevel}">$0.00</span></div>
+                            <div>TP: <span class="take-profit" th:text="${row.takeProfitLevel}">$0.00</span></div>
                         </td>
 
                         <!-- Risk Level -->
