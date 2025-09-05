@@ -267,7 +267,7 @@ public class AdvisoryEngineService {
         return prompt.toString();
     }
 
-    private String callGeminiAPI(String prompt) {
+    public String callGeminiAPI(String prompt) {
         // First attempt with primary provider
         try {
             return callGeminiAPIWithProvider(prompt, appConfig.getLlmProvider(), 1);
@@ -444,7 +444,211 @@ public class AdvisoryEngineService {
      * @return Map containing portfolio data with comprehensive analysis
      */
     public Map<String, Object> generatePortfolioTable(List<Holding> holdings) {
-        return portfolioTableService.generatePortfolioTable(holdings);
+        // First get the basic portfolio data without AI recommendations
+        Map<String, Object> portfolioData = portfolioTableService.generatePortfolioTable(holdings);
+        
+        // Then add AI recommendations to each row
+        addAIRecommendationsToPortfolioData(portfolioData);
+        
+        return portfolioData;
     }
 
+    /**
+     * Add AI recommendations to portfolio data rows.
+     */
+    @SuppressWarnings("unchecked")
+    private void addAIRecommendationsToPortfolioData(Map<String, Object> portfolioData) {
+        try {
+            List<Map<String, Object>> portfolioRows = (List<Map<String, Object>>) portfolioData.get("portfolioRows");
+            
+            if (portfolioRows != null) {
+                for (Map<String, Object> row : portfolioRows) {
+                    try {
+                        // Prepare technical parameters for AI analysis
+                        Map<String, Object> technicalParams = prepareTechnicalParametersFromRow(row);
+                        
+                        // Get AI recommendation with explanations
+                        Map<String, Object> aiResponse = getAIRecommendationWithExplanations(technicalParams);
+                        
+                        // Update the row with AI recommendation data
+                        row.put("aiRecommendation", aiResponse.get("recommendation"));
+                        row.put("aiRecommendationScore", aiResponse.get("score"));
+                        row.put("aiExplanations", aiResponse.get("explanations"));
+                        row.put("aiConfidence", aiResponse.get("confidence"));
+                        
+                    } catch (Exception e) {
+                        logger.error("Failed to fetch AI recommendation for {}: ", row.get("symbol"), e);
+                        row.put("aiRecommendation", "AI_UNAVAILABLE");
+                        row.put("aiRecommendationScore", 0);
+                        row.put("aiExplanations", java.util.Arrays.asList("AI recommendation service temporarily unavailable"));
+                        row.put("aiConfidence", "LOW");
+                    } finally {
+                        // To avoid hitting rate limits, pause briefly between requests
+                        Thread.sleep(500); // 0.5 second delay
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error adding AI recommendations to portfolio data", e);
+        }
+    }
+
+    /**
+     * Prepare technical parameters from a portfolio row for AI analysis.
+     */
+    private Map<String, Object> prepareTechnicalParametersFromRow(Map<String, Object> row) {
+        Map<String, Object> params = new HashMap<>();
+        
+        // Basic asset information
+        params.put("symbol", row.get("symbol"));
+        params.put("name", row.get("name"));
+        params.put("sector", row.get("sector"));
+        
+        // Financial metrics
+        params.put("profitLossPercentage", row.get("profitLossPercentage"));
+        params.put("distanceTo3MonthTarget", row.get("distanceTo3MonthTarget"));
+        params.put("currentPrice", row.get("currentPrice"));
+        params.put("averagePrice", row.get("averagePrice"));
+        
+        // Technical indicators
+        params.put("rsi", row.get("rsi"));
+        params.put("macd", row.get("macd"));
+        params.put("sma20", row.get("sma20"));
+        params.put("sma50", row.get("sma50"));
+        params.put("sma200", row.get("sma200"));
+        params.put("priceChange24h", row.get("priceChange24h"));
+        params.put("volume24h", row.get("volume24h"));
+        params.put("marketCap", row.get("marketCap"));
+        
+        // Portfolio context
+        params.put("holdings", row.get("holdings"));
+        params.put("totalAvgCost", row.get("initialValue")); // Use initialValue as totalAvgCost
+        params.put("expectedEntry", row.get("expectedEntry"));
+        params.put("targetPrice3Month", row.get("targetPrice3Month"));
+        params.put("targetPriceLongTerm", row.get("targetPriceLongTerm"));
+        
+        return params;
+    }
+    
+    /**
+     * Generate AI recommendation with explanations for given technical parameters
+     */
+    private Map<String, Object> getAIRecommendationWithExplanations(Map<String, Object> technicalParams) {
+        try {
+            // Build AI prompt
+            String prompt = buildAIRecommendationPrompt(technicalParams);
+            
+            // Get AI response
+            String aiResponse = callGeminiAPI(prompt);
+            
+            // Parse AI response
+            return parseAIRecommendationResponse(aiResponse);
+            
+        } catch (Exception e) {
+            logger.error("Error getting AI recommendation: " + e.getMessage(), e);
+            
+            // Return fallback recommendation
+            Map<String, Object> fallback = new HashMap<>();
+            fallback.put("recommendation", "NEUTRAL");
+            fallback.put("confidence", 50);
+            fallback.put("explanations", new String[]{"AI analysis temporarily unavailable", "Using default neutral recommendation", "Please check system logs for details"});
+            return fallback;
+        }
+    }
+    
+    /**
+     * Build AI prompt for recommendation generation
+     */
+    private String buildAIRecommendationPrompt(Map<String, Object> technicalParams) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("As a crypto investment advisor, analyze the following technical parameters and provide a recommendation:\n\n");
+        
+        // Add technical parameters to prompt
+        prompt.append("Symbol: ").append(technicalParams.get("symbol")).append("\n");
+        prompt.append("Current Price: $").append(technicalParams.get("currentPrice")).append("\n");
+        prompt.append("Holdings: ").append(technicalParams.get("holdings")).append("\n");
+        prompt.append("Expected Entry: $").append(technicalParams.get("expectedEntry")).append("\n");
+        prompt.append("Target Price (3 months): $").append(technicalParams.get("targetPrice3Month")).append("\n");
+        prompt.append("Target Price (Long term): $").append(technicalParams.get("targetPriceLongTerm")).append("\n");
+        prompt.append("Support Level: $").append(technicalParams.get("supportLevel")).append("\n");
+        prompt.append("Resistance Level: $").append(technicalParams.get("resistanceLevel")).append("\n");
+        prompt.append("Stop Loss: $").append(technicalParams.get("stopLoss")).append("\n");
+        prompt.append("Take Profit: $").append(technicalParams.get("takeProfit")).append("\n");
+        prompt.append("Risk Level: ").append(technicalParams.get("riskLevel")).append("\n");
+        prompt.append("Profit/Loss: $").append(technicalParams.get("profitLoss")).append("\n");
+        
+        prompt.append("\nPlease provide:\n");
+        prompt.append("1. A recommendation (STRONG_BUY, BUY, NEUTRAL, SELL, STRONG_SELL)\n");
+        prompt.append("2. A confidence score (0-100)\n");
+        prompt.append("3. Exactly 3 brief explanations (each max 50 words)\n\n");
+        prompt.append("Format your response as JSON:\n");
+        prompt.append("{\n");
+        prompt.append("  \"recommendation\": \"STRONG_BUY\",\n");
+        prompt.append("  \"confidence\": 85,\n");
+        prompt.append("  \"explanations\": [\"Explanation 1\", \"Explanation 2\", \"Explanation 3\"]\n");
+        prompt.append("}");
+        
+        return prompt.toString();
+    }
+    
+    /**
+     * Parse AI recommendation response from JSON
+     */
+    private Map<String, Object> parseAIRecommendationResponse(String aiResponse) {
+        try {
+            // Clean up the response (remove markdown formatting if present)
+            String cleanResponse = aiResponse.trim();
+            if (cleanResponse.startsWith("```json")) {
+                cleanResponse = cleanResponse.substring(7);
+            }
+            if (cleanResponse.endsWith("```")) {
+                cleanResponse = cleanResponse.substring(0, cleanResponse.length() - 3);
+            }
+            cleanResponse = cleanResponse.trim();
+            
+            // Parse JSON response
+            JsonNode responseNode = objectMapper.readTree(cleanResponse);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("recommendation", responseNode.get("recommendation").asText());
+            result.put("confidence", responseNode.get("confidence").asInt());
+            
+            // Parse explanations array
+            JsonNode explanationsNode = responseNode.get("explanations");
+            String[] explanations = new String[3];
+            for (int i = 0; i < Math.min(3, explanationsNode.size()); i++) {
+                explanations[i] = explanationsNode.get(i).asText();
+            }
+            result.put("explanations", explanations);
+            
+            return result;
+            
+        } catch (Exception e) {
+            logger.error("Error parsing AI response: " + e.getMessage(), e);
+            
+            // Fallback parsing - try to extract recommendation from text
+            Map<String, Object> fallback = new HashMap<>();
+            String upperResponse = aiResponse.toUpperCase();
+            
+            if (upperResponse.contains("STRONG_BUY")) {
+                fallback.put("recommendation", "STRONG_BUY");
+                fallback.put("confidence", 80);
+            } else if (upperResponse.contains("STRONG_SELL")) {
+                fallback.put("recommendation", "STRONG_SELL");
+                fallback.put("confidence", 80);
+            } else if (upperResponse.contains("BUY")) {
+                fallback.put("recommendation", "BUY");
+                fallback.put("confidence", 70);
+            } else if (upperResponse.contains("SELL")) {
+                fallback.put("recommendation", "SELL");
+                fallback.put("confidence", 70);
+            } else {
+                fallback.put("recommendation", "NEUTRAL");
+                fallback.put("confidence", 50);
+            }
+            
+            fallback.put("explanations", new String[]{"AI response parsing failed", "Using fallback analysis", "Check system logs for details"});
+            return fallback;
+        }
+    }
 }

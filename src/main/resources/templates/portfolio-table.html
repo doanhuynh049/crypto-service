@@ -368,6 +368,84 @@
         .rec-oversold-consider-buying { background: #27ae60; color: white; }
         .rec-review { background: #34495e; color: white; }
 
+        /* AI Recommendation Styles */
+        .ai-recommendation-cell {
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .ai-recommendation-main {
+            margin-bottom: 5px;
+        }
+
+        .ai-recommendation {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .ai-score-confidence {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+            font-size: 0.65rem;
+            margin-top: 2px;
+        }
+
+        .ai-score {
+            background: #34495e;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .ai-confidence {
+            padding: 2px 4px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .confidence-high { background: #27ae60; color: white; }
+        .confidence-medium { background: #f39c12; color: white; }
+        .confidence-low { background: #e74c3c; color: white; }
+
+        .ai-explanations {
+            margin-top: 5px;
+            text-align: left;
+        }
+
+        .ai-explanations ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .ai-explanation {
+            font-size: 0.65rem;
+            color: #7f8c8d;
+            margin-bottom: 2px;
+            padding: 2px 4px;
+            background: rgba(52, 73, 94, 0.1);
+            border-radius: 4px;
+            line-height: 1.2;
+        }
+
+        /* AI Recommendation Color Scheme */
+        .ai-rec-hold { background: #3498db; color: white; }
+        .ai-rec-buy { background: #2ecc71; color: white; }
+        .ai-rec-strong-buy { background: #27ae60; color: white; }
+        .ai-rec-sell { background: #e74c3c; color: white; }
+        .ai-rec-strong-sell { background: #c0392b; color: white; }
+        .ai-rec-take-profit { background: #9b59b6; color: white; }
+        .ai-rec-stop-loss { background: #e67e22; color: white; }
+        .ai-rec-ai-unavailable { background: #95a5a6; color: white; }
+
         .footer {
             background: #34495e;
             color: white;
@@ -445,6 +523,20 @@
             .symbol {
                 font-size: 0.9rem;
             }
+
+            .ai-recommendation-cell {
+                font-size: 0.65rem;
+                padding: 4px;
+            }
+
+            .ai-score-confidence {
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .ai-explanation {
+                font-size: 0.6rem;
+            }
         }
     </style>
 </head>
@@ -513,6 +605,7 @@
                         <th>Trend</th>
                         <th>Technical Indicators</th>
                         <th>Recommendation</th>
+                        <th>AI Recommendation<br><span style="font-size: 0.7rem; opacity: 0.8;">(Score / Confidence)</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -614,6 +707,27 @@
                             <span class="recommendation"
                                   th:class="'rec-' + ${#strings.toLowerCase(#strings.replace(row.recommendation, '_', '-'))}"
                                   th:text="${#strings.replace(row.recommendation, '_', ' ')}">HOLD</span>
+                        </td>
+
+                        <!-- AI Recommendation -->
+                        <td class="ai-recommendation-cell">
+                            <div class="ai-recommendation-main">
+                                <span class="ai-recommendation"
+                                      th:class="'ai-rec-' + ${#strings.toLowerCase(#strings.replace(row.aiRecommendation, '_', '-'))}"
+                                      th:text="${#strings.replace(row.aiRecommendation, '_', ' ')}">HOLD</span>
+                                <div class="ai-score-confidence">
+                                    <span class="ai-score" th:text="${row.aiRecommendationScore} + '/100'">50/100</span>
+                                    <span class="ai-confidence" 
+                                          th:class="'confidence-' + ${#strings.toLowerCase(row.aiConfidence)}"
+                                          th:text="${row.aiConfidence}">MEDIUM</span>
+                                </div>
+                            </div>
+                            <div class="ai-explanations" th:if="${row.aiExplanations != null}">
+                                <ul>
+                                    <li th:each="explanation : ${row.aiExplanations}" 
+                                        th:text="${explanation}" class="ai-explanation">Analysis reason</li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ public class PortfolioTableService {
     
     @Autowired
     private DataProviderService dataProviderService;
-
     /**
      * Generates comprehensive portfolio table data with enhanced features.
      * 
@@ -150,6 +150,12 @@ public class PortfolioTableService {
             // Enhanced action recommendation
             String recommendation = getActionRecommendationEnhanced(holding, marketData, profitLossPercentage, distanceTo3MonthTarget);
             row.put("recommendation", recommendation);
+
+            // Add placeholder for AI recommendation (will be populated later by AdvisoryEngineService)
+            row.put("aiRecommendation", "PENDING");
+            row.put("aiRecommendationScore", 0);
+            row.put("aiExplanations", Arrays.asList("AI analysis pending"));
+            row.put("aiConfidence", "LOW");
 
             // Sector-based analysis tracking
             updateSectorAnalysis(holding, portfolioWeight, profitLoss, sectorAllocations, sectorProfitLoss);
@@ -615,4 +621,5 @@ public class PortfolioTableService {
 
         return distribution;
     }
+
 }
