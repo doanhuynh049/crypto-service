@@ -464,7 +464,7 @@ public class AdvisoryEngineService {
                 row.put("targetPriceLongTerm", holding.getTargetPriceLongTerm());
 
                 // Financial calculations
-                double initialValue = holding.getInitialValue();
+                double initialValue = holding.getTotalAvgCost();
                 double currentValue = holding.getHoldings() * currentPrice;
                 double profitLoss = currentValue - initialValue;
                 double profitLossPercentage = initialValue > 0 ? (profitLoss / initialValue) * 100 : 0;
@@ -657,7 +657,7 @@ public class AdvisoryEngineService {
             }
 
             // Position value risk (higher value = higher risk)
-            double positionValue = holding.getInitialValue();
+            double positionValue = holding.getTotalAvgCost();
             if (positionValue > 50000) riskScore += 2;
             else if (positionValue > 20000) riskScore += 1;
 
@@ -693,7 +693,7 @@ public class AdvisoryEngineService {
     }
     private double getTotalPortfolioValue(List<Holding> holdings) {
         return holdings.stream()
-                .mapToDouble(Holding::getInitialValue)
+                .mapToDouble(Holding::getTotalAvgCost)
                 .sum();
     }
 }

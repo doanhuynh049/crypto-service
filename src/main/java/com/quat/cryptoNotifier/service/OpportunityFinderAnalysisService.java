@@ -59,17 +59,18 @@ public class OpportunityFinderAnalysisService {
         // Calculate total portfolio value for context
         double totalPortfolioValue = 0;
         for (Holding holding : holdings) {
-            totalPortfolioValue += holding.getInitialValue();
+            totalPortfolioValue += holding.getTotalAvgCost();
         }
         
         // Add detailed portfolio information
         for (Holding holding : holdings) {
-            double currentWeight = (holding.getInitialValue() / totalPortfolioValue) * 100;
+            double currentWeight = (holding.getTotalAvgCost() / totalPortfolioValue) * 100;
             
             prompt.append(String.format("--- %s (%s) ---\n", holding.getSymbol(), holding.getName()));
+            prompt.append(String.format("Sector: %s\n", holding.getSector() != null ? holding.getSector() : "Unknown"));
             prompt.append(String.format("Holdings: %.6f %s\n", holding.getHoldings(), holding.getSymbol()));
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
-            prompt.append(String.format("Initial Investment: $%.2f (%.1f%% of portfolio)\n", holding.getInitialValue(), currentWeight));
+            prompt.append(String.format("Initial Investment: $%.2f (%.1f%% of portfolio)\n", holding.getTotalAvgCost(), currentWeight));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
             prompt.append(String.format("Expected Target Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));

@@ -101,8 +101,8 @@ public class EntryExitStrategyAnalysisService {
 
                     // Current P&L for context
                     double currentValue = holding.getHoldings() * currentPrice;
-                    double profitLoss = currentValue - holding.getInitialValue();
-                    double profitLossPercentage = (profitLoss / holding.getInitialValue()) * 100;
+                    double profitLoss = currentValue - holding.getTotalAvgCost();
+                    double profitLossPercentage = (profitLoss / holding.getTotalAvgCost()) * 100;
                     prompt.append(String.format("Current P&L: $%.2f (%.1f%%)\n", profitLoss, profitLossPercentage));
 
                     // Technical indicators for momentum

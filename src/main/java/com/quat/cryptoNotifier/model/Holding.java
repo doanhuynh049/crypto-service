@@ -6,6 +6,7 @@ public class Holding {
     private String id;
     private String symbol;
     private String name;
+    private String sector;
     private double holdings;
     @JsonProperty("avgBuyPrice")
     private double averagePrice;
@@ -24,6 +25,20 @@ public class Holding {
         this.id = id;
         this.symbol = symbol;
         this.name = name;
+        this.holdings = holdings;
+        this.averagePrice = averagePrice;
+        this.expectedEntry = expectedEntry;
+        this.deepEntryPrice = deepEntryPrice;
+        this.targetPrice3Month = targetPrice3Month;
+        this.targetPriceLongTerm = targetPriceLongTerm;
+    }
+
+    public Holding(String id, String symbol, String name, String sector, double holdings, double averagePrice, 
+                   double expectedEntry, double deepEntryPrice, double targetPrice3Month, double targetPriceLongTerm) {
+        this.id = id;
+        this.symbol = symbol;
+        this.name = name;
+        this.sector = sector;
         this.holdings = holdings;
         this.averagePrice = averagePrice;
         this.expectedEntry = expectedEntry;
@@ -55,6 +70,14 @@ public class Holding {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSector() {
+        return sector;
+    }
+
+    public void setSector(String sector) {
+        this.sector = sector;
     }
 
     public double getHoldings() {
@@ -142,12 +165,12 @@ public class Holding {
         return holdings * currentPrice;
     }
 
-    public double getInitialValue() {
+    public double getTotalAvgCost() {
         return holdings * averagePrice;
     }
 
     public double getProfitLoss(double currentPrice) {
-        return getCurrentValue(currentPrice) - getInitialValue();
+        return getCurrentValue(currentPrice) - getTotalAvgCost();
     }
 
     public double getProfitLossPercentage(double currentPrice) {
@@ -168,6 +191,7 @@ public class Holding {
                 "id='" + id + '\'' +
                 ", symbol='" + symbol + '\'' +
                 ", name='" + name + '\'' +
+                ", sector='" + sector + '\'' +
                 ", holdings=" + holdings +
                 ", averagePrice=" + averagePrice +
                 ", expectedEntry=" + expectedEntry +

@@ -50,13 +50,14 @@ public class RiskOpportunityAnalysisService {
                 continue; // Skip stablecoins
             }
             prompt.append(String.format("--- %s (%s) ---\n", holding.getSymbol(), holding.getName()));
+            prompt.append(String.format("Sector: %s\n", holding.getSector() != null ? holding.getSector() : "Unknown"));
             prompt.append(String.format("Holdings: %.6f %s\n", holding.getHoldings(), holding.getSymbol()));
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
             prompt.append(String.format("Expected Deep Entry Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
-            prompt.append(String.format("Initial Investment Value: $%.2f\n", holding.getInitialValue()));
+            prompt.append(String.format("Initial Investment Value: $%.2f\n", holding.getTotalAvgCost()));
             prompt.append("\n");
         }
         
