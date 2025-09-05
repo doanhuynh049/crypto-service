@@ -141,6 +141,18 @@ public class EmailService {
         System.out.println("Portfolio Table email sent successfully");
     }
 
+    public void sendStrategyAndTargetReview(List<Holding> holdings, Map<String, Object> strategyAnalysis) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("holdings", holdings);
+        variables.put("strategyAnalysis", strategyAnalysis);
+        
+        String subject = String.format("📈 Investment Strategy & Target Review - %s",
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+            
+        sendEmailWithTemplate(subject, "strategy-target-review", variables);
+        System.out.println("Investment Strategy & Target Review email sent successfully");
+    }
+
     /**
      * Send consolidated investment analysis summary email with all crypto analyses
      */

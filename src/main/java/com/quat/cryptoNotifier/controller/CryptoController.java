@@ -129,6 +129,26 @@ public class CryptoController {
         }
     }
 
+    @GetMapping("/test-strategy-review")
+    public String testStrategyAndTargetReview() {
+        try {
+            // Load holdings
+            ClassPathResource resource = new ClassPathResource("holdings.json");
+            Holdings holdings = objectMapper.readValue(resource.getInputStream(), Holdings.class);
+            List<Holding> cryptos = holdings.getCryptos();
+
+            // Generate investment strategy analysis
+            Map<String, Object> strategyAnalysis = advisoryEngineService.generateInvestmentStrategyAnalysis(cryptos);
+
+            // Send email with analysis
+            emailService.sendStrategyAndTargetReview(cryptos, strategyAnalysis);
+
+            return "Investment Strategy & Target Review completed successfully. Check your email for detailed analysis of your strategy and price targets.";
+        } catch (Exception e) {
+            return "Error running strategy and target review: " + e.getMessage();
+        }
+    }
+
     @GetMapping("/health")
     public String health() {
         return "Crypto Advisory Service is running";

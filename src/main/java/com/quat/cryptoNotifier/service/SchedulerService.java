@@ -126,6 +126,15 @@ public class SchedulerService {
             e.printStackTrace();
         }
         Thread.sleep(1000);
+
+        try {
+            Map<String, Object> strategyAnalysis = advisoryEngineService.generateInvestmentStrategyAnalysis(holdings);
+            emailService.sendStrategyAndTargetReview(holdings, strategyAnalysis);
+        } catch (Exception e) {
+            System.err.println("Investment Strategy Analysis failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
     }
 
     public void sendAdvisoriesForEachCrypto(List<Holding> holdings) throws InterruptedException {

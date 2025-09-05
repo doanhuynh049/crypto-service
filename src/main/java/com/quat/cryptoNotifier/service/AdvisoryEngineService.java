@@ -55,6 +55,9 @@ public class AdvisoryEngineService {
     private USDTAllocationAnalysisService usdtAllocationAnalysisService;
 
     @Autowired
+    private AdvisorAIService advisorAIService;
+
+    @Autowired
     private InvestmentAnalysisService investmentAnalysisService;
 
     @Autowired
@@ -138,6 +141,17 @@ public class AdvisoryEngineService {
 
         // Parse the AI response and return structured data
         Map<String, Object> parsedAnalysis = usdtAllocationAnalysisService.parseUSDTAllocationResponse(aiResponse);
+        return parsedAnalysis;
+    }
+
+    public Map<String, Object> generateInvestmentStrategyAnalysis(List<Holding> holdings) {
+        String prompt = advisorAIService.buildInvestmentStrategyPrompt(holdings);
+        System.out.println("Investment Strategy Analysis Prompt: " + prompt);
+        String aiResponse = callGeminiAPI(prompt);
+        System.out.println("Investment Strategy Analysis AI Response: " + aiResponse);
+
+        // Parse the AI response and return structured data using dedicated service
+        Map<String, Object> parsedAnalysis = advisorAIService.parseInvestmentStrategyResponse(aiResponse);
         return parsedAnalysis;
     }
 
