@@ -35,8 +35,8 @@
         "avgBuyPrice": 159.79,
         "expectedEntry": 185.0,
         "deepEntryPrice": 100.0,
-        "targetPrice3Month": 220.0,
-        "targetPriceLongTerm": 450.0
+        "targetPrice3Month": 250.0,
+        "targetPriceLongTerm": 400.0
       },
       {
         "id": "avalanche-2",
@@ -48,7 +48,7 @@
         "expectedEntry": 22.0,
         "deepEntryPrice": 23.5,
         "targetPrice3Month": 35.0,
-        "targetPriceLongTerm": 55.0
+        "targetPriceLongTerm": 60.0
       },
       {
         "id": "chainlink",
@@ -59,8 +59,8 @@
         "avgBuyPrice": 20.46,
         "expectedEntry": 19.5,
         "deepEntryPrice": 20.0,
-        "targetPrice3Month": 27.0,
-        "targetPriceLongTerm": 40.0
+        "targetPrice3Month": 30.0,
+        "targetPriceLongTerm": 55.0
       },
       {
         "id": "binancecoin",
@@ -83,8 +83,8 @@
         "avgBuyPrice": 0.6250722,
         "expectedEntry": 0.75,
         "deepEntryPrice": 0.6,
-        "targetPrice3Month": 1.0,
-        "targetPriceLongTerm": 1.5
+        "targetPrice3Month": 1.2,
+        "targetPriceLongTerm": 2.5
       },
       {
         "id": "render-token",
@@ -96,7 +96,7 @@
         "expectedEntry": 3.6,
         "deepEntryPrice": 3.85,
         "targetPrice3Month": 5.0,
-        "targetPriceLongTerm": 12.0
+        "targetPriceLongTerm": 10.0
       },
       {
         "id": "fetch-ai",
@@ -107,8 +107,8 @@
         "avgBuyPrice": 0.64100313,
         "expectedEntry": 0.6,
         "deepEntryPrice": 0.6755,
-        "targetPrice3Month": 0.8,
-        "targetPriceLongTerm": 1.5
+        "targetPrice3Month": 0.75,
+        "targetPriceLongTerm": 1.2
       },
       {
         "id": "arbitrum",
@@ -119,8 +119,8 @@
         "avgBuyPrice": 0.4597,
         "expectedEntry": 0.48,
         "deepEntryPrice": 0.4,
-        "targetPrice3Month": 0.65,
-        "targetPriceLongTerm": 1.2
+        "targetPrice3Month": 0.75,
+        "targetPriceLongTerm": 1.8
       },
       {
         "id": "aave",
@@ -131,8 +131,8 @@
         "avgBuyPrice": 303.93,
         "expectedEntry": 303.93,
         "deepEntryPrice": 290.64,
-        "targetPrice3Month": 337.09,
-        "targetPriceLongTerm": 370.66
+        "targetPrice3Month": 450.0,
+        "targetPriceLongTerm": 700.0
       },
       {
         "id": "the-graph",
@@ -143,8 +143,8 @@
         "avgBuyPrice": 0.08655,
         "expectedEntry": 0.09,
         "deepEntryPrice": 0.09,
-        "targetPrice3Month": 0.105,
-        "targetPriceLongTerm": 0.2
+        "targetPrice3Month": 0.15,
+        "targetPriceLongTerm": 0.4
       },
       {
         "id": "ondo-finance",
@@ -167,8 +167,8 @@
         "avgBuyPrice": 3.82,
         "expectedEntry": 4.2,
         "deepEntryPrice": 3.8,
-        "targetPrice3Month": 5.0,
-        "targetPriceLongTerm": 7.0
+        "targetPrice3Month": 6.0,
+        "targetPriceLongTerm": 10.0
       },
       {
         "id": "uniswap",
@@ -179,8 +179,8 @@
         "avgBuyPrice": 10.15,
         "expectedEntry": 10.61,
         "deepEntryPrice": 10.31,
-        "targetPrice3Month": 12.62,
-        "targetPriceLongTerm": 19.37
+        "targetPrice3Month": 15.0,
+        "targetPriceLongTerm": 25.0
       },
       {
         "id": "sui",
@@ -204,7 +204,7 @@
         "expectedEntry": 0.8,
         "deepEntryPrice": 1.0,
         "targetPrice3Month": 1.18,
-        "targetPriceLongTerm": 3.0
+        "targetPriceLongTerm": 1.8
       },
       {
         "id": "tron",
@@ -216,7 +216,7 @@
         "expectedEntry": 0.33,
         "deepEntryPrice": 0.3,
         "targetPrice3Month": 0.37,
-        "targetPriceLongTerm": 0.45
+        "targetPriceLongTerm": 0.55
       },
       {
         "id": "chainbase",
@@ -227,8 +227,8 @@
         "avgBuyPrice": 0.3678,
         "expectedEntry": 0.3678,
         "deepEntryPrice": 0.2097,
-        "targetPrice3Month": 0.216,
-        "targetPriceLongTerm": 0.487
+        "targetPrice3Month": 0.18,
+        "targetPriceLongTerm": 0.3
       },
       {
         "id": "tether",
