@@ -154,8 +154,8 @@ public class PortfolioTableService {
             // Add placeholder for AI recommendation (will be populated later by AdvisoryEngineService)
             row.put("aiRecommendation", "PENDING");
             row.put("aiRecommendationScore", 0);
-            row.put("aiExplanations", Arrays.asList("AI analysis pending"));
-            row.put("aiConfidence", "LOW");
+            row.put("aiExplanations", Arrays.asList(""));
+            row.put("aiConfidence", "");
 
             // Sector-based analysis tracking
             updateSectorAnalysis(holding, portfolioWeight, profitLoss, sectorAllocations, sectorProfitLoss);
