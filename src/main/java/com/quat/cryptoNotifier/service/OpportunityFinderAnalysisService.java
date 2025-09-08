@@ -72,7 +72,7 @@ public class OpportunityFinderAnalysisService {
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
             prompt.append(String.format("Initial Investment: $%.2f (%.1f%% of portfolio)\n", holding.getTotalAvgCost(), currentWeight));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
-            prompt.append(String.format("Expected Target Price: $%.2f\n", holding.getDeepEntryPrice()));
+            prompt.append(String.format("Expected Deep Entry Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
             

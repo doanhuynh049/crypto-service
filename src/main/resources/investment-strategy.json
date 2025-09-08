@@ -8,18 +8,18 @@
     },
     "portfolioTargets": {
       "btcAllocation": "30%",
-      "ethAllocation": "30%",
-      "largCapAltcoins": "10-20%",
+      "ethAllocation": "25%",
+      "largeCapAltcoins": "15%",
       "stablecoins": "20%",
-      "smallCapSpeculative": "5-10%"
+      "smallCapSpeculative": "10%"
     },
     "sectorDiversification": {
       "layer1": "45-50%",
       "layer2": "10-15%",
       "defi": "15-20%",
-      "aiMachineLearning": "8-12%",
+      "aiMachineLearning": "5-10%",
       "infrastructure": "5-10%",
-      "realWorldAssets": "3-8%",
+      "realWorldAssets": "3-5%",
       "stablecoinsYield": "15-20%"
     },
     "riskManagement": {
@@ -27,7 +27,8 @@
       "maxCorrelatedSectorExposure": "30%",
       "recommendedStablecoinBuffer": "15-25%",
       "profitTakingThreshold": "50%",
-      "stopLossGuideline": "Based on individual risk tolerance and technical levels"
+      "stopLossGuideline": "Set based on individual risk tolerance, key technical levels, and volatility", 
+      "riskReviewFrequency": "Monthly portfolio review including stress tests for adverse market conditions"
     },
     "analysisFramework": {
       "fundamentalCriteria": [

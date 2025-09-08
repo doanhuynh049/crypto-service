@@ -444,12 +444,12 @@ public class AdvisoryEngineService {
         prompt.append("\nPlease provide:\n");
         prompt.append("1. A recommendation (STRONG_BUY, BUY, NEUTRAL, SELL, STRONG_SELL)\n");
         prompt.append("2. A confidence score (0-100)\n");
-        prompt.append("3. Exactly 3 brief explanations (each max 50 words)\n\n");
+        prompt.append("3. Exactly 1 brief explanations (each max 20 words)\n\n");
         prompt.append("Format your response as JSON:\n");
         prompt.append("{\n");
         prompt.append("  \"recommendation\": \"STRONG_BUY\",\n");
         prompt.append("  \"confidence\": 85,\n");
-        prompt.append("  \"explanations\": [\"Explanation 1\", \"Explanation 2\", \"Explanation 3\"]\n");
+        prompt.append("  \"explanations\": [\"Explanation 1\"]\n");
         prompt.append("}");
         
         return prompt.toString();

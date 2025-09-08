@@ -28,18 +28,6 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
-    public void sendPortfolioOverview(List<Holding> holdings, Map<String, Object> advisories) {
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("holdings", holdings);
-        variables.put("advisories", advisories);
-        
-        String subject = String.format("📈 Portfolio Overview - %s", 
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
-            
-        sendEmailWithTemplate(subject, "portfolio-overview", variables);
-        System.out.println("Portfolio overview email sent successfully");
-    }
-
     public void sendRiskOpportunityAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("holdings", holdings);

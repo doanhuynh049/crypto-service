@@ -73,8 +73,8 @@ public class EntryExitStrategyAnalysisService {
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
             
             // Add target prices for comparison
-            prompt.append(String.format("Expected Entry Target: $%.2f\n", holding.getExpectedEntry()));
-            prompt.append(String.format("Deep Entry Target: $%.2f\n", holding.getDeepEntryPrice()));
+            prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
+            prompt.append(String.format("Deep Entry Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Price Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Price Target: $%.2f\n", holding.getTargetPriceLongTerm()));
 
