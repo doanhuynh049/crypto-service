@@ -23,7 +23,7 @@
       "stablecoinsYield": "15-20%"
     },
     "riskManagement": {
-      "maxSingleAssetConcentration": "15%",
+      "maxSingleAssetConcentration": "15%, except for BTC and ETH up to 30%",
       "maxCorrelatedSectorExposure": "30%",
       "recommendedStablecoinBuffer": "15-25%",
       "profitTakingThreshold": "50%",
