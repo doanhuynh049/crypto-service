@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class EmailService {
@@ -28,7 +29,22 @@ public class EmailService {
     @Autowired
     private TemplateEngine templateEngine;
 
+    /**
+     * Convert markdown-style bold formatting (**text**) to HTML bold tags
+     */
+    public String convertMarkdownToHtml(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        // Convert **text** to <strong>text</strong>
+        return text.replaceAll("\\*\\*(.*?)\\*\\*", "<strong>$1</strong>");
+    }
+
     public void sendRiskOpportunityAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
+        // Process all text fields to convert markdown to HTML
+        processAnalysisDataForHtml(analysisData);
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("holdings", holdings);
         variables.put("analysisData", analysisData);
@@ -38,6 +54,66 @@ public class EmailService {
             
         sendEmailWithTemplate(subject, "risk-opportunity-analysis", variables);
         System.out.println("Risk & Opportunity Analysis email sent successfully");
+    }
+
+    /**
+     * Process analysis data to convert markdown formatting to HTML
+     */
+    @SuppressWarnings("unchecked")
+    private void processAnalysisDataForHtml(Map<String, Object> analysisData) {
+        // Convert summary
+        if (analysisData.containsKey("summary")) {
+            analysisData.put("summary", convertMarkdownToHtml((String) analysisData.get("summary")));
+        }
+
+        // Process portfolio analysis
+        if (analysisData.containsKey("portfolio_analysis")) {
+            Map<String, Object> portfolioAnalysis = (Map<String, Object>) analysisData.get("portfolio_analysis");
+
+            // Convert sector diversification text
+            if (portfolioAnalysis.containsKey("sector_diversification")) {
+                Map<String, Object> sectorDiv = (Map<String, Object>) portfolioAnalysis.get("sector_diversification");
+                for (String key : sectorDiv.keySet()) {
+                    if (sectorDiv.get(key) instanceof String) {
+                        sectorDiv.put(key, convertMarkdownToHtml((String) sectorDiv.get(key)));
+                    }
+                }
+            }
+
+            // Convert other portfolio analysis fields
+            String[] textFields = {"correlation_risks", "overexposure_concerns", "risk_reward_balance"};
+            for (String field : textFields) {
+                if (portfolioAnalysis.containsKey(field) && portfolioAnalysis.get(field) instanceof String) {
+                    portfolioAnalysis.put(field, convertMarkdownToHtml((String) portfolioAnalysis.get(field)));
+                }
+            }
+
+            // Process recommended adjustments
+            if (portfolioAnalysis.containsKey("recommended_adjustments")) {
+                List<Map<String, Object>> adjustments = (List<Map<String, Object>>) portfolioAnalysis.get("recommended_adjustments");
+                for (Map<String, Object> adjustment : adjustments) {
+                    if (adjustment.containsKey("action")) {
+                        adjustment.put("action", convertMarkdownToHtml((String) adjustment.get("action")));
+                    }
+                    if (adjustment.containsKey("rationale")) {
+                        adjustment.put("rationale", convertMarkdownToHtml((String) adjustment.get("rationale")));
+                    }
+                }
+            }
+        }
+
+        // Process individual analysis
+        if (analysisData.containsKey("individual_analysis")) {
+            List<Map<String, Object>> individualAnalysis = (List<Map<String, Object>>) analysisData.get("individual_analysis");
+            for (Map<String, Object> coin : individualAnalysis) {
+                String[] coinFields = {"market_outlook_short", "market_outlook_long", "risk_factors", "upside_opportunities", "rationale"};
+                for (String field : coinFields) {
+                    if (coin.containsKey(field) && coin.get(field) instanceof String) {
+                        coin.put(field, convertMarkdownToHtml((String) coin.get(field)));
+                    }
+                }
+            }
+        }
     }
 
     public void sendPortfolioHealthCheck(List<Holding> holdings, Map<String, Object> healthData) {

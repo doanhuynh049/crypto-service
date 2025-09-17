@@ -350,15 +350,15 @@
                     </div>
                     <div class="risk-card warning">
                         <h4>⚠️ Correlation Risks</h4>
-                        <p th:text="${analysisData.portfolio_analysis.correlation_risks}">Correlation risk analysis</p>
+                        <p th:utext="${analysisData.portfolio_analysis.correlation_risks}">Correlation risk analysis</p>
                     </div>
                     <div class="risk-card">
                         <h4>🎯 Overexposure Concerns</h4>
-                        <p th:text="${analysisData.portfolio_analysis.overexposure_concerns}">Overexposure analysis</p>
+                        <p th:utext="${analysisData.portfolio_analysis.overexposure_concerns}">Overexposure analysis</p>
                     </div>
                     <div class="risk-card good">
                         <h4>⚖️ Risk vs Reward Balance</h4>
-                        <p th:text="${analysisData.portfolio_analysis.risk_reward_balance}">Risk reward balance assessment</p>
+                        <p th:utext="${analysisData.portfolio_analysis.risk_reward_balance}">Risk reward balance assessment</p>
                     </div>
                 </div>
             </div>
