@@ -18,10 +18,16 @@ curl http://localhost:8080/api/health
 curl -X POST http://localhost:8080/api/reorder-holdings
 
 # Reorder holdings by total average cost (highest first) - EXPLICIT
-curl -X POST "http://localhost:8080/api/reorder-holdings?order=desc"
+curl -X POST "http://localhost:8080/api/reorder-holdings?sortBy=total_avg_cost&order=desc"
 
 # Reorder holdings by total average cost (lowest first)
-curl -X POST "http://localhost:8080/api/reorder-holdings?order=asc"
+curl -X POST "http://localhost:8080/api/reorder-holdings?sortBy=total_avg_cost&order=asc"
+
+# Reorder holdings by total current value (highest first) - NEW!
+curl -X POST "http://localhost:8080/api/reorder-holdings?sortBy=total_current_value&order=desc"
+
+# Reorder holdings by total current value (lowest first) - NEW!
+curl -X POST "http://localhost:8080/api/reorder-holdings?sortBy=total_current_value&order=asc"
 ```
 
 ### Holdings Information
@@ -29,6 +35,22 @@ curl -X POST "http://localhost:8080/api/reorder-holdings?order=asc"
 ```bash
 # Get holdings summary with total average cost calculations
 curl http://localhost:8080/api/holdings-summary
+```
+
+### XLSX Export
+
+```bash
+# Export holdings to Excel file sorted by current value (default)
+curl -o "portfolio.xlsx" "http://localhost:8080/api/export-holdings-xlsx"
+
+# Export holdings sorted by total average cost
+curl -o "portfolio.xlsx" "http://localhost:8080/api/export-holdings-xlsx?sortBy=total_avg_cost&order=desc"
+
+# Export holdings sorted by current value (ascending)
+curl -o "portfolio.xlsx" "http://localhost:8080/api/export-holdings-xlsx?sortBy=total_current_value&order=asc"
+
+# Export with custom filename
+curl -o "my-portfolio-$(date +%Y%m%d).xlsx" "http://localhost:8080/api/export-holdings-xlsx"
 ```
 
 ## Advisory Analysis Commands
@@ -103,23 +125,33 @@ curl http://localhost:8080/api/test-risk-analysis
 curl http://localhost:8080/api/holdings-summary
 curl http://localhost:8080/api/test-portfolio-optimization
 
-# Organize holdings by investment size
-curl -X POST "http://localhost:8080/api/reorder-holdings?order=desc"
+# Organize holdings by current market value (NEW!)
+curl -X POST "http://localhost:8080/api/reorder-holdings?sortBy=total_current_value&order=desc"
+
+# Organize holdings by investment size (historical cost)
+curl -X POST "http://localhost:8080/api/reorder-holdings?sortBy=total_avg_cost&order=desc"
+
+# Export current portfolio to Excel for analysis
+curl -o "pre-rebalance-$(date +%Y%m%d).xlsx" "http://localhost:8080/api/export-holdings-xlsx"
 
 # After rebalancing
 curl http://localhost:8080/api/holdings-summary
 ```
 
-### Research and Analysis
+### Excel Export and Analysis
 
 ```bash
-# Deep dive analysis on specific tokens
-curl "http://localhost:8080/api/test-investment-analysis?symbol=BTC&name=Bitcoin"
-curl "http://localhost:8080/api/test-investment-analysis?symbol=ETH&name=Ethereum"
-curl http://localhost:8080/api/test-eth-investment-analysis
+# Export portfolio sorted by current value for spreadsheet analysis
+curl -o "portfolio-current-value.xlsx" "http://localhost:8080/api/export-holdings-xlsx?sortBy=total_current_value"
 
-# Market opportunity analysis
-curl http://localhost:8080/api/test-risk-analysis
+# Export portfolio sorted by investment cost for tax reporting
+curl -o "portfolio-cost-basis.xlsx" "http://localhost:8080/api/export-holdings-xlsx?sortBy=total_avg_cost"
+
+# Export smallest positions first to identify rebalancing candidates
+curl -o "small-positions.xlsx" "http://localhost:8080/api/export-holdings-xlsx?order=asc"
+
+# Daily export with timestamp
+curl -o "daily-portfolio-$(date +%Y-%m-%d).xlsx" "http://localhost:8080/api/export-holdings-xlsx"
 ```
 
 ## HTTP Methods Reference
@@ -128,7 +160,8 @@ curl http://localhost:8080/api/test-risk-analysis
 |----------|--------|------------|---------|
 | `/api/health` | GET | None | Service health check |
 | `/api/holdings-summary` | GET | None | Holdings overview |
-| `/api/reorder-holdings` | POST | `order` (desc/asc) | Reorder holdings file |
+| `/api/reorder-holdings` | POST | `sortBy` (total_avg_cost/total_current_value), `order` (desc/asc) | Reorder holdings file |
+| `/api/export-holdings-xlsx` | GET | `sortBy` (total_avg_cost/total_current_value), `order` (desc/asc) | Export portfolio to Excel |
 | `/api/trigger-advisory` | GET | None | Full advisory analysis |
 | `/api/test-risk-analysis` | GET | None | Risk & opportunity analysis |
 | `/api/test-portfolio-health` | GET | None | Portfolio health check |

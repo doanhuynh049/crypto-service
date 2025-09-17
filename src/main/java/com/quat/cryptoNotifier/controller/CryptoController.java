@@ -3,18 +3,30 @@ package com.quat.cryptoNotifier.controller;
 import com.quat.cryptoNotifier.service.SchedulerService;
 import com.quat.cryptoNotifier.service.AdvisoryEngineService;
 import com.quat.cryptoNotifier.service.EmailService;
+import com.quat.cryptoNotifier.service.DataProviderService;
 import com.quat.cryptoNotifier.model.Holding;
 import com.quat.cryptoNotifier.model.Holdings;
+import com.quat.cryptoNotifier.model.MarketData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
+// Apache POI imports for Excel generation
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +46,9 @@ public class CryptoController {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private DataProviderService dataProviderService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -160,7 +175,8 @@ public class CryptoController {
     }
 
     @PostMapping("/reorder-holdings")
-    public String reorderHoldingsByTotalAvgCost(@RequestParam(defaultValue = "desc") String order) {
+    public String reorderHoldingsByTotalAvgCost(@RequestParam(defaultValue = "desc") String order,
+                                               @RequestParam(defaultValue = "total_avg_cost") String sortBy) {
         try {
             // Load current holdings
             ClassPathResource resource = new ClassPathResource("holdings.json");
@@ -171,8 +187,19 @@ public class CryptoController {
                 return "No holdings found to reorder";
             }
 
-            // Sort by total average cost (holdings * avgBuyPrice)
-            Comparator<Holding> comparator = Comparator.comparingDouble(Holding::getTotalAvgCost);
+            // Choose sorting method based on sortBy parameter
+            Comparator<Holding> comparator;
+            String sortDescription;
+
+            if ("total_current_value".equalsIgnoreCase(sortBy)) {
+                // Sort by total current value (holdings * current price)
+                comparator = Comparator.comparingDouble(this::calculateTotalCurrentValue);
+                sortDescription = "total current value";
+            } else {
+                // Default: Sort by total average cost (holdings * avgBuyPrice)
+                comparator = Comparator.comparingDouble(Holding::getTotalAvgCost);
+                sortDescription = "total average cost";
+            }
 
             if ("desc".equalsIgnoreCase(order)) {
                 comparator = comparator.reversed();
@@ -215,12 +242,173 @@ public class CryptoController {
 
             formatMapper.writeValue(holdingsFile, cleanOutput);
 
-            return String.format("Holdings successfully reordered by total average cost (%s). %d holdings processed.",
-                               order.toUpperCase(), cryptos.size());
+            return String.format("Holdings successfully reordered by %s (%s). %d holdings processed.",
+                               sortDescription, order.toUpperCase(), cryptos.size());
 
         } catch (Exception e) {
             return "Error reordering holdings: " + e.getMessage();
         }
+    }
+
+    @GetMapping("/export-holdings-xlsx")
+    public ResponseEntity<byte[]> exportHoldingsToXlsx(@RequestParam(defaultValue = "desc") String order,
+                                                       @RequestParam(defaultValue = "total_current_value") String sortBy) {
+        try {
+            // Load current holdings
+            ClassPathResource resource = new ClassPathResource("holdings.json");
+            Holdings holdings = objectMapper.readValue(resource.getInputStream(), Holdings.class);
+            List<Holding> cryptos = holdings.getCryptos();
+
+            if (cryptos == null || cryptos.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            // Sort holdings based on specified criteria
+            Comparator<Holding> comparator;
+            if ("total_current_value".equalsIgnoreCase(sortBy)) {
+                comparator = Comparator.comparingDouble(this::calculateTotalCurrentValue);
+            } else {
+                comparator = Comparator.comparingDouble(Holding::getTotalAvgCost);
+            }
+
+            if ("desc".equalsIgnoreCase(order)) {
+                comparator = comparator.reversed();
+            }
+            cryptos.sort(comparator);
+
+            // Generate XLSX file
+            byte[] excelData = generateHoldingsExcel(cryptos);
+
+            // Create filename with timestamp
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+            String filename = String.format("portfolio-holdings_%s.xlsx", timestamp);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", filename);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+
+        } catch (Exception e) {
+            System.err.println("Error exporting holdings to XLSX: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Calculate total current value for a holding
+     */
+    private double calculateTotalCurrentValue(Holding holding) {
+        try {
+            MarketData marketData = dataProviderService.getMarketData(holding.getId());
+            return holding.getHoldings() * marketData.getCurrentPrice();
+        } catch (Exception e) {
+            System.err.println("Error fetching current price for " + holding.getSymbol() + ": " + e.getMessage());
+            // Fallback to total average cost if current price unavailable
+            return holding.getTotalAvgCost();
+        }
+    }
+
+    /**
+     * Generate Excel file with portfolio holdings
+     */
+    private byte[] generateHoldingsExcel(List<Holding> cryptos) throws Exception {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Portfolio Holdings");
+
+        // Create header style
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 12);
+        headerStyle.setFont(headerFont);
+        headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        // Create data style for numbers
+        CellStyle numberStyle = workbook.createCellStyle();
+        numberStyle.setDataFormat(workbook.createDataFormat().getFormat("#,##0.00"));
+
+        CellStyle currencyStyle = workbook.createCellStyle();
+        currencyStyle.setDataFormat(workbook.createDataFormat().getFormat("$#,##0.00"));
+
+        // Create header row
+        Row headerRow = sheet.createRow(0);
+        String[] headers = {
+            "Symbol", "Name", "Exchange", "Sector", "Industry",
+            "Shares", "Avg Buy Price", "Conservative Entry",
+            "Target 3M", "Target Long Term", "Platform"
+        };
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Populate data rows
+        int rowNum = 1;
+        for (Holding holding : cryptos) {
+            Row row = sheet.createRow(rowNum++);
+
+            // Symbol
+            row.createCell(0).setCellValue(holding.getSymbol());
+
+            // Name
+            row.createCell(1).setCellValue(holding.getName());
+
+            // Exchange (assuming CoinGecko for crypto)
+            row.createCell(2).setCellValue("CoinGecko");
+
+            // Sector
+            row.createCell(3).setCellValue(holding.getSector() != null ? holding.getSector() : "Cryptocurrency");
+
+            // Industry (using sector as industry for crypto)
+            row.createCell(4).setCellValue(holding.getSector() != null ? holding.getSector() : "Blockchain");
+
+            // Shares (holdings amount)
+            Cell sharesCell = row.createCell(5);
+            sharesCell.setCellValue(holding.getHoldings());
+            sharesCell.setCellStyle(numberStyle);
+
+            // Avg Buy Price
+            Cell avgPriceCell = row.createCell(6);
+            avgPriceCell.setCellValue(holding.getAveragePrice());
+            avgPriceCell.setCellStyle(currencyStyle);
+
+            // Conservative Entry (using expectedEntry)
+            Cell entryCell = row.createCell(7);
+            entryCell.setCellValue(holding.getExpectedEntry());
+            entryCell.setCellStyle(currencyStyle);
+
+            // Target 3M
+            Cell target3MCell = row.createCell(8);
+            target3MCell.setCellValue(holding.getTargetPrice3Month());
+            target3MCell.setCellStyle(currencyStyle);
+
+            // Target Long Term
+            Cell targetLTCell = row.createCell(9);
+            targetLTCell.setCellValue(holding.getTargetPriceLongTerm());
+            targetLTCell.setCellStyle(currencyStyle);
+
+            // Platform (generic for crypto)
+            row.createCell(10).setCellValue("Crypto Exchange");
+        }
+
+        // Auto-size columns
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Write to byte array
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+
+        return outputStream.toByteArray();
     }
 
     @GetMapping("/holdings-summary")
