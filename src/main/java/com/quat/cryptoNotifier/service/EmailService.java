@@ -17,6 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 
 @Service
 public class EmailService {
@@ -29,6 +38,10 @@ public class EmailService {
 
     @Autowired
     private TemplateEngine templateEngine;
+
+    // Store paths to individual crypto email files for consolidation
+    private final Map<String, String> cryptoEmailFiles = new ConcurrentHashMap<>();
+    private static final String EMAIL_ATTACHMENTS_DIR = "email-attachments";
 
     public void sendRiskOpportunityAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
         // Process all text fields to convert markdown to HTML
@@ -167,6 +180,9 @@ public class EmailService {
         System.out.println("Portfolio Optimization Analysis email sent successfully");
     }
 
+    /**
+     * Modified sendInvestmentAnalysis to save email as .eml file for consolidation
+     */
     public void sendInvestmentAnalysis(Map<String, Object> analysisData) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("analysisData", analysisData);
@@ -174,14 +190,16 @@ public class EmailService {
         String symbol = (String) analysisData.getOrDefault("symbol", "CRYPTO");
         String subject = String.format("🪙 %s Investment Analysis - %s", symbol,
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
-            
-        sendEmailWithTemplate(subject, "investment-analysis", variables);
-        System.out.println(symbol + " Investment Analysis email sent successfully");
-    }
 
-    // Legacy method for ETH analysis
-    public void sendETHInvestmentAnalysis(Map<String, Object> analysisData) {
-        sendInvestmentAnalysis(analysisData);
+        // Send the email and save as .eml file
+        String emlFilePath = sendEmailWithTemplateAndSave(subject, "investment-analysis", variables, symbol);
+
+        // Store the file path for consolidation
+        if (emlFilePath != null) {
+            cryptoEmailFiles.put(symbol, emlFilePath);
+        }
+
+        System.out.println(symbol + " Investment Analysis email sent successfully and saved as " + emlFilePath);
     }
 
     public void sendEntryExitStrategyAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
@@ -233,7 +251,7 @@ public class EmailService {
     }
 
     /**
-     * Send consolidated investment analysis summary email with all crypto analyses
+     * Send consolidated investment analysis summary email with all crypto email attachments
      */
     public void sendConsolidatedInvestmentAnalysis(List<InvestmentAnalysisCacheService.AnalysisSummary> analysisSummaries) {
         Map<String, Object> variables = new HashMap<>();
@@ -242,17 +260,179 @@ public class EmailService {
         
         String subject = String.format("📊 Daily Investment Analysis Summary - %s", 
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
-            
-        sendEmailWithTemplate(subject, "consolidated-investment-analysis", variables);
-        System.out.println("Consolidated Investment Analysis Summary email sent successfully with " + 
-            analysisSummaries.size() + " crypto analyses");
+
+        // Collect all crypto email files for attachment
+        List<String> attachmentFiles = new ArrayList<>();
+        for (InvestmentAnalysisCacheService.AnalysisSummary summary : analysisSummaries) {
+            String emlFile = cryptoEmailFiles.get(summary.getSymbol());
+            if (emlFile != null && new File(emlFile).exists()) {
+                attachmentFiles.add(emlFile);
+            }
+        }
+
+        sendEmailWithTemplateAndAttachments(subject, "consolidated-investment-analysis", variables, attachmentFiles);
+
+        System.out.println("Consolidated Investment Analysis Summary email sent successfully with " +
+            analysisSummaries.size() + " crypto analyses and " + attachmentFiles.size() + " email attachments");
+
+        // Clean up after sending consolidated email
+        cleanupEmailFiles();
     }
 
     /**
-     * Common method to send emails with optional file attachments
-     * This eliminates code duplication across all email sending methods
+     * Enhanced method to send emails and save as .eml file
      */
-    private void sendEmailWithTemplate(String subject, String templateName, 
+    private String sendEmailWithTemplateAndSave(String subject, String templateName,
+                                               Map<String, Object> templateVariables, String cryptoSymbol) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(appConfig.getMailFrom());
+            helper.setTo(appConfig.getMailTo());
+            helper.setSubject(subject);
+
+            // Create context with all provided variables
+            Context context = new Context();
+            if (templateVariables != null) {
+                for (Map.Entry<String, Object> entry : templateVariables.entrySet()) {
+                    context.setVariable(entry.getKey(), entry.getValue());
+                }
+            }
+
+            // Always add timestamp
+            context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+            // Process template and set content
+            String content = templateEngine.process(templateName, context);
+            helper.setText(content, true);
+
+            // Send the email
+//            mailSender.send(message);
+
+            // Save email as .eml file
+            String emlFilePath = saveEmailAsEmlFile(message, cryptoSymbol);
+
+            System.out.println("Email sent successfully: " + subject);
+            return emlFilePath;
+
+        } catch (MessagingException | IOException e) {
+            System.err.println("Failed to send email or save .eml file: " + subject + " - " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Enhanced method to send emails with file attachments
+     */
+    private void sendEmailWithTemplateAndAttachments(String subject, String templateName,
+                                                   Map<String, Object> templateVariables, List<String> attachmentFiles) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(appConfig.getMailFrom());
+            helper.setTo(appConfig.getMailTo());
+            helper.setSubject(subject);
+
+            // Create context with all provided variables
+            Context context = new Context();
+            if (templateVariables != null) {
+                for (Map.Entry<String, Object> entry : templateVariables.entrySet()) {
+                    context.setVariable(entry.getKey(), entry.getValue());
+                }
+            }
+
+            // Always add timestamp
+            context.setVariable("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+            // Process template and set content
+            String content = templateEngine.process(templateName, context);
+            helper.setText(content, true);
+
+            // Add email attachments
+            if (attachmentFiles != null && !attachmentFiles.isEmpty()) {
+                for (String filePath : attachmentFiles) {
+                    File file = new File(filePath);
+                    if (file.exists()) {
+                        String fileName = file.getName();
+                        helper.addAttachment(fileName, file);
+                        System.out.println("Added attachment: " + fileName);
+                    }
+                }
+            }
+
+            // Send the email
+            mailSender.send(message);
+
+            System.out.println("Email sent successfully: " + subject);
+
+        } catch (MessagingException e) {
+            System.err.println("Failed to send email with attachments: " + subject + " - " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Save a MimeMessage as an .eml file
+     */
+    private String saveEmailAsEmlFile(MimeMessage message, String cryptoSymbol) throws IOException, MessagingException {
+        // Create attachments directory if it doesn't exist
+        File attachmentsDir = new File(EMAIL_ATTACHMENTS_DIR);
+        if (!attachmentsDir.exists()) {
+            attachmentsDir.mkdirs();
+        }
+
+        // Create filename with timestamp
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String fileName = String.format("%s-investment-analysis-%s.eml", cryptoSymbol, timestamp);
+        String filePath = EMAIL_ATTACHMENTS_DIR + File.separator + fileName;
+
+        // Write the MimeMessage to .eml file
+        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+            message.writeTo(fos);
+        }
+
+        System.out.println("Saved email as .eml file: " + filePath);
+        return filePath;
+    }
+
+    /**
+     * Clean up saved email files after consolidated email is sent
+     */
+    private void cleanupEmailFiles() {
+        for (String filePath : cryptoEmailFiles.values()) {
+            try {
+                File file = new File(filePath);
+                if (file.exists()) {
+                    file.delete();
+                    System.out.println("Cleaned up email file: " + filePath);
+                }
+            } catch (Exception e) {
+                System.err.println("Error cleaning up email file: " + filePath + " - " + e.getMessage());
+            }
+        }
+        cryptoEmailFiles.clear();
+    }
+
+    /**
+     * Clear stored email files (useful for manual cleanup or error recovery)
+     */
+    public void clearStoredEmailFiles() {
+        cleanupEmailFiles();
+        System.out.println("Cleared all stored email files");
+    }
+
+    // Legacy method for ETH analysis
+    public void sendETHInvestmentAnalysis(Map<String, Object> analysisData) {
+        sendInvestmentAnalysis(analysisData);
+    }
+
+    /**
+     * Common method to send emails without attachments (for backward compatibility)
+     */
+    private void sendEmailWithTemplate(String subject, String templateName,
                                      Map<String, Object> templateVariables) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -287,3 +467,4 @@ public class EmailService {
         }
     }
 }
+
