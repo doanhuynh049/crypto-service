@@ -12,6 +12,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,18 +29,6 @@ public class EmailService {
 
     @Autowired
     private TemplateEngine templateEngine;
-
-    /**
-     * Convert markdown-style bold formatting (**text**) to HTML bold tags
-     */
-    public String convertMarkdownToHtml(String text) {
-        if (text == null || text.isEmpty()) {
-            return text;
-        }
-
-        // Convert **text** to <strong>text</strong>
-        return text.replaceAll("\\*\\*(.*?)\\*\\*", "<strong>$1</strong>");
-    }
 
     public void sendRiskOpportunityAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
         // Process all text fields to convert markdown to HTML
@@ -66,6 +55,15 @@ public class EmailService {
             analysisData.put("summary", convertMarkdownToHtml((String) analysisData.get("summary")));
         }
 
+        // Process risk warnings - this is where the main formatting issue is
+        if (analysisData.containsKey("risk_warnings")) {
+            List<String> riskWarnings = (List<String>) analysisData.get("risk_warnings");
+            List<String> processedWarnings = new ArrayList<>();
+            for (String warning : riskWarnings) {
+                processedWarnings.add(convertMarkdownToHtml(warning));
+            }
+            analysisData.put("risk_warnings", processedWarnings);
+        }
         // Convert market timing considerations
         if (analysisData.containsKey("market_timing_considerations")) {
             analysisData.put("market_timing_considerations", convertMarkdownToHtml((String) analysisData.get("market_timing_considerations")));
@@ -121,11 +119,23 @@ public class EmailService {
         }
     }
 
+    /**
+     * Convert markdown-style bold formatting (**text**) to HTML bold tags
+     */
+    public String convertMarkdownToHtml(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        // Convert **text** to <strong>text</strong>
+        return text.replaceAll("\\*\\*(.*?)\\*\\*", "<strong>$1</strong>");
+    }
+
     public void sendPortfolioHealthCheck(List<Holding> holdings, Map<String, Object> healthData) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("holdings", holdings);
         variables.put("healthData", healthData);
-        
+        processAnalysisDataForHtml(healthData);
         String subject = String.format("🏥 Portfolio Health Check - %s", 
             LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
             

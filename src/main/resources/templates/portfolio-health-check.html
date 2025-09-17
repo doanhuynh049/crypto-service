@@ -517,7 +517,7 @@
             <div class="risk-warnings" th:if="${healthData.risk_warnings}">
                 <h3>⚠️ Key Risk Warnings</h3>
                 <ul class="risk-list">
-                    <li th:each="warning : ${healthData.risk_warnings}" th:text="${warning}">Risk warning</li>
+                    <li th:each="warning : ${healthData.risk_warnings}" th:utext="${warning}">Risk warning</li>
                 </ul>
             </div>
         </div>
