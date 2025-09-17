@@ -223,10 +223,18 @@
             padding-bottom: 10px;
         }
         .exit-item {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
+            background: #ffffff; /* clean white background */
+            border-radius: 12px; /* slightly more rounded */
+            padding: 20px 25px; /* slightly wider padding for balance */
             margin-bottom: 15px;
+            border-left: 5px solid #FFD700; /* light yellow accent */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* subtle shadow for depth */
+            transition: transform 0.2s, box-shadow 0.2s; /* smooth hover effect */
+        }
+
+        .exit-item:hover {
+            transform: translateY(-2px); /* subtle lift */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); /* stronger shadow on hover */
         }
         .urgency-high { border-left: 4px solid #e74c3c; }
         .urgency-medium { border-left: 4px solid #f39c12; }
