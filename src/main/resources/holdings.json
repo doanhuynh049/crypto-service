@@ -71,7 +71,7 @@
       "id" : "chainlink",
       "symbol" : "LINK",
       "name" : "Chainlink",
-      "sector" : "DeFi",
+      "sector" : "Oracle / Infrastructure",
       "holdings" : 1.25,
       "avgBuyPrice" : 20.76,
       "expectedEntry" : 19.5,
