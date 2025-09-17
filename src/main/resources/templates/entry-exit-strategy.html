@@ -52,18 +52,21 @@
             font-size: 20px;
             font-weight: bold;
         }
-        
-        /* Crypto Containers */
+
         .crypto-container {
             border: 2px solid #e74c3c;
             margin-bottom: 20px;
             background-color: #ffffff;
+            border-radius: 8px;      /* smoother look */
+            padding: 15px;           /* space inside */
         }
-        .crypto-container.buy { 
-            border-color: #27ae60; 
+        .crypto-container.buy {
+            border-color: #27ae60;
+            background-color: #f0fdf4; /* pale green */
         }
-        .crypto-container.hold { 
-            border-color: #f39c12; 
+        .crypto-container.hold {
+            border-color: #f39c12;
+            background-color: #fff8e6; /* pale yellow */
         }
         
         .crypto-header {
@@ -291,6 +294,139 @@
                 font-size: 18px;
             }
         }
+
+        /* Summary Table Styles */
+        .summary-table-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .summary-table-container h2 {
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .summary-table th {
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 2px solid #2980b9;
+        }
+        .summary-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 13px;
+        }
+        .summary-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .summary-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Action badges in table */
+        .action-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .action-badge.sell {
+            background-color: #e74c3c;
+            color: #ffffff;
+        }
+        .action-badge.buy {
+            background-color: #27ae60;
+            color: #ffffff;
+        }
+        .action-badge.hold {
+            background-color: #f39c12;
+            color: #ffffff;
+        }
+
+        /* Priority badges */
+        .priority-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .priority-badge.high {
+            background-color: #e74c3c;
+            color: #ffffff;
+        }
+        .priority-badge.medium {
+            background-color: #f39c12;
+            color: #ffffff;
+        }
+        .priority-badge.low {
+            background-color: #95a5a6;
+            color: #ffffff;
+        }
+
+        /* Confidence badges */
+        .confidence-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            background-color: #3498db;
+            color: #ffffff;
+        }
+
+        /* Price formatting */
+        .price-cell {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Symbol formatting */
+        .symbol-cell {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        /* Mobile responsive for table */
+        @media (max-width: 768px) {
+            .summary-table {
+                font-size: 11px;
+            }
+            .summary-table th,
+            .summary-table td {
+                padding: 6px 4px;
+            }
+            .summary-table-container {
+                padding: 15px;
+                overflow-x: auto;
+            }
+            .action-badge,
+            .priority-badge,
+            .confidence-badge {
+                font-size: 9px;
+                padding: 2px 4px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -319,6 +455,94 @@
                         <span th:text="${analysisData['market_overview']['best_trading_window']}" style="font-weight: bold;"></span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Summary Table -->
+            <div class="summary-table-container">
+                <h2>📋 Trading Summary</h2>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Action</th>
+                            <th>Amount</th>
+                            <th>Target Price</th>
+                            <th>Priority</th>
+                            <th>Confidence</th>
+                            <th>Key Levels</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sell Recommendations -->
+                        <tr th:each="sellRec : ${analysisData['sell_recommendations'] ?: {}}" class="sell-row">
+                            <td class="symbol-cell" th:text="${sellRec['symbol']}">BTC</td>
+                            <td>
+                                <span class="action-badge sell">SELL</span>
+                            </td>
+                            <td class="price-cell" th:text="${sellRec['sell_amount_percentage'] ?: 'N/A'}">25%</td>
+                            <td class="price-cell" th:text="${sellRec['target_sell_price'] ?: 'N/A'}">$95,000</td>
+                            <td>
+                                <span class="priority-badge"
+                                      th:class="${sellRec['priority'] != null ? sellRec['priority'].toLowerCase() : 'medium'}"
+                                      th:text="${sellRec['priority'] ?: 'MEDIUM'}">HIGH</span>
+                            </td>
+                            <td>
+                                <span class="confidence-badge"
+                                      th:text="${sellRec['confidence_level'] ?: 'MEDIUM'}">HIGH</span>
+                            </td>
+                            <td class="price-cell" th:text="${sellRec['target_sell_price'] ?: 'See details'}">Stop: $90k</td>
+                        </tr>
+
+                        <!-- Buy Recommendations -->
+                        <tr th:each="buyRec : ${analysisData['buy_recommendations'] ?: {}}" class="buy-row">
+                            <td class="symbol-cell" th:text="${buyRec['symbol']}">ETH</td>
+                            <td>
+                                <span class="action-badge buy">BUY</span>
+                            </td>
+                            <td class="price-cell" th:text="${buyRec['buy_amount_usd'] ?: 'N/A'}">$500</td>
+                            <td class="price-cell" th:text="${buyRec['target_buy_price'] ?: 'N/A'}">$3,200</td>
+                            <td>
+                                <span class="priority-badge"
+                                      th:class="${buyRec['priority'] != null ? buyRec['priority'].toLowerCase() : 'medium'}"
+                                      th:text="${buyRec['priority'] ?: 'MEDIUM'}">MEDIUM</span>
+                            </td>
+                            <td>
+                                <span class="confidence-badge"
+                                      th:text="${buyRec['confidence_level'] ?: 'MEDIUM'}">MEDIUM</span>
+                            </td>
+                            <td class="price-cell">
+                                <span th:if="${buyRec['stop_loss_level'] != null}"
+                                      th:text="'Stop: ' + ${buyRec['stop_loss_level']}">Stop: $3,000</span>
+                                <span th:if="${buyRec['stop_loss_level'] == null}">See details</span>
+                            </td>
+                        </tr>
+
+                        <!-- Hold Recommendations -->
+                        <tr th:each="holdRec : ${analysisData['hold_recommendations'] ?: {}}" class="hold-row">
+                            <td class="symbol-cell" th:text="${holdRec['symbol']}">SOL</td>
+                            <td>
+                                <span class="action-badge hold">HOLD</span>
+                            </td>
+                            <td class="price-cell">Current</td>
+                            <td class="price-cell">
+                                <span th:if="${holdRec['watch_levels'] != null and holdRec['watch_levels']['sell_above'] != null}"
+                                      th:text="${holdRec['watch_levels']['sell_above']}">$180</span>
+                                <span th:if="${holdRec['watch_levels'] == null or holdRec['watch_levels']['sell_above'] == null}">Monitor</span>
+                            </td>
+                            <td>
+                                <span class="priority-badge medium">MEDIUM</span>
+                            </td>
+                            <td>
+                                <span class="confidence-badge">STABLE</span>
+                            </td>
+                            <td class="price-cell">
+                                <span th:if="${holdRec['watch_levels'] != null and holdRec['watch_levels']['buy_below'] != null}"
+                                      th:text="'Buy: ' + ${holdRec['watch_levels']['buy_below']}">Buy: $140</span>
+                                <span th:if="${holdRec['watch_levels'] == null or holdRec['watch_levels']['buy_below'] == null}">Watch</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <!-- Sell Recommendations -->
@@ -542,6 +766,44 @@
                             th:text="${alert}"></li>
                     </ul>
                 </div>
+            </div>
+
+            <!-- Summary Table (Newly Added Section) -->
+            <div class="summary-table-container" th:if="${analysisData['summary_table'] != null}">
+                <h2>📈 Summary Table</h2>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Action</th>
+                            <th>Amount</th>
+                            <th>Target Price</th>
+                            <th>Current Price</th>
+                            <th>Stop Loss</th>
+                            <th>Take Profit</th>
+                            <th>Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row : ${analysisData['summary_table']}"
+                            th:class="${row['action'].toLowerCase()}">
+                            <td class="symbol-cell" th:text="${row['asset']}"></td>
+                            <td>
+                                <span class="action-badge" th:class="${row['action'].toLowerCase()}"
+                                    th:text="${row['action']}"></span>
+                            </td>
+                            <td class="price-cell" th:text="${row['amount']}"></td>
+                            <td class="price-cell" th:text="${row['target_price']}"></td>
+                            <td class="price-cell" th:text="${row['current_price']}"></td>
+                            <td class="price-cell" th:text="${row['stop_loss']}"></td>
+                            <td class="price-cell" th:text="${row['take_profit']}"></td>
+                            <td>
+                                <span class="priority-badge" th:class="${row['priority'].toLowerCase()}"
+                                    th:text="${row['priority']}"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
         </div>
