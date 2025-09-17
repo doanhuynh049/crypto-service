@@ -3,6 +3,7 @@ package com.quat.cryptoNotifier.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quat.cryptoNotifier.model.Holding;
+import com.quat.cryptoNotifier.model.MarketData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +22,13 @@ public class RiskOpportunityAnalysisService {
     @Autowired
     private InvestmentStrategyService investmentStrategyService;
 
+    @Autowired
+    private DataProviderService dataProviderService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Build a comprehensive risk and opportunity analysis prompt
+     * Build a comprehensive risk and opportunity analysis prompt with current market data
      */
     public String buildRiskOpportunityPrompt(List<Holding> holdings) {
         StringBuilder prompt = new StringBuilder();
@@ -42,25 +46,79 @@ public class RiskOpportunityAnalysisService {
         prompt.append("- Identify overexposure or correlation risks.\n");
         prompt.append("- Suggest adjustments to balance risk vs reward.\n\n");
         
-        prompt.append("Portfolio data:\n\n");
-        
-        // Add detailed portfolio information
+        prompt.append("Portfolio data with current market information:\n\n");
+
+        // Add detailed portfolio information with current market data
+        double totalPortfolioValue = 0;
+        double totalInvestmentCost = 0;
+
         for (Holding holding : holdings) {
-            if (holding.getSymbol() == "USDT" || holding.getSymbol() == "USDC" || holding.getSymbol() == "BUSD") {
-                continue; // Skip stablecoins
+            if ("USDT".equals(holding.getSymbol()) || "USDC".equals(holding.getSymbol()) || "BUSD".equals(holding.getSymbol())) {
+                continue; // Skip stablecoins for market analysis
             }
+
+            // Get current market data
+            MarketData marketData = null;
+            double currentPrice = 0;
+            double currentValue = 0;
+            double profitLoss = 0;
+            double profitLossPercentage = 0;
+            String technicalAnalysis = "N/A";
+
+            try {
+                marketData = dataProviderService.getMarketData(holding.getId());
+                if (marketData != null) {
+                    currentPrice = marketData.getCurrentPrice();
+                    currentValue = holding.getHoldings() * currentPrice;
+                    profitLoss = currentValue - holding.getTotalAvgCost();
+                    profitLossPercentage = ((currentPrice - holding.getAveragePrice()) / holding.getAveragePrice()) * 100;
+                    technicalAnalysis = buildTechnicalAnalysis(marketData);
+                }
+            } catch (Exception e) {
+                System.err.println("Error fetching market data for " + holding.getSymbol() + ": " + e.getMessage());
+                currentPrice = 0; // Fallback to average price
+                currentValue = 0;
+            }
+
+            totalPortfolioValue += currentValue;
+            totalInvestmentCost += holding.getTotalAvgCost();
+
             prompt.append(String.format("--- %s (%s) ---\n", holding.getSymbol(), holding.getName()));
             prompt.append(String.format("Sector: %s\n", holding.getSector() != null ? holding.getSector() : "Unknown"));
             prompt.append(String.format("Holdings: %.6f %s\n", holding.getHoldings(), holding.getSymbol()));
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
+            prompt.append(String.format("Current Price: $%.2f\n", currentPrice != 0 ? currentPrice : "Unknown"));
+            prompt.append(String.format("Current Value: $%.2f\n", currentValue != 0 ? currentValue : "Unknown"));
+            prompt.append(String.format("Initial Investment: $%.2f\n", holding.getTotalAvgCost()));
+            prompt.append(String.format("Profit/Loss: $%.2f (%.2f%%)\n", profitLoss, profitLossPercentage));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
             prompt.append(String.format("Expected Deep Entry Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
-            prompt.append(String.format("Initial Investment Value: $%.2f\n", holding.getTotalAvgCost()));
+
+            // Add technical analysis if available
+            if (!"N/A".equals(technicalAnalysis)) {
+                prompt.append(String.format("Technical Analysis: %s\n", technicalAnalysis));
+            }
+
+            // Add price action context
+            double percentToTarget3M = ((holding.getTargetPrice3Month() - currentPrice) / currentPrice) * 100;
+            double percentToTargetLT = ((holding.getTargetPriceLongTerm() - currentPrice) / currentPrice) * 100;
+            prompt.append(String.format("Distance to 3M Target: %.1f%%\n", percentToTarget3M));
+            prompt.append(String.format("Distance to LT Target: %.1f%%\n", percentToTargetLT));
             prompt.append("\n");
         }
         
+        // Add portfolio summary
+        double totalProfitLoss = totalPortfolioValue - totalInvestmentCost;
+        double totalProfitLossPercentage = totalInvestmentCost > 0 ? (totalProfitLoss / totalInvestmentCost) * 100 : 0;
+
+        prompt.append("--- Portfolio Summary ---\n");
+        prompt.append(String.format("Total Investment Cost: $%.2f\n", totalInvestmentCost));
+        prompt.append(String.format("Current Portfolio Value: $%.2f\n", totalPortfolioValue));
+        prompt.append(String.format("Total Profit/Loss: $%.2f (%.2f%%)\n", totalProfitLoss, totalProfitLossPercentage));
+        prompt.append("\n");
+
         // Add investment context from centralized strategy
         prompt.append("--- Investment Context ---\n");
         prompt.append(investmentStrategyService.getInvestmentContextSection());
@@ -111,6 +169,48 @@ public class RiskOpportunityAnalysisService {
         prompt.append("}\n");
         
         return prompt.toString();
+    }
+
+    /**
+     * Build technical analysis summary from market data
+     */
+    private String buildTechnicalAnalysis(MarketData marketData) {
+        if (marketData == null) {
+            return "N/A";
+        }
+
+        StringBuilder analysis = new StringBuilder();
+
+        // RSI Analysis
+        if (marketData.getRsi() != null) {
+            double rsi = marketData.getRsi();
+            String rsiStatus = rsi > 70 ? "Overbought" : (rsi < 30 ? "Oversold" : "Neutral");
+            analysis.append(String.format("RSI: %.1f (%s), ", rsi, rsiStatus));
+        }
+
+        // Moving Average Analysis
+        if (marketData.getSma20() != null && marketData.getSma50() != null) {
+            double currentPrice = marketData.getCurrentPrice();
+            String maStatus = "";
+
+            if (currentPrice > marketData.getSma20() && currentPrice > marketData.getSma50()) {
+                maStatus = "Above key MAs (Bullish)";
+            } else if (currentPrice < marketData.getSma20() && currentPrice < marketData.getSma50()) {
+                maStatus = "Below key MAs (Bearish)";
+            } else {
+                maStatus = "Mixed MA signals";
+            }
+
+            analysis.append(String.format("MA Status: %s, ", maStatus));
+        }
+
+        // MACD Analysis
+        if (marketData.getMacd() != null && marketData.getMacdSignal() != null) {
+            String macdStatus = marketData.getMacd() > marketData.getMacdSignal() ? "Bullish" : "Bearish";
+            analysis.append(String.format("MACD: %s", macdStatus));
+        }
+
+        return analysis.length() > 0 ? analysis.toString() : "Limited technical data available";
     }
 
     /**
