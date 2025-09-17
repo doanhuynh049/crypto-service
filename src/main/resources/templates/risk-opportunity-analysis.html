@@ -291,6 +291,40 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* New Styles for Summary Table */
+        .summary-table-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e1e8ed;
+        }
+        .action-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .action-summary-table th, .action-summary-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        .action-summary-table th {
+            background: #f1f1f1;
+            color: #34495e;
+            font-weight: 600;
+        }
+        .action-summary-table td {
+            color: #5a6c7d;
+        }
+        .action-badge-small {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-weight: bold;
+            font-size: 12px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -391,6 +425,38 @@
             <!-- Individual Analysis -->
             <div class="individual-analysis">
                 <h2>💰 Individual Coin Analysis</h2>
+
+                <!-- Summary Table -->
+                <div class="summary-table-container">
+                    <h3>📋 Quick Action Summary</h3>
+                    <table class="action-summary-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Action</th>
+                                <th>Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="coin : ${analysisData.individual_analysis}">
+                                <td><strong th:text="${coin.symbol}">ETH</strong></td>
+                                <td>
+                                    <span class="action-badge-small"
+                                          th:classappend="${coin.action_recommendation == 'BUY'} ? 'action-buy' : (${coin.action_recommendation == 'SELL'} ? 'action-sell' : 'action-hold')"
+                                          th:text="${coin.action_recommendation}">BUY</span>
+                                </td>
+                                <td>
+                                    <span class="priority-indicator"
+                                          th:text="${coin.action_recommendation == 'BUY'} ? 'High' : (${coin.action_recommendation == 'SELL'} ? 'High' : 'Medium')">Medium</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Detailed Analysis -->
+                <h3 style="margin-top: 30px; margin-bottom: 20px; color: #2c3e50;">📊 Detailed Analysis</h3>
+
                 <div th:each="coin : ${analysisData.individual_analysis}" class="coin-analysis">
                     <div class="coin-header">
                         <div class="coin-symbol" th:text="${coin.symbol}">BTC</div>
