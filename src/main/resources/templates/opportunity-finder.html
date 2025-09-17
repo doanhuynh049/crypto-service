@@ -416,12 +416,12 @@
                 <!-- Portfolio Risks -->
                 <div class="detail-item" th:if="${analysisData.risk_assessment?.portfolio_risks}">
                     <div class="detail-label">📊 Overall Portfolio Risks</div>
-                    <div class="detail-value" th:text="${analysisData.risk_assessment.portfolio_risks}">Overall portfolio risk assessment</div>
+                    <div class="detail-value" th:utext="${analysisData.risk_assessment.portfolio_risks}">Overall portfolio risk assessment</div>
                 </div>
                 
                 <div class="detail-item" th:if="${analysisData.risk_assessment?.concentration_concerns}">
                     <div class="detail-label">🎯 Concentration Concerns</div>
-                    <div class="detail-value" th:text="${analysisData.risk_assessment.concentration_concerns}">Areas of excessive concentration</div>
+                    <div class="detail-value" th:utext="${analysisData.risk_assessment.concentration_concerns}">Areas of excessive concentration</div>
                 </div>
 
                 <!-- Speculative Coins -->
@@ -591,7 +591,7 @@
             <!-- Market Timing Considerations -->
             <div class="market-timing" th:if="${analysisData.market_timing_considerations}">
                 <h3>⏰ Market Timing Considerations</h3>
-                <p th:text="${analysisData.market_timing_considerations}">Current market conditions and timing factors</p>
+                <p th:utext="${analysisData.market_timing_considerations}">Current market conditions and timing factors</p>
             </div>
         </div>
 

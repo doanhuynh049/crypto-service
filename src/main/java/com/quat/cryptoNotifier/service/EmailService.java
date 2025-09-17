@@ -66,6 +66,11 @@ public class EmailService {
             analysisData.put("summary", convertMarkdownToHtml((String) analysisData.get("summary")));
         }
 
+        // Convert market timing considerations
+        if (analysisData.containsKey("market_timing_considerations")) {
+            analysisData.put("market_timing_considerations", convertMarkdownToHtml((String) analysisData.get("market_timing_considerations")));
+        }
+
         // Process portfolio analysis
         if (analysisData.containsKey("portfolio_analysis")) {
             Map<String, Object> portfolioAnalysis = (Map<String, Object>) analysisData.get("portfolio_analysis");

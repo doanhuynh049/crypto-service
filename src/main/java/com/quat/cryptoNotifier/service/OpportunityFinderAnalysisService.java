@@ -382,8 +382,9 @@ public class OpportunityFinderAnalysisService {
                 parsedData.put("action_plan", actionPlan);
             }
 
-            // Parse market timing considerations
-            parsedData.put("market_timing_considerations", responseNode.has("market_timing_considerations") ? responseNode.get("market_timing_considerations").asText() : "");
+            // Parse market timing considerations with markdown formatting
+            String marketTiming = responseNode.has("market_timing_considerations") ? responseNode.get("market_timing_considerations").asText() : "";
+            parsedData.put("market_timing_considerations", convertMarkdownToHtml(marketTiming));
 
         } catch (Exception e) {
             System.err.println("Error parsing opportunity finder response: " + e.getMessage());
@@ -401,6 +402,23 @@ public class OpportunityFinderAnalysisService {
         }
 
         return parsedData;
+    }
+
+    /**
+     * Convert markdown-style bold formatting (**text**) to HTML bold tags and add line breaks
+     */
+    private String convertMarkdownToHtml(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        // Convert **text** to <strong>text</strong>
+        String processedText = text.replaceAll("\\*\\*(.*?)\\*\\*", "<strong>$1</strong>");
+
+        // Add line breaks after numbered points for better formatting
+        processedText = processedText.replaceAll("(\\d+\\. \\*\\*[^*]+\\*\\*[^\\d]*?)(?=\\d+\\. \\*\\*|$)", "$1<br><br>");
+
+        return processedText;
     }
 
     /**
@@ -473,9 +491,10 @@ public class OpportunityFinderAnalysisService {
             riskAssessment.put("speculative_coins", speculative);
         }
 
-        riskAssessment.put("portfolio_risks", riskNode.has("portfolio_risks") ? riskNode.get("portfolio_risks").asText() : "");
-        riskAssessment.put("concentration_concerns", riskNode.has("concentration_concerns") ? riskNode.get("concentration_concerns").asText() : "");
-        
+        // Apply markdown conversion to portfolio_risks and concentration_concerns
+        riskAssessment.put("portfolio_risks", riskNode.has("portfolio_risks") ? convertMarkdownToHtml(riskNode.get("portfolio_risks").asText()) : "");
+        riskAssessment.put("concentration_concerns", riskNode.has("concentration_concerns") ? convertMarkdownToHtml(riskNode.get("concentration_concerns").asText()) : "");
+
         return riskAssessment;
     }
 
