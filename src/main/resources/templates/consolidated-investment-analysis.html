@@ -287,6 +287,131 @@
             font-size: 14px;
         }
 
+        /* Table Styles */
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 0 30px 0;
+        }
+
+        .table-header {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .table-header-cell {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .table-row {
+            transition: background-color 0.3s;
+        }
+
+        .table-row:hover {
+            background-color: #f1f1f1;
+        }
+
+        .table-cell {
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .asset-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .asset-symbol {
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 5px;
+        }
+
+        .asset-name {
+            font-size: 14px;
+            color: #555555;
+        }
+
+        .asset-price {
+            font-size: 14px;
+            color: #2c5aa0;
+            margin-left: 5px;
+        }
+
+        /* Action badges */
+        .action-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .action-buy {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
+        .action-dca {
+            background-color: #ff9800;
+            color: #ffffff;
+        }
+        .action-wait {
+            background-color: #f44336;
+            color: #ffffff;
+        }
+
+        /* Confidence indicators */
+        .confidence-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .confidence-high {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
+        .confidence-medium {
+            background-color: #ff9800;
+            color: #ffffff;
+        }
+        .confidence-low {
+            background-color: #f44336;
+            color: #ffffff;
+        }
+
+        /* Sentiment indicators */
+        .sentiment-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .sentiment-bullish {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
+        .sentiment-bearish {
+            background-color: #f44336;
+            color: #ffffff;
+        }
+        .sentiment-neutral {
+            background-color: #2196F3;
+            color: #ffffff;
+        }
+
         /* Responsive adjustments */
         @media only screen and (max-width: 600px) {
             .email-container { width: 100% !important; }
@@ -294,6 +419,19 @@
                 width: 100% !important;
                 display: block !important;
                 padding: 10px 0 !important;
+            }
+            .table-header-cell, .table-cell {
+                padding: 8px;
+                font-size: 14px;
+            }
+            .summary-title {
+                font-size: 20px;
+            }
+            .stat-number {
+                font-size: 20px;
+            }
+            .key-metric {
+                padding: 10px 12px;
             }
         }
     </style>
@@ -356,6 +494,69 @@
                                                 <td class="stat-item">
                                                     <div class="stat-number" th:text="${analysisSummaries != null ? #aggregates.sum(analysisSummaries.![confidence == 'HIGH' ? 1 : 0]) : 0}">0</div>
                                                     <div class="stat-label">High Confidence</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Holdings Summary Table -->
+                            <table class="summary-table" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin: 0 0 30px 0;">
+                                <tr>
+                                    <td class="summary-header">
+                                        <h2 class="summary-title"><span class="emoji">📋</span> Holdings Summary</h2>
+                                        <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+                                            Quick overview of all analyzed positions and recommended actions
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0;">
+                                        <table class="holdings-table" cellpadding="0" cellspacing="0" border="0" role="presentation" style="width: 100%; border-collapse: collapse;">
+                                            <!-- Table Header -->
+                                            <tr class="table-header">
+                                                <td class="table-header-cell" style="width: 20%;">Asset</td>
+                                                <td class="table-header-cell" style="width: 15%;">Action</td>
+                                                <td class="table-header-cell" style="width: 15%;">Confidence</td>
+                                                <td class="table-header-cell" style="width: 15%;">Entry Quality</td>
+                                                <td class="table-header-cell" style="width: 15%;">Sentiment</td>
+                                                <td class="table-header-cell" style="width: 20%;">Key Insight</td>
+                                            </tr>
+                                            <!-- Table Rows -->
+                                            <tr th:each="summary, iterStat : ${analysisSummaries}"
+                                                class="table-row"
+                                                th:classappend="${iterStat.even} ? 'table-row-even' : 'table-row-odd'">
+                                                <td class="table-cell asset-cell">
+                                                    <div class="asset-info">
+                                                        <span class="asset-symbol" th:text="${summary.symbol}">BTC</span>
+                                                        <span class="asset-name" th:if="${summary.name}" th:text="${summary.name}">Bitcoin</span>
+                                                        <span class="asset-price" th:if="${summary.currentPrice}" th:text="${summary.currentPrice}">$50,000</span>
+                                                    </div>
+                                                </td>
+                                                <td class="table-cell action-cell">
+                                                    <span class="action-badge"
+                                                          th:classappend="${summary.recommendation == 'BUY'} ? 'action-buy' :
+                                                                        (${summary.recommendation == 'DCA'} ? 'action-dca' : 'action-wait')"
+                                                          th:text="${summary.recommendation}">BUY</span>
+                                                </td>
+                                                <td class="table-cell confidence-cell">
+                                                    <span class="confidence-indicator"
+                                                          th:classappend="${summary.confidence == 'HIGH'} ? 'confidence-high' :
+                                                                        (${summary.confidence == 'MEDIUM'} ? 'confidence-medium' : 'confidence-low')"
+                                                          th:text="${summary.confidence}">HIGH</span>
+                                                </td>
+                                                <td class="table-cell entry-cell">
+                                                    <span th:text="${summary.entryQuality ?: 'FAIR'}">GOOD</span>
+                                                </td>
+                                                <td class="table-cell sentiment-cell">
+                                                    <span class="sentiment-indicator"
+                                                          th:classappend="${summary.currentSentiment == 'BULLISH'} ? 'sentiment-bullish' :
+                                                                        (${summary.currentSentiment == 'BEARISH'} ? 'sentiment-bearish' : 'sentiment-neutral')"
+                                                          th:text="${summary.currentSentiment ?: 'NEUTRAL'}">BULLISH</span>
+                                                </td>
+                                                <td class="table-cell insight-cell">
+                                                    <span class="insight-text" th:text="${#strings.abbreviate(summary.bottomLine ?: 'Analysis pending', 60)}">Strong fundamentals, good entry point</span>
                                                 </td>
                                             </tr>
                                         </table>
