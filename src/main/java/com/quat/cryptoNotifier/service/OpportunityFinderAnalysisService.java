@@ -3,6 +3,7 @@ package com.quat.cryptoNotifier.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quat.cryptoNotifier.model.Holding;
+import com.quat.cryptoNotifier.model.MarketData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +33,14 @@ public class OpportunityFinderAnalysisService {
     @Autowired
     private InvestmentStrategyService investmentStrategyService;
 
+    @Autowired
+    private DataProviderService dataProviderService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Build a comprehensive opportunity finder analysis prompt.
-     * 
+     * Build a comprehensive opportunity finder analysis prompt with current market data.
+     *
      * This method creates a detailed prompt that asks the AI to analyze the portfolio for:
      * - Fundamental strength of each asset
      * - Risk assessment and speculative elements
@@ -54,36 +58,125 @@ public class OpportunityFinderAnalysisService {
         prompt.append("- Where I could add new assets to improve diversification.\n");
         prompt.append("- Which coins I should reduce or exit.\n\n");
         
-        prompt.append("Portfolio data:\n\n");
-        
-        // Calculate total portfolio value for context
+        prompt.append("Portfolio data with current market information:\n\n");
+
+        // Calculate total portfolio value with current market data
         double totalPortfolioValue = 0;
+        double totalInvestmentCost = 0;
+
         for (Holding holding : holdings) {
-            totalPortfolioValue += holding.getTotalAvgCost();
+            if ("USDT".equals(holding.getSymbol()) || "USDC".equals(holding.getSymbol()) || "BUSD".equals(holding.getSymbol())) {
+                totalInvestmentCost += holding.getTotalAvgCost();
+                continue; // Skip stablecoins for market value calculation but include in cost
+            }
+
+            // Get current market data
+            MarketData marketData = null;
+            double currentPrice = 0;
+            double currentValue = 0;
+
+            try {
+                marketData = dataProviderService.getMarketData(holding.getId());
+                if (marketData != null) {
+                    currentPrice = marketData.getCurrentPrice();
+                    currentValue = holding.getHoldings() * currentPrice;
+                }
+            } catch (Exception e) {
+                System.err.println("Error fetching market data for " + holding.getSymbol() + ": " + e.getMessage());
+                currentPrice = holding.getAveragePrice(); // Fallback to average price
+                currentValue = holding.getTotalAvgCost();
+            }
+
+            totalPortfolioValue += currentValue;
+            totalInvestmentCost += holding.getTotalAvgCost();
         }
         
-        // Add detailed portfolio information
+        // Add stablecoin value to total portfolio value
         for (Holding holding : holdings) {
-            double currentWeight = (holding.getTotalAvgCost() / totalPortfolioValue) * 100;
-            
+            if ("USDT".equals(holding.getSymbol()) || "USDC".equals(holding.getSymbol()) || "BUSD".equals(holding.getSymbol())) {
+                totalPortfolioValue += holding.getTotalAvgCost(); // Stablecoins at face value
+            }
+        }
+
+        // Add detailed portfolio information with market data
+        for (Holding holding : holdings) {
+            double currentWeight = 0;
+            double currentPrice = 0;
+            double currentValue = 0;
+            double profitLoss = 0;
+            double profitLossPercentage = 0;
+            String technicalAnalysis = "N/A";
+
+            if ("USDT".equals(holding.getSymbol()) || "USDC".equals(holding.getSymbol()) || "BUSD".equals(holding.getSymbol())) {
+                // Handle stablecoins
+                currentPrice = 1.0;
+                currentValue = holding.getTotalAvgCost();
+                currentWeight = (currentValue / totalPortfolioValue) * 100;
+            } else {
+                // Get market data for cryptocurrencies
+                try {
+                    MarketData marketData = dataProviderService.getMarketData(holding.getId());
+                    if (marketData != null) {
+                        currentPrice = marketData.getCurrentPrice();
+                        currentValue = holding.getHoldings() * currentPrice;
+                        profitLoss = currentValue - holding.getTotalAvgCost();
+                        profitLossPercentage = ((currentPrice - holding.getAveragePrice()) / holding.getAveragePrice()) * 100;
+                        technicalAnalysis = buildTechnicalAnalysis(marketData);
+                        currentWeight = (currentValue / totalPortfolioValue) * 100;
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error fetching market data for " + holding.getSymbol() + ": " + e.getMessage());
+                    currentPrice = holding.getAveragePrice();
+                    currentValue = holding.getTotalAvgCost();
+                    currentWeight = (currentValue / totalPortfolioValue) * 100;
+                }
+            }
+
             prompt.append(String.format("--- %s (%s) ---\n", holding.getSymbol(), holding.getName()));
             prompt.append(String.format("Sector: %s\n", holding.getSector() != null ? holding.getSector() : "Unknown"));
             prompt.append(String.format("Holdings: %.6f %s\n", holding.getHoldings(), holding.getSymbol()));
             prompt.append(String.format("Average Buy Price: $%.2f\n", holding.getAveragePrice()));
-            prompt.append(String.format("Initial Investment: $%.2f (%.1f%% of portfolio)\n", holding.getTotalAvgCost(), currentWeight));
+            prompt.append(String.format("Current Price: $%.2f\n", currentPrice));
+            prompt.append(String.format("Current Value: $%.2f\n", currentValue));
+            prompt.append(String.format("Current Weight: %.1f%% of portfolio\n", currentWeight));
+            prompt.append(String.format("Initial Investment: $%.2f\n", holding.getTotalAvgCost()));
+            prompt.append(String.format("Profit/Loss: $%.2f (%.2f%%)\n", profitLoss, profitLossPercentage));
             prompt.append(String.format("Expected Entry Price: $%.2f\n", holding.getExpectedEntry()));
             prompt.append(String.format("Expected Deep Entry Price: $%.2f\n", holding.getDeepEntryPrice()));
             prompt.append(String.format("3-Month Target: $%.2f\n", holding.getTargetPrice3Month()));
             prompt.append(String.format("Long-term Target: $%.2f\n", holding.getTargetPriceLongTerm()));
             
-            // Calculate potential returns for context
-            double targetReturn3M = ((holding.getTargetPrice3Month() - holding.getAveragePrice()) / holding.getAveragePrice()) * 100;
-            double targetReturnLong = ((holding.getTargetPriceLongTerm() - holding.getAveragePrice()) / holding.getAveragePrice()) * 100;
-            prompt.append(String.format("Expected 3M Return: %.1f%%\n", targetReturn3M));
-            prompt.append(String.format("Expected Long Return: %.1f%%\n", targetReturnLong));
+            // Add technical analysis if available
+            if (!"N/A".equals(technicalAnalysis)) {
+                prompt.append(String.format("Technical Analysis: %s\n", technicalAnalysis));
+            }
+
+            // Calculate potential returns from current price
+            if (currentPrice > 0) {
+                double targetReturn3M = ((holding.getTargetPrice3Month() - currentPrice) / currentPrice) * 100;
+                double targetReturnLong = ((holding.getTargetPriceLongTerm() - currentPrice) / currentPrice) * 100;
+                prompt.append(String.format("Upside to 3M Target: %.1f%%\n", targetReturn3M));
+                prompt.append(String.format("Upside to Long Target: %.1f%%\n", targetReturnLong));
+            }
+
+            // Performance since purchase
+            if (!("USDT".equals(holding.getSymbol()) || "USDC".equals(holding.getSymbol()) || "BUSD".equals(holding.getSymbol()))) {
+                double totalReturnFromEntry = ((holding.getAveragePrice() - holding.getExpectedEntry()) / holding.getExpectedEntry()) * 100;
+                prompt.append(String.format("Entry Performance: %.1f%% vs expected entry\n", totalReturnFromEntry));
+            }
             prompt.append("\n");
         }
         
+        // Add portfolio summary with current market performance
+        double totalProfitLoss = totalPortfolioValue - totalInvestmentCost;
+        double totalProfitLossPercentage = totalInvestmentCost > 0 ? (totalProfitLoss / totalInvestmentCost) * 100 : 0;
+
+        prompt.append("--- Portfolio Summary ---\n");
+        prompt.append(String.format("Total Investment Cost: $%.2f\n", totalInvestmentCost));
+        prompt.append(String.format("Current Portfolio Value: $%.2f\n", totalPortfolioValue));
+        prompt.append(String.format("Total Profit/Loss: $%.2f (%.2f%%)\n", totalProfitLoss, totalProfitLossPercentage));
+        prompt.append("\n");
+
         // Add centralized analysis framework and investment strategy
         prompt.append(investmentStrategyService.getAnalysisFrameworkSection());
         prompt.append(investmentStrategyService.getDecisionCriteriaSection());
@@ -186,6 +279,48 @@ public class OpportunityFinderAnalysisService {
         prompt.append("}\n");
         
         return prompt.toString();
+    }
+
+    /**
+     * Build technical analysis summary from market data
+     */
+    private String buildTechnicalAnalysis(MarketData marketData) {
+        if (marketData == null) {
+            return "N/A";
+        }
+
+        StringBuilder analysis = new StringBuilder();
+
+        // RSI Analysis
+        if (marketData.getRsi() != null) {
+            double rsi = marketData.getRsi();
+            String rsiStatus = rsi > 70 ? "Overbought" : (rsi < 30 ? "Oversold" : "Neutral");
+            analysis.append(String.format("RSI: %.1f (%s), ", rsi, rsiStatus));
+        }
+
+        // Moving Average Analysis
+        if (marketData.getSma20() != null && marketData.getSma50() != null) {
+            double currentPrice = marketData.getCurrentPrice();
+            String maStatus = "";
+
+            if (currentPrice > marketData.getSma20() && currentPrice > marketData.getSma50()) {
+                maStatus = "Above key MAs (Bullish)";
+            } else if (currentPrice < marketData.getSma20() && currentPrice < marketData.getSma50()) {
+                maStatus = "Below key MAs (Bearish)";
+            } else {
+                maStatus = "Mixed MA signals";
+            }
+
+            analysis.append(String.format("MA Status: %s, ", maStatus));
+        }
+
+        // MACD Analysis
+        if (marketData.getMacd() != null && marketData.getMacdSignal() != null) {
+            String macdStatus = marketData.getMacd() > marketData.getMacdSignal() ? "Bullish" : "Bearish";
+            analysis.append(String.format("MACD: %s", macdStatus));
+        }
+
+        return analysis.length() > 0 ? analysis.toString() : "Limited technical data available";
     }
 
     /**
