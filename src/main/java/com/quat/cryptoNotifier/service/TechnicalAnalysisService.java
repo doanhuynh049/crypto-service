@@ -42,10 +42,6 @@ public class TechnicalAnalysisService {
 
     /**
      * Build a comprehensive technical analysis prompt for all portfolio holdings.
-     *
-     * This method creates a prompt that asks the AI to perform deep technical analysis
-     * on each cryptocurrency, including indicators, patterns, support/resistance levels,
-     * and provide specific technical-based trading recommendations.
      */
     public String buildTechnicalAnalysisPrompt(List<Holding> holdings) {
         StringBuilder prompt = new StringBuilder();
@@ -54,12 +50,11 @@ public class TechnicalAnalysisService {
         prompt.append("Perform detailed technical analysis for each cryptocurrency in my portfolio.\n\n");
 
         prompt.append("ANALYSIS REQUIREMENTS:\n");
-        prompt.append("- 📊 TECHNICAL INDICATORS: RSI, MACD, Moving Averages, Bollinger Bands, Volume\n");
+        prompt.append("- 📊 TECHNICAL INDICATORS: RSI, MACD, Moving Averages, Volume\n");
         prompt.append("- 📈 CHART PATTERNS: Triangles, Head & Shoulders, Support/Resistance\n");
         prompt.append("- 🎯 PRICE LEVELS: Key support, resistance, breakout levels\n");
         prompt.append("- 📉 MOMENTUM: Trend strength, momentum divergences\n");
         prompt.append("- ⚡ SIGNALS: Buy/Sell signals based on technical confluence\n");
-        prompt.append("- 🔄 TIMEFRAMES: Focus on daily and 4-hour charts\n");
         prompt.append("- 💡 ADVICE: Specific technical-based recommendations\n\n");
 
         prompt.append("PORTFOLIO TECHNICAL DATA:\n\n");
@@ -115,7 +110,7 @@ public class TechnicalAnalysisService {
             prompt.append("\n");
         }
 
-        // Add technical analysis framework and JSON output format
+        // Add technical analysis framework
         prompt.append("--- TECHNICAL ANALYSIS FRAMEWORK ---\n");
         prompt.append("For each cryptocurrency, analyze:\n");
         prompt.append("1. TREND ANALYSIS: Overall trend direction and strength\n");
@@ -127,6 +122,7 @@ public class TechnicalAnalysisService {
         prompt.append("7. TECHNICAL SIGNALS: Buy/sell signals from indicator confluence\n");
         prompt.append("8. RISK LEVELS: Stop-loss and take-profit recommendations\n\n");
 
+        // Add JSON output format specification
         prompt.append("--- JSON OUTPUT FORMAT ---\n");
         prompt.append("Provide detailed technical analysis in this JSON format:\n");
         prompt.append("{\n");
@@ -156,7 +152,9 @@ public class TechnicalAnalysisService {
         prompt.append("      },\n");
         prompt.append("      \"support_resistance\": {\n");
         prompt.append("        \"immediate_support\": \"$89,000\",\n");
-        prompt.append("        \"immediate_resistance\": \"$95,000\"\n");
+        prompt.append("        \"strong_support\": \"$85,000\",\n");
+        prompt.append("        \"immediate_resistance\": \"$95,000\",\n");
+        prompt.append("        \"strong_resistance\": \"$100,000\"\n");
         prompt.append("      },\n");
         prompt.append("      \"chart_patterns\": {\n");
         prompt.append("        \"current_pattern\": \"TRIANGLE|FLAG|NONE\",\n");
@@ -171,9 +169,15 @@ public class TechnicalAnalysisService {
         prompt.append("        \"stop_loss\": \"$87,000\",\n");
         prompt.append("        \"take_profit_1\": \"$96,000\"\n");
         prompt.append("      },\n");
+        prompt.append("      \"momentum_analysis\": {\n");
+        prompt.append("        \"momentum_direction\": \"BULLISH|BEARISH|NEUTRAL\",\n");
+        prompt.append("        \"momentum_strength\": \"STRONG|MODERATE|WEAK\",\n");
+        prompt.append("        \"divergences\": \"POSITIVE|NEGATIVE|NONE\"\n");
+        prompt.append("      },\n");
         prompt.append("      \"technical_advice\": {\n");
         prompt.append("        \"recommendation\": \"ACCUMULATE|REDUCE|HOLD|AVOID\",\n");
         prompt.append("        \"reasoning\": \"Brief technical reasoning\",\n");
+        prompt.append("        \"timeframe\": \"1-3 days|1-2 weeks|1 month+\",\n");
         prompt.append("        \"confidence_level\": \"HIGH|MEDIUM|LOW\"\n");
         prompt.append("      }\n");
         prompt.append("    }\n");
@@ -188,19 +192,17 @@ public class TechnicalAnalysisService {
         prompt.append("    \"technical_outlook\": {\n");
         prompt.append("      \"short_term\": \"1-7 days outlook\",\n");
         prompt.append("      \"medium_term\": \"1-4 weeks outlook\"\n");
+        prompt.append("      \"key_catalysts\": \"Upcoming technical events\"\n");
         prompt.append("    }\n");
         prompt.append("  }\n");
         prompt.append("}\n\n");
+        prompt.append("IMPORTANT: Analyze ALL cryptocurrencies in the portfolio. Keep explanations technical but concise.\n");
 
         return prompt.toString();
     }
 
     /**
      * Parse AI response from technical analysis into structured data.
-     *
-     * This method processes the AI's JSON response and extracts all technical analysis
-     * information including market overview, individual crypto analysis, support/resistance
-     * levels, technical indicators, chart patterns, and trading recommendations.
      */
     public Map<String, Object> parseTechnicalAnalysisResponse(String response) {
         Map<String, Object> parsed = new HashMap<>();
@@ -286,7 +288,9 @@ public class TechnicalAnalysisService {
                         Map<String, String> levels = new HashMap<>();
                         JsonNode sr = crypto.get("support_resistance");
                         levels.put("immediate_support", sr.has("immediate_support") ? sr.get("immediate_support").asText() : "");
+                        levels.put("strong_support", sr.has("strong_support") ? sr.get("strong_support").asText() : "");
                         levels.put("immediate_resistance", sr.has("immediate_resistance") ? sr.get("immediate_resistance").asText() : "");
+                        levels.put("strong_resistance", sr.has("strong_resistance") ? sr.get("strong_resistance").asText() : "");
                         cryptoAnalysis.put("support_resistance", levels);
                     }
 
@@ -318,12 +322,21 @@ public class TechnicalAnalysisService {
                         cryptoAnalysis.put("trading_levels", trading);
                     }
 
+                    if (crypto.has("momentum_analysis")) {
+                        Map<String, String> advice = new HashMap<>();
+                        JsonNode ta = crypto.get("momentum_analysis");
+                        advice.put("momentum_direction", ta.has("momentum_direction") ? ta.get("momentum_direction").asText() : "");
+                        advice.put("momentum_strength", ta.has("momentum_strength") ? ta.get("momentum_strength").asText() : "");
+                        advice.put("divergences", ta.has("divergences") ? ta.get("divergences").asText() : "");
+                        cryptoAnalysis.put("momentum_analysis", advice);
+                    }
                     // Parse technical advice
                     if (crypto.has("technical_advice")) {
                         Map<String, String> advice = new HashMap<>();
                         JsonNode ta = crypto.get("technical_advice");
                         advice.put("recommendation", ta.has("recommendation") ? ta.get("recommendation").asText() : "");
                         advice.put("reasoning", ta.has("reasoning") ? ta.get("reasoning").asText() : "");
+                        advice.put("timeframe", ta.has("timeframe") ? ta.get("timeframe").asText() : "");
                         advice.put("confidence_level", ta.has("confidence_level") ? ta.get("confidence_level").asText() : "");
                         cryptoAnalysis.put("technical_advice", advice);
                     }
@@ -394,6 +407,7 @@ public class TechnicalAnalysisService {
                     JsonNode outlookNode = summaryNode.get("technical_outlook");
                     outlook.put("short_term", outlookNode.has("short_term") ? outlookNode.get("short_term").asText() : "");
                     outlook.put("medium_term", outlookNode.has("medium_term") ? outlookNode.get("medium_term").asText() : "");
+                    outlook.put("key_catalysts", outlookNode.has("key_catalysts") ? outlookNode.get("key_catalysts").asText() : "");
                     summary.put("technical_outlook", outlook);
                 }
 
