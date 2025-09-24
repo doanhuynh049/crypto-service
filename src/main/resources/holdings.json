@@ -2,19 +2,17 @@
   "portfolio": {
     "cryptos": [
       {
-        "id": "ethereum",
         "symbol": "ETH",
         "name": "Ethereum",
         "sector": "Layer 1",
-        "holdings": 0.0208872,
-        "avgBuyPrice": 3177.31,
-        "expectedEntry": 4200.0,
+        "holdings": 0.0232872,
+        "avgBuyPrice": 3253.67,
+        "expectedEntry": 4000.0,
         "deepEntryPrice": 3800.0,
         "targetPrice3Month": 5000.0,
         "targetPriceLongTerm": 10000.0
       },
       {
-        "id": "bitcoin",
         "symbol": "BTC",
         "name": "Bitcoin",
         "sector": "Layer 1",
@@ -26,11 +24,10 @@
         "targetPriceLongTerm": 150000.0
       },
       {
-        "id": "tether",
         "symbol": "USDT",
         "name": "Tether",
         "sector": "Stablecoin",
-        "holdings": 97.34,
+        "holdings": 36.397,
         "avgBuyPrice": 1.0,
         "expectedEntry": 1.0,
         "deepEntryPrice": 1.0,
@@ -38,19 +35,17 @@
         "targetPriceLongTerm": 1.0
       },
       {
-        "id": "uniswap",
         "symbol": "UNI",
         "name": "Uniswap",
         "sector": "DeFi",
-        "holdings": 3.74,
-        "avgBuyPrice": 9.62,
-        "expectedEntry": 10.61,
-        "deepEntryPrice": 10.31,
+        "holdings": 4.3,
+        "avgBuyPrice": 9.56,
+        "expectedEntry": 9.3,
+        "deepEntryPrice": 9.0,
         "targetPrice3Month": 15.0,
         "targetPriceLongTerm": 25.0
       },
       {
-        "id": "chainlink",
         "symbol": "LINK",
         "name": "Chainlink",
         "sector": "Oracle / Infrastructure",
@@ -62,19 +57,72 @@
         "targetPriceLongTerm": 55.0
       },
       {
-        "id": "fetch-ai",
+        "symbol": "ARB",
+        "name": "Arbitrum",
+        "sector": "Layer 2",
+        "holdings": 56.1,
+        "avgBuyPrice": 0.4695,
+        "expectedEntry": 0.45,
+        "deepEntryPrice": 0.4,
+        "targetPrice3Month": 0.75,
+        "targetPriceLongTerm": 1.8
+      },
+      {
         "symbol": "FET",
         "name": "Artificial Superintelligence Alliance",
         "sector": "AI/ML",
-        "holdings": 31.9,
-        "avgBuyPrice": 0.64100313,
+        "holdings": 40.5,
+        "avgBuyPrice": 0.6319,
         "expectedEntry": 0.6,
         "deepEntryPrice": 0.5,
         "targetPrice3Month": 0.75,
         "targetPriceLongTerm": 1.2
       },
       {
-        "id": "render-token",
+        "symbol": "OP",
+        "name": "Optimism",
+        "sector": "Layer 2",
+        "holdings": 31.4,
+        "avgBuyPrice": 0.6522,
+        "expectedEntry": 0.62,
+        "deepEntryPrice": 0.6,
+        "targetPrice3Month": 1.2,
+        "targetPriceLongTerm": 2.5
+      },
+      {
+        "symbol": "SOL",
+        "name": "Solana",
+        "sector": "Layer 1",
+        "holdings": 0.097872,
+        "avgBuyPrice": 166.63,
+        "expectedEntry": 160.0,
+        "deepEntryPrice": 100.0,
+        "targetPrice3Month": 250.0,
+        "targetPriceLongTerm": 400.0
+      },
+      {
+        "symbol": "ONDO",
+        "name": "Ondo Finance",
+        "sector": "DeFi",
+        "holdings": 22.1,
+        "avgBuyPrice": 0.9243,
+        "expectedEntry": 0.95,
+        "deepEntryPrice": 0.75,
+        "targetPrice3Month": 1.15,
+        "targetPriceLongTerm": 2.0
+      },
+      {
+        "symbol": "AAVE",
+        "name": "Aave",
+        "sector": "DeFi",
+        "holdings": 0.069,
+        "avgBuyPrice": 302.35,
+        "expectedEntry": 300.0,
+        "deepEntryPrice": 290.0,
+        "targetPrice3Month": 450.0,
+        "targetPriceLongTerm": 700.0
+      },
+      {
         "symbol": "RNDR",
         "name": "Render Token",
         "sector": "AI/ML",
@@ -86,43 +134,6 @@
         "targetPriceLongTerm": 10.0
       },
       {
-        "id": "optimism",
-        "symbol": "OP",
-        "name": "Optimism",
-        "sector": "Layer 2",
-        "holdings": 24.5907,
-        "avgBuyPrice": 0.6250722,
-        "expectedEntry": 0.75,
-        "deepEntryPrice": 0.6,
-        "targetPrice3Month": 1.2,
-        "targetPriceLongTerm": 2.5
-      },
-      {
-        "id": "solana",
-        "symbol": "SOL",
-        "name": "Solana",
-        "sector": "Layer 1",
-        "holdings": 0.0728,
-        "avgBuyPrice": 159.79,
-        "expectedEntry": 185.0,
-        "deepEntryPrice": 100.0,
-        "targetPrice3Month": 250.0,
-        "targetPriceLongTerm": 400.0
-      },
-      {
-        "id": "ondo-finance",
-        "symbol": "ONDO",
-        "name": "Ondo Finance",
-        "sector": "DeFi",
-        "holdings": 16.7,
-        "avgBuyPrice": 0.924324,
-        "expectedEntry": 0.95,
-        "deepEntryPrice": 0.75,
-        "targetPrice3Month": 1.15,
-        "targetPriceLongTerm": 2.0
-      },
-      {
-        "id": "avalanche-2",
         "symbol": "AVAX",
         "name": "Avalanche",
         "sector": "Layer 1",
@@ -134,43 +145,6 @@
         "targetPriceLongTerm": 60.0
       },
       {
-        "id": "arbitrum",
-        "symbol": "ARB",
-        "name": "Arbitrum",
-        "sector": "Layer 2",
-        "holdings": 24.6,
-        "avgBuyPrice": 0.4597,
-        "expectedEntry": 0.48,
-        "deepEntryPrice": 0.4,
-        "targetPrice3Month": 0.75,
-        "targetPriceLongTerm": 1.8
-      },
-      {
-        "id": "polkadot",
-        "symbol": "DOT",
-        "name": "Polkadot",
-        "sector": "Layer 1",
-        "holdings": 2.7,
-        "avgBuyPrice": 3.82,
-        "expectedEntry": 4.2,
-        "deepEntryPrice": 3.8,
-        "targetPrice3Month": 6.0,
-        "targetPriceLongTerm": 10.0
-      },
-      {
-        "id": "the-graph",
-        "symbol": "GRT",
-        "name": "The Graph",
-        "sector": "DeFi",
-        "holdings": 122.0,
-        "avgBuyPrice": 0.08655,
-        "expectedEntry": 0.09,
-        "deepEntryPrice": 0.09,
-        "targetPrice3Month": 0.15,
-        "targetPriceLongTerm": 0.4
-      },
-      {
-        "id": "tron",
         "symbol": "TRX",
         "name": "Tron",
         "sector": "Layer 1",
@@ -182,19 +156,28 @@
         "targetPriceLongTerm": 0.55
       },
       {
-        "id": "aave",
-        "symbol": "AAVE",
-        "name": "Aave",
-        "sector": "DeFi",
-        "holdings": 0.034,
-        "avgBuyPrice": 303.93,
-        "expectedEntry": 303.93,
-        "deepEntryPrice": 290.64,
-        "targetPrice3Month": 450.0,
-        "targetPriceLongTerm": 700.0
+        "symbol": "DOT",
+        "name": "Polkadot",
+        "sector": "Layer 1",
+        "holdings": 2.7,
+        "avgBuyPrice": 3.82,
+        "expectedEntry": 4.2,
+        "deepEntryPrice": 3.8,
+        "targetPrice3Month": 6.0,
+        "targetPriceLongTerm": 10.0
       },
       {
-        "id": "sui",
+        "symbol": "GRT",
+        "name": "The Graph",
+        "sector": "DeFi",
+        "holdings": 122.0,
+        "avgBuyPrice": 0.0866,
+        "expectedEntry": 0.09,
+        "deepEntryPrice": 0.09,
+        "targetPrice3Month": 0.15,
+        "targetPriceLongTerm": 0.4
+      },
+      {
         "symbol": "SUI",
         "name": "Sui",
         "sector": "Layer 1",
@@ -206,7 +189,6 @@
         "targetPriceLongTerm": 6.0
       },
       {
-        "id": "cardano",
         "symbol": "ADA",
         "name": "Cardano",
         "sector": "Layer 1",
@@ -218,11 +200,10 @@
         "targetPriceLongTerm": 1.8
       },
       {
-        "id": "binancecoin",
         "symbol": "BNB",
         "name": "Binance Coin",
         "sector": "Layer 1",
-        "holdings": 0.02678,
+        "holdings": 0.0046,
         "avgBuyPrice": 803.53,
         "expectedEntry": 800.0,
         "deepEntryPrice": 400.0,
