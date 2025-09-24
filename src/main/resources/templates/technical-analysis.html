@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Analysis Report</title>
+    <style>
+        /* Simple email-safe styles with white background */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            line-height: 1.5;
+            color: #333333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header .date {
+            margin: 0;
+            font-size: 14px;
+        }
+        .content {
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        /* Market Technical Overview */
+        .market-overview {
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .market-overview h2 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .market-overview .overview-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .market-overview .overview-label {
+            font-weight: bold;
+            min-width: 120px;
+            margin-right: 10px;
+        }
+
+        /* Technical Analysis Table */
+        .technical-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+        .technical-table th {
+            background-color: #34495e;
+            color: #ffffff;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .technical-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+            vertical-align: top;
+        }
+        .technical-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .technical-table .symbol-cell {
+            font-weight: bold;
+            font-size: 14px;
+            background-color: #ecf0f1;
+        }
+        .technical-table .price-cell {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Signal Colors */
+        .signal-bullish { color: #27ae60; font-weight: bold; }
+        .signal-bearish { color: #e74c3c; font-weight: bold; }
+        .signal-neutral { color: #f39c12; font-weight: bold; }
+        .trend-strong { background-color: #d5f4e6; }
+        .trend-moderate { background-color: #fff8e6; }
+        .trend-weak { background-color: #fce4e4; }
+
+        /* Recommendation badges */
+        .recommendation {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .rec-accumulate { background-color: #d5f4e6; color: #27ae60; }
+        .rec-reduce { background-color: #fce4e4; color: #e74c3c; }
+        .rec-hold { background-color: #fff8e6; color: #f39c12; }
+        .rec-avoid { background-color: #f8d7da; color: #721c24; }
+
+        /* Confidence levels */
+        .confidence-high { color: #27ae60; font-weight: bold; }
+        .confidence-medium { color: #f39c12; font-weight: bold; }
+        .confidence-low { color: #e74c3c; font-weight: bold; }
+
+        /* Technical Summary Section */
+        .technical-summary {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .technical-summary h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+        .summary-section {
+            margin-bottom: 15px;
+        }
+        .summary-section h4 {
+            margin: 0 0 8px 0;
+            color: #34495e;
+            font-size: 14px;
+        }
+        .summary-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .summary-list li {
+            padding: 3px 0;
+            border-bottom: 1px dotted #ddd;
+        }
+
+        /* Responsive design */
+        @media screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border: none;
+            }
+            .content {
+                padding: 10px;
+            }
+            .technical-table {
+                font-size: 10px;
+            }
+            .technical-table th,
+            .technical-table td {
+                padding: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Technical Analysis Report</h1>
+            <p class="date" th:text="'Generated on ' + ${timestamp}">Generated on 2024-01-01 10:00:00</p>
+        </div>
+
+        <div class="content">
+            <!-- Market Technical Overview -->
+            <div class="market-overview" th:if="${analysisData.market_technical_overview}">
+                <h2>🌍 Market Technical Overview</h2>
+
+                <div class="overview-item">
+                    <span class="overview-label">Market Trend:</span>
+                    <span th:text="${analysisData.market_technical_overview.overall_market_trend}"
+                          th:class="'signal-' + ${#strings.toLowerCase(analysisData.market_technical_overview.overall_market_trend)}">BULLISH</span>
+                </div>
+
+                <div class="overview-item">
+                    <span class="overview-label">Momentum:</span>
+                    <span th:text="${analysisData.market_technical_overview.market_momentum}"
+                          th:class="'signal-' + ${#strings.toLowerCase(analysisData.market_technical_overview.market_momentum)}">STRONG</span>
+                </div>
+
+                <div class="overview-item">
+                    <span class="overview-label">Volatility:</span>
+                    <span th:text="${analysisData.market_technical_overview.volatility_assessment}">MODERATE</span>
+                </div>
+
+                <div class="overview-item" th:if="${analysisData.market_technical_overview.sector_rotation}">
+                    <span class="overview-label">Sector Analysis:</span>
+                    <span th:text="${analysisData.market_technical_overview.sector_rotation}">DeFi showing strength</span>
+                </div>
+
+                <div class="overview-item" th:if="${analysisData.market_technical_overview.key_market_levels}">
+                    <span class="overview-label">Key Levels:</span>
+                    <span th:text="${analysisData.market_technical_overview.key_market_levels}">BTC $90K support, $100K resistance</span>
+                </div>
+            </div>
+
+            <!-- Technical Analysis Table -->
+            <div th:if="${analysisData.technical_analysis_table}">
+                <h2 style="color: #2c3e50; margin-bottom: 15px;">📈 Technical Analysis Table</h2>
+
+                <table class="technical-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Price</th>
+                            <th>Trend</th>
+                            <th>RSI</th>
+                            <th>MACD</th>
+                            <th>MA Alignment</th>
+                            <th>Support</th>
+                            <th>Resistance</th>
+                            <th>Pattern</th>
+                            <th>Signal</th>
+                            <th>Recommendation</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="crypto : ${analysisData.technical_analysis_table}">
+                            <td class="symbol-cell" th:text="${crypto.symbol}">BTC</td>
+                            <td class="price-cell" th:text="${crypto.current_price}">$92,000</td>
+
+                            <!-- Trend Analysis -->
+                            <td th:if="${crypto.trend_analysis}">
+                                <span th:text="${crypto.trend_analysis.primary_trend}"
+                                      th:class="'signal-' + ${#strings.toLowerCase(crypto.trend_analysis.primary_trend)}">BULLISH</span><br>
+                                <small th:text="${crypto.trend_analysis.trend_strength}"
+                                       th:class="'trend-' + ${#strings.toLowerCase(crypto.trend_analysis.trend_strength)}">STRONG</small>
+                            </td>
+                            <td th:unless="${crypto.trend_analysis}">-</td>
+
+                            <!-- RSI -->
+                            <td th:if="${crypto.technical_indicators?.rsi}">
+                                <strong th:text="${crypto.technical_indicators.rsi.value}">65.2</strong><br>
+                                <small th:text="${crypto.technical_indicators.rsi.signal}"
+                                       th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.rsi.signal)}">NEUTRAL</small>
+                            </td>
+                            <td th:unless="${crypto.technical_indicators?.rsi}">-</td>
+
+                            <!-- MACD -->
+                            <td th:if="${crypto.technical_indicators?.macd}">
+                                <strong th:text="${crypto.technical_indicators.macd.value}">0.0045</strong><br>
+                                <small th:text="${crypto.technical_indicators.macd.signal}"
+                                       th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.macd.signal)}">BULLISH</small>
+                            </td>
+                            <td th:unless="${crypto.technical_indicators?.macd}">-</td>
+
+                            <!-- Moving Averages -->
+                            <td th:if="${crypto.technical_indicators?.moving_averages}">
+                                <small>20: </small><span th:text="${crypto.technical_indicators.moving_averages.ma20}">$90.5K</span><br>
+                                <small>50: </small><span th:text="${crypto.technical_indicators.moving_averages.ma50}">$88K</span><br>
+                                <span th:text="${crypto.technical_indicators.moving_averages.alignment}"
+                                      th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.moving_averages.alignment)}">BULLISH</span>
+                            </td>
+                            <td th:unless="${crypto.technical_indicators?.moving_averages}">-</td>
+
+                            <!-- Support -->
+                            <td th:if="${crypto.support_resistance}">
+                                <strong th:text="${crypto.support_resistance.immediate_support}">$89K</strong><br>
+                                <small th:text="${crypto.support_resistance.strong_support}">$85K</small>
+                            </td>
+                            <td th:unless="${crypto.support_resistance}">-</td>
+
+                            <!-- Resistance -->
+                            <td th:if="${crypto.support_resistance}">
+                                <strong th:text="${crypto.support_resistance.immediate_resistance}">$95K</strong><br>
+                                <small th:text="${crypto.support_resistance.strong_resistance}">$100K</small>
+                            </td>
+                            <td th:unless="${crypto.support_resistance}">-</td>
+
+                            <!-- Chart Pattern -->
+                            <td th:if="${crypto.chart_patterns}">
+                                <span th:text="${crypto.chart_patterns.current_pattern}">TRIANGLE</span><br>
+                                <small th:text="${crypto.chart_patterns.pattern_confidence}"
+                                       th:class="'confidence-' + ${#strings.toLowerCase(crypto.chart_patterns.pattern_confidence)}">HIGH</small>
+                            </td>
+                            <td th:unless="${crypto.chart_patterns}">NONE</td>
+
+                            <!-- Technical Signal -->
+                            <td th:if="${crypto.technical_signals}">
+                                <span th:text="${crypto.technical_signals.primary_signal}"
+                                      th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_signals.primary_signal)}">BUY</span><br>
+                                <small th:text="${crypto.technical_signals.signal_strength}"
+                                       th:class="'confidence-' + ${#strings.toLowerCase(crypto.technical_signals.signal_strength)}">STRONG</small>
+                            </td>
+                            <td th:unless="${crypto.technical_signals}">-</td>
+
+                            <!-- Recommendation -->
+                            <td th:if="${crypto.technical_advice}">
+                                <span th:text="${crypto.technical_advice.recommendation}"
+                                      th:class="'recommendation rec-' + ${#strings.toLowerCase(crypto.technical_advice.recommendation)}">ACCUMULATE</span>
+                            </td>
+                            <td th:unless="${crypto.technical_advice}">-</td>
+
+                            <!-- Confidence -->
+                            <td th:if="${crypto.technical_advice}">
+                                <span th:text="${crypto.technical_advice.confidence_level}"
+                                      th:class="'confidence-' + ${#strings.toLowerCase(crypto.technical_advice.confidence_level)}">HIGH</span>
+                            </td>
+                            <td th:unless="${crypto.technical_advice}">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Detailed Analysis for Each Crypto -->
+            <div th:if="${analysisData.technical_analysis_table}" style="margin-top: 30px;">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">🔍 Detailed Technical Analysis</h2>
+
+                <div th:each="crypto : ${analysisData.technical_analysis_table}"
+                     style="border: 1px solid #ddd; margin-bottom: 20px; border-radius: 8px; overflow: hidden;">
+
+                    <!-- Crypto Header -->
+                    <div style="background-color: #34495e; color: white; padding: 15px;">
+                        <h3 style="margin: 0; display: inline-block;" th:text="${crypto.symbol + ' - ' + crypto.current_price}">BTC - $92,000</h3>
+                        <span th:if="${crypto.technical_advice}"
+                              th:text="${crypto.technical_advice.recommendation}"
+                              th:class="'recommendation rec-' + ${#strings.toLowerCase(crypto.technical_advice.recommendation)}"
+                              style="float: right; margin-top: 2px;">ACCUMULATE</span>
+                    </div>
+
+                    <!-- Technical Details -->
+                    <div style="padding: 15px; background-color: #f8f9fa;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+
+                            <!-- Left Column -->
+                            <div>
+                                <h4 style="color: #2c3e50; margin: 0 0 10px 0;">📊 Technical Indicators</h4>
+
+                                <div th:if="${crypto.technical_indicators?.rsi}" style="margin-bottom: 8px;">
+                                    <strong>RSI (14):</strong>
+                                    <span th:text="${crypto.technical_indicators.rsi.value}">65.2</span>
+                                    (<span th:text="${crypto.technical_indicators.rsi.signal}"
+                                           th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.rsi.signal)}">NEUTRAL</span>)
+                                </div>
+
+                                <div th:if="${crypto.technical_indicators?.macd}" style="margin-bottom: 8px;">
+                                    <strong>MACD:</strong>
+                                    <span th:text="${crypto.technical_indicators.macd.value}">0.0045</span>
+                                    (<span th:text="${crypto.technical_indicators.macd.signal}"
+                                           th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.macd.signal)}">BULLISH</span>)
+                                </div>
+
+                                <div th:if="${crypto.momentum_analysis}" style="margin-bottom: 8px;">
+                                    <strong>Momentum:</strong>
+                                    <span th:text="${crypto.momentum_analysis.momentum_direction}"
+                                          th:class="'signal-' + ${#strings.toLowerCase(crypto.momentum_analysis.momentum_direction)}">BULLISH</span>
+                                    (<span th:text="${crypto.momentum_analysis.momentum_strength}">STRONG</span>)
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <h4 style="color: #2c3e50; margin: 0 0 10px 0;">🎯 Key Levels</h4>
+
+                                <div th:if="${crypto.support_resistance}" style="margin-bottom: 8px;">
+                                    <strong>Support:</strong>
+                                    <span th:text="${crypto.support_resistance.immediate_support}">$89,000</span>
+                                    | <span th:text="${crypto.support_resistance.strong_support}">$85,000</span>
+                                </div>
+
+                                <div th:if="${crypto.support_resistance}" style="margin-bottom: 8px;">
+                                    <strong>Resistance:</strong>
+                                    <span th:text="${crypto.support_resistance.immediate_resistance}">$95,000</span>
+                                    | <span th:text="${crypto.support_resistance.strong_resistance}">$100,000</span>
+                                </div>
+
+                                <div th:if="${crypto.trading_levels}" style="margin-bottom: 8px;">
+                                    <strong>Entry Zone:</strong>
+                                    <span th:text="${crypto.trading_levels.entry_zone}">$90,000 - $91,000</span>
+                                </div>
+
+                                <div th:if="${crypto.trading_levels}" style="margin-bottom: 8px;">
+                                    <strong>Stop Loss:</strong>
+                                    <span style="color: #e74c3c;" th:text="${crypto.trading_levels.stop_loss}">$87,000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technical Advice -->
+                        <div th:if="${crypto.technical_advice}" style="margin-top: 15px; padding: 10px; background-color: white; border-left: 4px solid #3498db;">
+                            <h4 style="color: #2c3e50; margin: 0 0 8px 0;">💡 Technical Advice</h4>
+                            <p style="margin: 0; font-style: italic;" th:text="${crypto.technical_advice.reasoning}">
+                                Strong bullish momentum with RSI in healthy range and MACD showing positive divergence.
+                            </p>
+                            <small style="color: #7f8c8d;">
+                                Timeframe: <span th:text="${crypto.technical_advice.timeframe}">1-2 weeks</span> |
+                                Confidence: <span th:text="${crypto.technical_advice.confidence_level}"
+                                                  th:class="'confidence-' + ${#strings.toLowerCase(crypto.technical_advice.confidence_level)}">HIGH</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Summary -->
+            <div class="technical-summary" th:if="${analysisData.technical_summary}">
+                <h3>📋 Technical Summary</h3>
+
+                <div class="summary-section" th:if="${analysisData.technical_summary.strongest_technical_setups}">
+                    <h4>🚀 Strongest Technical Setups</h4>
+                    <ul class="summary-list">
+                        <li th:each="setup : ${analysisData.technical_summary.strongest_technical_setups}"
+                            th:text="${setup}">BTC breakout pattern</li>
+                    </ul>
+                </div>
+
+                <div class="summary-section" th:if="${analysisData.technical_summary.weakest_technical_setups}">
+                    <h4>⚠️ Weakest Technical Setups</h4>
+                    <ul class="summary-list">
+                        <li th:each="setup : ${analysisData.technical_summary.weakest_technical_setups}"
+                            th:text="${setup}">ADA breakdown pattern</li>
+                    </ul>
+                </div>
+
+                <div class="summary-section" th:if="${analysisData.technical_summary.key_levels_to_watch}">
+                    <h4>👁️ Key Levels to Watch</h4>
+                    <div th:if="${analysisData.technical_summary.key_levels_to_watch.critical_support}">
+                        <strong>Critical Support:</strong>
+                        <ul class="summary-list">
+                            <li th:each="level : ${analysisData.technical_summary.key_levels_to_watch.critical_support}"
+                                th:text="${level}">BTC $85K</li>
+                        </ul>
+                    </div>
+                    <div th:if="${analysisData.technical_summary.key_levels_to_watch.critical_resistance}">
+                        <strong>Critical Resistance:</strong>
+                        <ul class="summary-list">
+                            <li th:each="level : ${analysisData.technical_summary.key_levels_to_watch.critical_resistance}"
+                                th:text="${level}">BTC $100K</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="summary-section" th:if="${analysisData.technical_summary.technical_outlook}">
+                    <h4>🔮 Technical Outlook</h4>
+                    <p><strong>Short-term (1-7 days):</strong> <span th:text="${analysisData.technical_summary.technical_outlook.short_term}">Bullish momentum expected to continue</span></p>
+                    <p><strong>Medium-term (1-4 weeks):</strong> <span th:text="${analysisData.technical_summary.technical_outlook.medium_term}">Key resistance tests ahead</span></p>
+                    <p th:if="${analysisData.technical_summary.technical_outlook.key_catalysts}">
+                        <strong>Key Catalysts:</strong> <span th:text="${analysisData.technical_summary.technical_outlook.key_catalysts}">BTC $100K breakout attempt</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 12px;">
+                <p>This technical analysis is generated based on current market data and technical indicators.</p>
+                <p>Always do your own research and consider your risk tolerance before making investment decisions.</p>
+                <p style="font-style: italic;">Generated on <span th:text="${timestamp}">2024-01-01 10:00:00</span></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -250,6 +250,21 @@ public class EmailService {
         System.out.println("Investment Strategy & Target Review email sent successfully");
     }
 
+    public void sendTechnicalAnalysis(List<Holding> holdings, Map<String, Object> analysisData) {
+        // Process all text fields to convert markdown to HTML
+        processAnalysisDataForHtml(analysisData);
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("holdings", holdings);
+        variables.put("analysisData", analysisData);
+
+        String subject = String.format("📊 Technical Analysis Report - %s",
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+
+        sendEmailWithTemplate(subject, "technical-analysis", variables);
+        System.out.println("Technical Analysis Report email sent successfully");
+    }
+
     /**
      * Send consolidated investment analysis summary email with all crypto email attachments
      */

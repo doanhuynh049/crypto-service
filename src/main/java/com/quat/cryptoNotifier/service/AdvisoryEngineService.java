@@ -63,6 +63,9 @@ public class AdvisoryEngineService {
     @Autowired
     private PortfolioTableService portfolioTableService;
 
+    @Autowired
+    private TechnicalAnalysisService technicalAnalysisService;
+
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -152,6 +155,17 @@ public class AdvisoryEngineService {
 
         // Parse the AI response and return structured data using dedicated service
         Map<String, Object> parsedAnalysis = advisorAIService.parseInvestmentStrategyResponse(aiResponse);
+        return parsedAnalysis;
+    }
+
+    public Map<String, Object> generateTechnicalAnalysis(List<Holding> holdings) {
+        String prompt = technicalAnalysisService.buildTechnicalAnalysisPrompt(holdings);
+        System.out.println("Investment Strategy Analysis Prompt: " + prompt);
+        String aiResponse = callGeminiAPI(prompt);
+        System.out.println("Investment Strategy Analysis AI Response: " + aiResponse);
+
+        // Parse the AI response and return structured data using dedicated service
+        Map<String, Object> parsedAnalysis = technicalAnalysisService.parseTechnicalAnalysisResponse(aiResponse);
         return parsedAnalysis;
     }
 
