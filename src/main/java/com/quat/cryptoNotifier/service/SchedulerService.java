@@ -135,6 +135,15 @@ public class SchedulerService {
             e.printStackTrace();
         }
         Thread.sleep(1000);
+
+        try {
+            Map<String, Object> technicalAnalysis = advisoryEngineService.generateTechnicalAnalysis(holdings);
+            emailService.sendTechnicalAnalysis(holdings, technicalAnalysis);
+        } catch (Exception e) {
+            System.err.println("Technical Analysis failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
     }
 
     public void sendAdvisoriesForEachCrypto(List<Holding> holdings) throws InterruptedException {
