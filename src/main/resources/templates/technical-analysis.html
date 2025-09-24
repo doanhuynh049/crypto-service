@@ -65,10 +65,18 @@
         }
 
         /* Technical Analysis Table */
+        .technical-table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
         .technical-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 0;
             font-size: 12px;
         }
         .technical-table th {
@@ -78,6 +86,9 @@
             text-align: center;
             font-weight: bold;
             font-size: 11px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         .technical-table td {
             padding: 8px;
@@ -92,6 +103,9 @@
             font-weight: bold;
             font-size: 14px;
             background-color: #ecf0f1;
+            position: sticky;
+            left: 0;
+            z-index: 5;
         }
         .technical-table .price-cell {
             font-weight: bold;
@@ -216,109 +230,111 @@
             <div th:if="${analysisData.technical_analysis_table}">
                 <h2 style="color: #2c3e50; margin-bottom: 15px;">📈 Technical Analysis Table</h2>
 
-                <table class="technical-table">
-                    <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Price</th>
-                            <th>Trend</th>
-                            <th>RSI</th>
-                            <th>MACD</th>
-                            <th>MA Alignment</th>
-                            <th>Support</th>
-                            <th>Resistance</th>
-                            <th>Pattern</th>
-                            <th>Signal</th>
-                            <th>Recommendation</th>
-                            <th>Confidence</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="crypto : ${analysisData.technical_analysis_table}">
-                            <td class="symbol-cell" th:text="${crypto.symbol}">BTC</td>
-                            <td class="price-cell" th:text="${crypto.current_price}">$92,000</td>
+                <div class="technical-table-container">
+                    <table class="technical-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Price</th>
+                                <th>Trend</th>
+                                <th>RSI</th>
+                                <th>MACD</th>
+                                <th>MA Alignment</th>
+                                <th>Support</th>
+                                <th>Resistance</th>
+                                <th>Pattern</th>
+                                <th>Signal</th>
+                                <th>Recommendation</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="crypto : ${analysisData.technical_analysis_table}">
+                                <td class="symbol-cell" th:text="${crypto.symbol}">BTC</td>
+                                <td class="price-cell" th:text="${crypto.current_price}">$92,000</td>
 
-                            <!-- Trend Analysis -->
-                            <td th:if="${crypto.trend_analysis}">
-                                <span th:text="${crypto.trend_analysis.primary_trend}"
-                                      th:class="'signal-' + ${#strings.toLowerCase(crypto.trend_analysis.primary_trend)}">BULLISH</span><br>
-                                <small th:text="${crypto.trend_analysis.trend_strength}"
-                                       th:class="'trend-' + ${#strings.toLowerCase(crypto.trend_analysis.trend_strength)}">STRONG</small>
-                            </td>
-                            <td th:unless="${crypto.trend_analysis}">-</td>
+                                <!-- Trend Analysis -->
+                                <td th:if="${crypto.trend_analysis}">
+                                    <span th:text="${crypto.trend_analysis.primary_trend}"
+                                          th:class="'signal-' + ${#strings.toLowerCase(crypto.trend_analysis.primary_trend)}">BULLISH</span><br>
+                                    <small th:text="${crypto.trend_analysis.trend_strength}"
+                                           th:class="'trend-' + ${#strings.toLowerCase(crypto.trend_analysis.trend_strength)}">STRONG</small>
+                                </td>
+                                <td th:unless="${crypto.trend_analysis}">-</td>
 
-                            <!-- RSI -->
-                            <td th:if="${crypto.technical_indicators?.rsi}">
-                                <strong th:text="${crypto.technical_indicators.rsi.value}">65.2</strong><br>
-                                <small th:text="${crypto.technical_indicators.rsi.signal}"
-                                       th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.rsi.signal)}">NEUTRAL</small>
-                            </td>
-                            <td th:unless="${crypto.technical_indicators?.rsi}">-</td>
+                                <!-- RSI -->
+                                <td th:if="${crypto.technical_indicators?.rsi}">
+                                    <strong th:text="${crypto.technical_indicators.rsi.value}">65.2</strong><br>
+                                    <small th:text="${crypto.technical_indicators.rsi.signal}"
+                                           th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.rsi.signal)}">NEUTRAL</small>
+                                </td>
+                                <td th:unless="${crypto.technical_indicators?.rsi}">-</td>
 
-                            <!-- MACD -->
-                            <td th:if="${crypto.technical_indicators?.macd}">
-                                <strong th:text="${crypto.technical_indicators.macd.value}">0.0045</strong><br>
-                                <small th:text="${crypto.technical_indicators.macd.signal}"
-                                       th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.macd.signal)}">BULLISH</small>
-                            </td>
-                            <td th:unless="${crypto.technical_indicators?.macd}">-</td>
+                                <!-- MACD -->
+                                <td th:if="${crypto.technical_indicators?.macd}">
+                                    <strong th:text="${crypto.technical_indicators.macd.value}">0.0045</strong><br>
+                                    <small th:text="${crypto.technical_indicators.macd.signal}"
+                                           th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.macd.signal)}">BULLISH</small>
+                                </td>
+                                <td th:unless="${crypto.technical_indicators?.macd}">-</td>
 
-                            <!-- Moving Averages -->
-                            <td th:if="${crypto.technical_indicators?.moving_averages}">
-                                <small>20: </small><span th:text="${crypto.technical_indicators.moving_averages.ma20}">$90.5K</span><br>
-                                <small>50: </small><span th:text="${crypto.technical_indicators.moving_averages.ma50}">$88K</span><br>
-                                <span th:text="${crypto.technical_indicators.moving_averages.alignment}"
-                                      th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.moving_averages.alignment)}">BULLISH</span>
-                            </td>
-                            <td th:unless="${crypto.technical_indicators?.moving_averages}">-</td>
+                                <!-- Moving Averages -->
+                                <td th:if="${crypto.technical_indicators?.moving_averages}">
+                                    <small>20: </small><span th:text="${crypto.technical_indicators.moving_averages.ma20}">$90.5K</span><br>
+                                    <small>50: </small><span th:text="${crypto.technical_indicators.moving_averages.ma50}">$88K</span><br>
+                                    <span th:text="${crypto.technical_indicators.moving_averages.alignment}"
+                                          th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_indicators.moving_averages.alignment)}">BULLISH</span>
+                                </td>
+                                <td th:unless="${crypto.technical_indicators?.moving_averages}">-</td>
 
-                            <!-- Support -->
-                            <td th:if="${crypto.support_resistance}">
-                                <strong th:text="${crypto.support_resistance.immediate_support}">$89K</strong><br>
-                                <small th:text="${crypto.support_resistance.strong_support}">$85K</small>
-                            </td>
-                            <td th:unless="${crypto.support_resistance}">-</td>
+                                <!-- Support -->
+                                <td th:if="${crypto.support_resistance}">
+                                    <strong th:text="${crypto.support_resistance.immediate_support}">$89K</strong><br>
+                                    <small th:text="${crypto.support_resistance.strong_support}">$85K</small>
+                                </td>
+                                <td th:unless="${crypto.support_resistance}">-</td>
 
-                            <!-- Resistance -->
-                            <td th:if="${crypto.support_resistance}">
-                                <strong th:text="${crypto.support_resistance.immediate_resistance}">$95K</strong><br>
-                                <small th:text="${crypto.support_resistance.strong_resistance}">$100K</small>
-                            </td>
-                            <td th:unless="${crypto.support_resistance}">-</td>
+                                <!-- Resistance -->
+                                <td th:if="${crypto.support_resistance}">
+                                    <strong th:text="${crypto.support_resistance.immediate_resistance}">$95K</strong><br>
+                                    <small th:text="${crypto.support_resistance.strong_resistance}">$100K</small>
+                                </td>
+                                <td th:unless="${crypto.support_resistance}">-</td>
 
-                            <!-- Chart Pattern -->
-                            <td th:if="${crypto.chart_patterns}">
-                                <span th:text="${crypto.chart_patterns.current_pattern}">TRIANGLE</span><br>
-                                <small th:text="${crypto.chart_patterns.pattern_confidence}"
-                                       th:class="'confidence-' + ${#strings.toLowerCase(crypto.chart_patterns.pattern_confidence)}">HIGH</small>
-                            </td>
-                            <td th:unless="${crypto.chart_patterns}">NONE</td>
+                                <!-- Chart Pattern -->
+                                <td th:if="${crypto.chart_patterns}">
+                                    <span th:text="${crypto.chart_patterns.current_pattern}">TRIANGLE</span><br>
+                                    <small th:text="${crypto.chart_patterns.pattern_confidence}"
+                                           th:class="'confidence-' + ${#strings.toLowerCase(crypto.chart_patterns.pattern_confidence)}">HIGH</small>
+                                </td>
+                                <td th:unless="${crypto.chart_patterns}">NONE</td>
 
-                            <!-- Technical Signal -->
-                            <td th:if="${crypto.technical_signals}">
-                                <span th:text="${crypto.technical_signals.primary_signal}"
-                                      th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_signals.primary_signal)}">BUY</span><br>
-                                <small th:text="${crypto.technical_signals.signal_strength}"
-                                       th:class="'confidence-' + ${#strings.toLowerCase(crypto.technical_signals.signal_strength)}">STRONG</small>
-                            </td>
-                            <td th:unless="${crypto.technical_signals}">-</td>
+                                <!-- Technical Signal -->
+                                <td th:if="${crypto.technical_signals}">
+                                    <span th:text="${crypto.technical_signals.primary_signal}"
+                                          th:class="'signal-' + ${#strings.toLowerCase(crypto.technical_signals.primary_signal)}">BUY</span><br>
+                                    <small th:text="${crypto.technical_signals.signal_strength}"
+                                           th:class="'confidence-' + ${#strings.toLowerCase(crypto.technical_signals.signal_strength)}">STRONG</small>
+                                </td>
+                                <td th:unless="${crypto.technical_signals}">-</td>
 
-                            <!-- Recommendation -->
-                            <td th:if="${crypto.technical_advice}">
-                                <span th:text="${crypto.technical_advice.recommendation}"
-                                      th:class="'recommendation rec-' + ${#strings.toLowerCase(crypto.technical_advice.recommendation)}">ACCUMULATE</span>
-                            </td>
-                            <td th:unless="${crypto.technical_advice}">-</td>
+                                <!-- Recommendation -->
+                                <td th:if="${crypto.technical_advice}">
+                                    <span th:text="${crypto.technical_advice.recommendation}"
+                                          th:class="'recommendation rec-' + ${#strings.toLowerCase(crypto.technical_advice.recommendation)}">ACCUMULATE</span>
+                                </td>
+                                <td th:unless="${crypto.technical_advice}">-</td>
 
-                            <!-- Confidence -->
-                            <td th:if="${crypto.technical_advice}">
-                                <span th:text="${crypto.technical_advice.confidence_level}"
-                                      th:class="'confidence-' + ${#strings.toLowerCase(crypto.technical_advice.confidence_level)}">HIGH</span>
-                            </td>
-                            <td th:unless="${crypto.technical_advice}">-</td>
-                        </tr>
-                    </tbody>
-                </table>
+                                <!-- Confidence -->
+                                <td th:if="${crypto.technical_advice}">
+                                    <span th:text="${crypto.technical_advice.confidence_level}"
+                                          th:class="'confidence-' + ${#strings.toLowerCase(crypto.technical_advice.confidence_level)}">HIGH</span>
+                                </td>
+                                <td th:unless="${crypto.technical_advice}">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Detailed Analysis for Each Crypto -->
@@ -469,4 +485,3 @@
     </div>
 </body>
 </html>
-
